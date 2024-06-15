@@ -97,13 +97,13 @@ public class GameServerProcessor {
             // Blacklisting (equals ban)
             if (failAttemptNum >= FAIL_ATTEMPT_MAX && !gameServer.blacklist.contains(failedHostName)) {
                 gameServer.blacklist.add(failedHostName);
-                gameServer.gameObject.WINDOW.getConsole().append(String.format("Client (%s) is now blacklisted!", failedHostName));
+                gameServer.gameObject.WINDOW.writeOnConsole(String.format("Client (%s) is now blacklisted!", failedHostName));
                 DSLogger.reportWarning(String.format("Game Server (%s) is now blacklisted!", failedHostName), null);
             }
 
             // Too much failed attempts, endpoint is vulnerable .. try to shut down
             if (TotalFailedAttempts >= TOTAL_FAIL_ATTEMPT_MAX) {
-                gameServer.gameObject.WINDOW.getConsole().append(String.format("Game Server (%s) status critical! Trying to shut down!", failedHostName));
+                gameServer.gameObject.WINDOW.writeOnConsole(String.format("Game Server (%s) status critical! Trying to shut down!", failedHostName));
                 DSLogger.reportWarning(String.format("Game Server (%s) status critical! Trying to shut down!", failedHostName), null);
                 gameServer.stopServer();
             }
@@ -196,7 +196,7 @@ public class GameServerProcessor {
                             msg = String.format("Player ID is registered!", gameServer.worldName, gameServer.version);
                             response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
 
-                            gameServer.gameObject.WINDOW.getConsole().append(String.format("Player %s has connected.", newPlayerUniqueId));
+                            gameServer.gameObject.WINDOW.writeOnConsole((String.format("Player %s has connected.", newPlayerUniqueId)));
                             DSLogger.reportInfo(String.format("Player %s has connected.", newPlayerUniqueId), null);
 
                             gameServer.whoIsMap.put(clientHostName, newPlayerUniqueId);
@@ -218,7 +218,7 @@ public class GameServerProcessor {
                             critter.body.texName = info.texModel;
                             levelActors.otherPlayers.add(critter);
 
-                            gameServer.gameObject.WINDOW.getConsole().append(String.format("Player %s (%s) has connected.", info.name, info.uniqueId));
+                            gameServer.gameObject.WINDOW.writeOnConsole((String.format("Player %s (%s) has connected.", info.name, info.uniqueId)));
                             DSLogger.reportInfo(String.format("Player %s (%s) has connected.", info.name, info.uniqueId), null);
 
                             gameServer.whoIsMap.put(clientHostName, info.uniqueId);

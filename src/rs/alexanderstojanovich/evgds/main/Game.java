@@ -19,12 +19,9 @@ package rs.alexanderstojanovich.evgds.main;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import org.joml.Vector3f;
-import rs.alexanderstojanovich.evgds.critter.Player;
+import rs.alexanderstojanovich.evgds.level.LevelActors;
 import rs.alexanderstojanovich.evgds.net.DSMachine;
-import rs.alexanderstojanovich.evgds.net.DSObject;
-import rs.alexanderstojanovich.evgds.net.PosInfo;
-import rs.alexanderstojanovich.evgds.net.Request;
-import rs.alexanderstojanovich.evgds.net.RequestIfc;
+import rs.alexanderstojanovich.evgds.net.PlayerInfo;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
 
 /**
@@ -143,7 +140,9 @@ public class Game implements DSMachine {
      * @param deltaTime time interval between updates
      */
     public void update(double deltaTime) {
-
+        gameObject.update((float) deltaTime);
+        LevelActors levelActors = this.gameObject.levelContainer.levelActors;
+        PlayerInfo[] playerInfo = new PlayerInfo[levelActors.otherPlayers.size()];
     }
 
     /**
@@ -160,10 +159,6 @@ public class Game implements DSMachine {
         double lastTime = System.nanoTime();
         double currTime;
         double deltaTime;
-
-        // first time we got nothing
-        actionPerformed = false;
-        causingCollision = false;
 
         while (!gameObject.gameServer.isRunning()) {
             currTime = System.nanoTime();
@@ -193,22 +188,6 @@ public class Game implements DSMachine {
 
         this.running = false;
         DSLogger.reportDebug("Main loop ended.", null);
-    }
-
-    /**
-     * Request server to update player position.
-     */
-    public void requestSetPlayerPosition() {
-        try {
-            final Player player = gameObject.levelContainer.levelActors.player;
-            final PosInfo posInfo = new PosInfo(player.uniqueId, player.getPos(), player.getFront());
-            String posStr = posInfo.toString();
-            RequestIfc posReq = new Request(RequestIfc.RequestType.SET_POS, DSObject.DataType.OBJECT, posStr);
-            posReq.send(this);
-        } catch (Exception ex) {
-            DSLogger.reportError("Error occurred!", ex);
-            DSLogger.reportError(ex.getMessage(), ex);
-        }
     }
 
     /**

@@ -2,7 +2,7 @@
     "configuration": {
         "status": "error",
         "name": "DSynergy",
-        "packages": "rs.alexanderstojanovich.evg",
+        "packages": "rs.alexanderstojanovich.evgds",
         "ThresholdFilter": {
             "level": "debug"
         },

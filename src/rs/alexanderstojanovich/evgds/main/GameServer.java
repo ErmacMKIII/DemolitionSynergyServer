@@ -200,13 +200,13 @@ public class GameServer implements DSMachine, Runnable {
             // Blacklisting (equals ban)
             if (failAttemptNum >= FAIL_ATTEMPT_MAX && !blacklist.contains(failedHostName)) {
                 blacklist.add(failedHostName);
-                gameObject.WINDOW.getConsole().append(String.format("Client (%s) is now blacklisted!", failedHostName));
+                gameObject.WINDOW.writeOnConsole((String.format("Client (%s) is now blacklisted!", failedHostName)));
                 DSLogger.reportWarning(String.format("Game Server (%s) is now blacklisted!", failedHostName), null);
             }
 
             // Too much failed attempts, endpoint is vulnerable .. try to shut down
             if (TotalFailedAttempts >= TOTAL_FAIL_ATTEMPT_MAX) {
-                gameObject.WINDOW.getConsole().append(String.format("Game Server (%s:%d) status critical! Trying to shut down!", this.localIP, this.port));
+                gameObject.WINDOW.writeOnConsole((String.format("Game Server (%s:%d) status critical! Trying to shut down!", this.localIP, this.port)));
                 DSLogger.reportWarning(String.format("Game Server (%s:%d) status critical! Trying to shut down!", this.localIP, this.port), null);
                 shutDownSignal = true;
             }
@@ -226,10 +226,10 @@ public class GameServer implements DSMachine, Runnable {
             endpoint = new DatagramSocket(port, InetAddress.getByName(localIP));
             gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + worldName + " - Player Count: " + (1 + clients.size()));
             DSLogger.reportInfo(String.format("Game Server (%s:%d) started!", this.localIP, this.port), null);
-            gameObject.WINDOW.getConsole().append(String.format("Game Server (%s:%d) started!", this.localIP, this.port));
+            gameObject.WINDOW.writeOnConsole((String.format("Game Server (%s:%d) started!", this.localIP, this.port)));
         } catch (IOException ex) {
             DSLogger.reportError("Cannot create Game Server!", ex);
-            gameObject.WINDOW.getConsole().append("Cannot create Game Server!");
+            gameObject.WINDOW.writeOnConsole(("Cannot create Game Server!"));
             DSLogger.reportError(ex.getMessage(), ex);
             shutDownSignal = true;
         }
@@ -242,16 +242,16 @@ public class GameServer implements DSMachine, Runnable {
                     case INTERNAL_ERROR:
                         msg = String.format("Server %s error!", procResult.client);
                         DSLogger.reportError(msg, null);
-                        gameObject.WINDOW.getConsole().append(msg);
+                        gameObject.WINDOW.writeOnConsole(msg);
                         break;
                     case CLIENT_ERROR:
                         assertTstFailure(procResult.client);
                         msg = String.format("Client %s error!", procResult.client);
                         DSLogger.reportError(msg, null);
-                        gameObject.WINDOW.getConsole().append(msg);
+                        gameObject.WINDOW.writeOnConsole(msg);
                         if (blacklist.contains(procResult.client)) {
                             DSLogger.reportWarning(msg, null);
-                            gameObject.WINDOW.getConsole().append(msg);
+                            gameObject.WINDOW.writeOnConsole(msg);
                         }
                         break;
                     default:
@@ -259,7 +259,7 @@ public class GameServer implements DSMachine, Runnable {
                         timeToLiveMap.replace(procResult.client, GameServer.TIME_TO_LIVE);
 //                        msg = String.format("OK (%s)", procResult.client);
 //                        DSLogger.reportInfo(msg, null);
-//                        gameObject.WINDOW.getConsole().append(msg, false);
+//                        gameObject.WINDOW.writeOnConsole((msg, false);
                         break;
                 }
             } catch (Exception ex) {
@@ -275,7 +275,7 @@ public class GameServer implements DSMachine, Runnable {
         clients.clear();
         running = false;
         DSLogger.reportInfo("Game Server finished!", null);
-        gameObject.WINDOW.getConsole().append("Game Server finished!");
+        gameObject.WINDOW.writeOnConsole("Game Server finished!");
     }
 
     /**
@@ -290,7 +290,7 @@ public class GameServer implements DSMachine, Runnable {
 
         levelActors.otherPlayers.removeIf(ply -> ply.uniqueId.equals(uniqueId));
         DSLogger.reportInfo(String.format(isError ? "Player %s timed out." : "Player %s disconnected.", uniqueId), null);
-        gameObject.WINDOW.getConsole().append(String.format(isError ? "Player %s timed out." : "Player %s disconnected.", uniqueId));
+        gameObject.WINDOW.writeOnConsole(String.format(isError ? "Player %s timed out." : "Player %s disconnected.", uniqueId));
     }
 
     public String getWorldName() {

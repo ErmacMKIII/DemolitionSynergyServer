@@ -17,38 +17,78 @@
 package rs.alexanderstojanovich.evgds.main;
 
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.WindowEvent;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
+import static rs.alexanderstojanovich.evgds.main.Game.RESOURCES_DIR;
 
 /**
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class Window extends javax.swing.JFrame {
-
+    
+    public final GameObject gameObject;
     public static final Dimension DIM = Toolkit.getDefaultToolkit().getScreenSize();
+    
+    public static final String LOGOX_FILE_NAME = "app-icon.png";
+    public static final String LOGO_FILE_NAME = "app-icon-small.png";
 
     /**
      * Creates new form ServerIntrface
+     *
+     * @param gameObject game object linking everything
      */
-    public Window() {
+    public Window(GameObject gameObject) {
+        this.gameObject = gameObject;
         initComponents();
+        this.setIconImages(appLogos());
     }
-
+    
     public void initCenterWindow() {
         this.setLocation(DIM.width / 2 - this.getSize().width / 2, DIM.height / 2 - this.getSize().height / 2);
     }
+    
+    public void writeOnConsole(String msg) {
+        this.console.append(msg + "\r\n");
+    }
 
+    /**
+     * Init frame logo icon(s).
+     *
+     * @return list of image(s).
+     */
+    private static List<Image> appLogos() {
+        List<Image> result = new ArrayList<>();
+        
+        URL url_logo = Window.class.getResource(RESOURCES_DIR + LOGO_FILE_NAME);
+        URL url_logox = Window.class.getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
+        if (url_logo != null && url_logox != null) {
+            ImageIcon logo = new ImageIcon(url_logo);
+            ImageIcon logox = new ImageIcon(url_logox);
+            
+            result.add(logo.getImage());
+            result.add(logox.getImage());
+        }
+        
+        return result;
+    }
+    
     public JTextArea getConsole() {
         return console;
     }
-
+    
     public JLabel getGameTimeText() {
         return gameTimeText;
     }
-
+    
     public JProgressBar getProgBar() {
         return progBar;
     }
@@ -63,26 +103,26 @@ public class Window extends javax.swing.JFrame {
     private void initComponents() {
 
         panelNetwork = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
-        jLabel5 = new javax.swing.JLabel();
-        jSpinner1 = new javax.swing.JSpinner();
+        lblLocalIP = new javax.swing.JLabel();
+        tboxLocalIP = new javax.swing.JTextField();
+        lblServerPort = new javax.swing.JLabel();
+        spinServerPort = new javax.swing.JSpinner();
         btnStart = new javax.swing.JButton();
         btnStop = new javax.swing.JButton();
         btnRestart = new javax.swing.JButton();
         panelWorld = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        jComboBox1 = new javax.swing.JComboBox<>();
-        jLabel4 = new javax.swing.JLabel();
-        jTextField2 = new javax.swing.JTextField();
-        jLabel6 = new javax.swing.JLabel();
-        jSpinner2 = new javax.swing.JSpinner();
+        lblLevelSize = new javax.swing.JLabel();
+        cmbLevelSize = new javax.swing.JComboBox<>();
+        lblWorldName = new javax.swing.JLabel();
+        tboxWorldName = new javax.swing.JTextField();
+        lblMapSeed = new javax.swing.JLabel();
+        spinMapSeed = new javax.swing.JSpinner();
         jPanel1 = new javax.swing.JPanel();
         jPanel2 = new javax.swing.JPanel();
-        jButton2 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
-        jButton6 = new javax.swing.JButton();
-        jButton7 = new javax.swing.JButton();
+        btnGenerate = new javax.swing.JButton();
+        btnImport = new javax.swing.JButton();
+        btnExport = new javax.swing.JButton();
+        btnErase = new javax.swing.JButton();
         panelInfo = new javax.swing.JPanel();
         spPlayerInfo = new javax.swing.JScrollPane();
         playerInfoTbl = new javax.swing.JTable();
@@ -91,39 +131,57 @@ public class Window extends javax.swing.JFrame {
         panelConsole = new javax.swing.JPanel();
         spConsole = new javax.swing.JScrollPane();
         console = new javax.swing.JTextArea();
-        jMenuBar1 = new javax.swing.JMenuBar();
+        mainMenu = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
+        jMenuItem1 = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Demolition Synergy Server");
-        setMinimumSize(new java.awt.Dimension(640, 360));
-        setSize(new java.awt.Dimension(1280, 720));
+        setMinimumSize(new java.awt.Dimension(800, 720));
+        setName("windowFrame"); // NOI18N
+        setPreferredSize(new java.awt.Dimension(1280, 1024));
+        setSize(new java.awt.Dimension(1280, 1024));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
         panelNetwork.setBorder(javax.swing.BorderFactory.createTitledBorder("Network"));
         panelNetwork.setLayout(new java.awt.GridLayout(4, 1));
 
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel1.setText("Local IP:");
-        panelNetwork.add(jLabel1);
-        panelNetwork.add(jTextField1);
+        lblLocalIP.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblLocalIP.setText("Local IP:");
+        panelNetwork.add(lblLocalIP);
+        panelNetwork.add(tboxLocalIP);
 
-        jLabel5.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel5.setText("Server Port:");
-        panelNetwork.add(jLabel5);
-        panelNetwork.add(jSpinner1);
+        lblServerPort.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblServerPort.setText("Server Port:");
+        panelNetwork.add(lblServerPort);
+        panelNetwork.add(spinServerPort);
 
         btnStart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/play.png"))); // NOI18N
         btnStart.setText("Start");
+        btnStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnStartActionPerformed(evt);
+            }
+        });
         panelNetwork.add(btnStart);
 
         btnStop.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/stop.png"))); // NOI18N
         btnStop.setText("Stop");
+        btnStop.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnStopActionPerformed(evt);
+            }
+        });
         panelNetwork.add(btnStop);
 
         btnRestart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/restart.png"))); // NOI18N
         btnRestart.setText("Restart");
+        btnRestart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRestartActionPerformed(evt);
+            }
+        });
         panelNetwork.add(btnRestart);
 
         getContentPane().add(panelNetwork);
@@ -131,22 +189,22 @@ public class Window extends javax.swing.JFrame {
         panelWorld.setBorder(javax.swing.BorderFactory.createTitledBorder("World"));
         panelWorld.setLayout(new java.awt.GridLayout(3, 6));
 
-        jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel2.setText("Level Size:");
-        panelWorld.add(jLabel2);
-        panelWorld.add(jComboBox1);
+        lblLevelSize.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblLevelSize.setText("Level Size:");
+        panelWorld.add(lblLevelSize);
+        panelWorld.add(cmbLevelSize);
 
-        jLabel4.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel4.setText("World Name:");
-        panelWorld.add(jLabel4);
+        lblWorldName.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblWorldName.setText("World Name:");
+        panelWorld.add(lblWorldName);
 
-        jTextField2.setText("My World");
-        panelWorld.add(jTextField2);
+        tboxWorldName.setText("My World");
+        panelWorld.add(tboxWorldName);
 
-        jLabel6.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel6.setText("Seed:");
-        panelWorld.add(jLabel6);
-        panelWorld.add(jSpinner2);
+        lblMapSeed.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblMapSeed.setText("Seed:");
+        panelWorld.add(lblMapSeed);
+        panelWorld.add(spinMapSeed);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -174,21 +232,21 @@ public class Window extends javax.swing.JFrame {
 
         panelWorld.add(jPanel2);
 
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/new.png"))); // NOI18N
-        jButton2.setText("Generate New");
-        panelWorld.add(jButton2);
+        btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/new.png"))); // NOI18N
+        btnGenerate.setText("Generate New");
+        panelWorld.add(btnGenerate);
 
-        jButton5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/import.png"))); // NOI18N
-        jButton5.setText("Import World");
-        panelWorld.add(jButton5);
+        btnImport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/import.png"))); // NOI18N
+        btnImport.setText("Import World");
+        panelWorld.add(btnImport);
 
-        jButton6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/export.png"))); // NOI18N
-        jButton6.setText("Export World");
-        panelWorld.add(jButton6);
+        btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/export.png"))); // NOI18N
+        btnExport.setText("Export World");
+        panelWorld.add(btnExport);
 
-        jButton7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/trash.png"))); // NOI18N
-        jButton7.setText("Erase World");
-        panelWorld.add(jButton7);
+        btnErase.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/trash.png"))); // NOI18N
+        btnErase.setText("Erase World");
+        panelWorld.add(btnErase);
 
         getContentPane().add(panelWorld);
 
@@ -197,17 +255,17 @@ public class Window extends javax.swing.JFrame {
 
         playerInfoTbl.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null},
-                {null, null, null, null, null}
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null},
+                {null, null, null, null, null, null}
             },
             new String [] {
-                "PlayerId", "PlayerName", "Color", "View", "Position"
+                "PlayerId", "PlayerName", "Color", "Texture", "View", "Position"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -254,41 +312,69 @@ public class Window extends javax.swing.JFrame {
         getContentPane().add(panelConsole);
 
         jMenu1.setText("File");
-        jMenuBar1.add(jMenu1);
+
+        jMenuItem1.setText("Exit");
+        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem1ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem1);
+
+        mainMenu.add(jMenu1);
 
         jMenu2.setText("Edit");
-        jMenuBar1.add(jMenu2);
+        mainMenu.add(jMenu2);
 
-        setJMenuBar(jMenuBar1);
+        setJMenuBar(mainMenu);
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
+        // TODO add your handling code here:
+        gameObject.gameServer.startServer();
+    }//GEN-LAST:event_btnStartActionPerformed
+    
+    private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
+        // TODO add your handling code here:        
+        gameObject.gameServer.stopServer();
+        gameObject.clearEverything();
+    }//GEN-LAST:event_btnStopActionPerformed
+    
+    private void btnRestartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRestartActionPerformed
+        // TODO add your handling code here:
+        gameObject.gameServer.stopServer();
+        gameObject.clearEverything();
+    }//GEN-LAST:event_btnRestartActionPerformed
+    
+    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+        // TODO add your handling code here:
+        this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+    }//GEN-LAST:event_jMenuItem1ActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnErase;
+    private javax.swing.JButton btnExport;
+    private javax.swing.JButton btnGenerate;
+    private javax.swing.JButton btnImport;
     private javax.swing.JButton btnRestart;
     private javax.swing.JButton btnStart;
     private javax.swing.JButton btnStop;
+    private javax.swing.JComboBox<String> cmbLevelSize;
     private javax.swing.JTextArea console;
     private javax.swing.JLabel gameTimeText;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton5;
-    private javax.swing.JButton jButton6;
-    private javax.swing.JButton jButton7;
-    private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JSpinner jSpinner1;
-    private javax.swing.JSpinner jSpinner2;
-    private javax.swing.JTextField jTextField1;
-    private javax.swing.JTextField jTextField2;
+    private javax.swing.JLabel lblLevelSize;
+    private javax.swing.JLabel lblLocalIP;
+    private javax.swing.JLabel lblMapSeed;
+    private javax.swing.JLabel lblServerPort;
+    private javax.swing.JLabel lblWorldName;
+    private javax.swing.JMenuBar mainMenu;
     private javax.swing.JPanel panelConsole;
     private javax.swing.JPanel panelInfo;
     private javax.swing.JPanel panelNetwork;
@@ -297,5 +383,9 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JProgressBar progBar;
     private javax.swing.JScrollPane spConsole;
     private javax.swing.JScrollPane spPlayerInfo;
+    private javax.swing.JSpinner spinMapSeed;
+    private javax.swing.JSpinner spinServerPort;
+    private javax.swing.JTextField tboxLocalIP;
+    private javax.swing.JTextField tboxWorldName;
     // End of variables declaration//GEN-END:variables
 }

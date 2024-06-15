@@ -115,7 +115,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         final int height = cfg.getHeight();
         // creating the window
         /* Create and display the form */
-        WINDOW = new Window();
+        WINDOW = new Window(this);
         WINDOW.setSize(width, height);
         WINDOW.setVisible(true);
         WINDOW.initCenterWindow();
@@ -148,11 +148,6 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         DSLogger.reportDebug("Renderer started.", null);
         DSLogger.reportDebug("Game will start soon.", null);
         //----------------------------------------------------------------------
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
         game.go();
     }
 
