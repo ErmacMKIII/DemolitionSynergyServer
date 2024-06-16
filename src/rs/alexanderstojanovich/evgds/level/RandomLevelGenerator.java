@@ -92,7 +92,7 @@ public class RandomLevelGenerator {
         return LevelContainer.AllBlockMap.isLocationPopulated(pos)
                 || levelContainer.getLevelActors().getPlayer().body.containsInsideEqually(pos)
                 || levelContainer.getLevelActors().spectator.getPos().equals(pos)
-                || levelContainer.gameObject.isServerRunning();
+                || !levelContainer.gameObject.gameServer.isShutDownSignal();
     }
 
     private Block generateRandomSolidBlock(int posMin, int posMax, int hMin, int hMax) {
@@ -109,7 +109,7 @@ public class RandomLevelGenerator {
             randPos = new Vector3f(posx, posy, posz);
             randomAttempts++;
 //            DSLogger.reportDebug("randomAttemps = " + randomAttempts, null);
-        } while (repeatCondition(randPos) && randomAttempts < RAND_MAX_ATTEMPTS && levelContainer.gameObject.isServerRunning());
+        } while (repeatCondition(randPos) && randomAttempts < RAND_MAX_ATTEMPTS && !levelContainer.gameObject.gameServer.isShutDownSignal());
 
         if (randomAttempts == RAND_MAX_ATTEMPTS) {
             return null;
@@ -148,7 +148,7 @@ public class RandomLevelGenerator {
             randPos = new Vector3f(posx, posy, posz);
             randomAttempts++;
 //            DSLogger.reportDebug("randomAttemps = " + randomAttempts, null);
-        } while (repeatCondition(randPos) && randomAttempts < RAND_MAX_ATTEMPTS && levelContainer.gameObject.isServerRunning());
+        } while (repeatCondition(randPos) && randomAttempts < RAND_MAX_ATTEMPTS && !levelContainer.gameObject.gameServer.isShutDownSignal());
 
         if (randomAttempts == RAND_MAX_ATTEMPTS) {
             return null;
@@ -205,7 +205,7 @@ public class RandomLevelGenerator {
             }
             randomAttempts++;
 //            DSLogger.reportDebug("randomAttemps = " + randomAttempts, null);
-        } while (repeatCondition(adjPos) && randomAttempts < RAND_MAX_ATTEMPTS && levelContainer.gameObject.isServerRunning());
+        } while (repeatCondition(adjPos) && randomAttempts < RAND_MAX_ATTEMPTS && !levelContainer.gameObject.gameServer.isShutDownSignal());
 
         if (randomAttempts == RAND_MAX_ATTEMPTS) {
             return null;
@@ -267,7 +267,7 @@ public class RandomLevelGenerator {
             }
             randomAttempts++;
 //            DSLogger.reportDebug("randomAttemps = " + randomAttempts, null);
-        } while (repeatCondition(adjPos) && randomAttempts < RAND_MAX_ATTEMPTS && levelContainer.gameObject.isServerRunning());
+        } while (repeatCondition(adjPos) && randomAttempts < RAND_MAX_ATTEMPTS && !levelContainer.gameObject.gameServer.isShutDownSignal());
 
         if (randomAttempts == RAND_MAX_ATTEMPTS) {
             return null;
@@ -378,13 +378,13 @@ public class RandomLevelGenerator {
         int maxFluidBatchSize = (int) (beta * fluidBlocks);
 
         while ((solidBlocks > 0 || fluidBlocks > 0)
-                && levelContainer.gameObject.isServerRunning()) {
+                && !levelContainer.gameObject.gameServer.isShutDownSignal()) {
             if (solidBlocks > 0) {
                 int solidBatch = 1 + random.nextInt(Math.min(maxSolidBatchSize, solidBlocks));
                 Block solidBlock = null;
                 Block solidAdjBlock = null;
                 while (solidBatch > 0
-                        && levelContainer.gameObject.isServerRunning()) {
+                        && !levelContainer.gameObject.gameServer.isShutDownSignal()) {
                     if (solidBlock == null) {
                         solidBlock = generateRandomSolidBlock(posMin, posMax, hMin, hMax);
                         solidAdjBlock = solidBlock;
@@ -419,7 +419,7 @@ public class RandomLevelGenerator {
                 Block fluidBlock = null;
                 Block fluidAdjBlock = null;
                 while (fluidBatch > 0
-                        && levelContainer.gameObject.isServerRunning()) {
+                        && !levelContainer.gameObject.gameServer.isShutDownSignal()) {
                     if (fluidBlock == null) {
                         fluidBlock = generateRandomFluidBlock(posMin, posMax, hMin, hMax);
                         fluidAdjBlock = fluidBlock;
@@ -458,7 +458,7 @@ public class RandomLevelGenerator {
         levelContainer.setProgress(0.0f);
         IList<Vector3f> allFluidPos = LevelContainer.AllBlockMap.getPopulatedLocations(tb -> !tb.solid);
         for (Vector3f fldPos : allFluidPos) {
-            if (!levelContainer.gameObject.isServerRunning()) {
+            if (! !levelContainer.gameObject.gameServer.isShutDownSignal()) {
                 break;
             }
 

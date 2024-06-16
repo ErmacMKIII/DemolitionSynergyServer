@@ -19,9 +19,7 @@ package rs.alexanderstojanovich.evgds.main;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import org.joml.Vector3f;
-import rs.alexanderstojanovich.evgds.level.LevelActors;
 import rs.alexanderstojanovich.evgds.net.DSMachine;
-import rs.alexanderstojanovich.evgds.net.PlayerInfo;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
 
 /**
@@ -141,8 +139,6 @@ public class Game implements DSMachine {
      */
     public void update(double deltaTime) {
         gameObject.update((float) deltaTime);
-        LevelActors levelActors = this.gameObject.levelContainer.levelActors;
-        PlayerInfo[] playerInfo = new PlayerInfo[levelActors.otherPlayers.size()];
     }
 
     /**
@@ -160,7 +156,7 @@ public class Game implements DSMachine {
         double currTime;
         double deltaTime;
 
-        while (!gameObject.gameServer.isRunning()) {
+        while (!gameObject.gameServer.shutDownSignal) {
             currTime = System.nanoTime();
             deltaTime = (currTime - lastTime) / 1E9d;
             gameTicks += deltaTime * Game.TPS;

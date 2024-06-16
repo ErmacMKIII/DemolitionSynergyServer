@@ -67,15 +67,18 @@ public class Main {
             DSLogger.reportError("Unable to set Darcula look & feel!", ex);
         }
         // initialize game creation (only creates window)
-        GameObject gameObject = null;
         try {
-            gameObject = new GameObject(); // throws ex
+            final GameObject gameObject = new GameObject(); // throws ex
+            // start the game loop
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    Configuration outCfg = Game.makeConfig(gameObject); // makes configuration from ingame settings
+                    outCfg.writeConfigFile();  // writes configuration to the output file
+                }
+            });
         } catch (Exception ex) {
             DSLogger.reportFatalError("Unable to create game object - Application will exit!", null);
-        }
-        // start the game loop
-        if (gameObject != null) {
-            gameObject.start();
         }
     }
 

@@ -31,6 +31,7 @@ import rs.alexanderstojanovich.evgds.light.LightSource;
 import rs.alexanderstojanovich.evgds.main.Game;
 import rs.alexanderstojanovich.evgds.models.Model;
 import rs.alexanderstojanovich.evgds.net.PlayerInfo;
+import rs.alexanderstojanovich.evgds.net.PosInfo;
 import rs.alexanderstojanovich.evgds.util.GlobalColors;
 
 /**
@@ -169,4 +170,37 @@ public class LevelActors {
         });
     }
 
+    /**
+     * Get pos info from all the level map players
+     *
+     * @return
+     */
+    public PosInfo[] getPosInfo() {
+        PosInfo[] result = new PosInfo[otherPlayers.size()];
+
+        int index = 0;
+        for (Critter crit : otherPlayers) {
+            PosInfo pi = new PosInfo(crit.uniqueId, crit.getPos(), crit.getFront());
+            result[index++] = pi;
+        }
+
+        return result;
+    }
+
+    /**
+     * Get player info from all the level map players
+     *
+     * @return
+     */
+    public PlayerInfo[] getPlayerInfo() {
+        PlayerInfo[] result = new PlayerInfo[otherPlayers.size()];
+
+        int index = 0;
+        for (Critter crit : otherPlayers) {
+            PlayerInfo pi = new PlayerInfo(crit.getName(), crit.getBody().texName, crit.uniqueId, crit.body.getPrimaryRGBAColor());
+            result[index++] = pi;
+        };
+
+        return result;
+    }
 }

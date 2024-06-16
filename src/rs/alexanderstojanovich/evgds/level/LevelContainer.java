@@ -529,7 +529,7 @@ public class LevelContainer implements GravityEnviroment {
 
         //----------------------------------------------------------------------
         for (Vector3f sp : solidPos) {
-            if (gameObject.isServerRunning()) {
+            if (gameObject.gameServer.isShutDownSignal()) {
                 break;
             }
             byte[] byteArraySolid = Block.toByteArray(sp, AllBlockMap.getLocation(sp));
@@ -549,7 +549,7 @@ public class LevelContainer implements GravityEnviroment {
         buffer[pos++] = (byte) (fluidNum >> 8);
 
         for (Vector3f fp : fluidPos) {
-            if (gameObject.isServerRunning()) {
+            if (gameObject.gameServer.isShutDownSignal()) {
                 break;
             }
             byte[] byteArrayFluid = Block.toByteArray(fp, AllBlockMap.getLocation(fp));
@@ -565,7 +565,7 @@ public class LevelContainer implements GravityEnviroment {
         levelActors.unfreeze();
         progress = 100.0f;
 
-        if (progress == 100.0f && !gameObject.isServerRunning()) {
+        if (progress == 100.0f && !gameObject.gameServer.isShutDownSignal()) {
             success = true;
         }
         working = false;
@@ -631,7 +631,7 @@ public class LevelContainer implements GravityEnviroment {
             buffer[pos++] = (byte) (count);
             buffer[pos++] = (byte) (count >> 8);
             for (Vector3f p : blkPos) {
-                if (gameObject.isServerRunning()) {
+                if (gameObject.gameServer.isShutDownSignal()) {
                     break;
                 }
                 byte[] byteArray = Block.toByteArray(p, AllBlockMap.getLocation(p));
@@ -648,7 +648,7 @@ public class LevelContainer implements GravityEnviroment {
         levelActors.unfreeze();
         progress = 100.0f;
 
-        if (progress == 100.0f && !gameObject.isServerRunning()) {
+        if (progress == 100.0f && !gameObject.gameServer.isShutDownSignal()) {
             success = true;
         }
         working = false;
@@ -703,7 +703,7 @@ public class LevelContainer implements GravityEnviroment {
             if (strSolid.equals("SOLID")) {
                 int solidNum = ((buffer[pos + 1] & 0xFF) << 8) | (buffer[pos] & 0xFF);
                 pos += 2;
-                for (int i = 0; i < solidNum && !gameObject.isServerRunning(); i++) {
+                for (int i = 0; i < solidNum && !gameObject.gameServer.isShutDownSignal(); i++) {
                     byte[] byteArraySolid = new byte[29];
                     System.arraycopy(buffer, pos, byteArraySolid, 0, 29);
                     Block solidBlock = Block.fromByteArray(byteArraySolid, true);
@@ -722,7 +722,7 @@ public class LevelContainer implements GravityEnviroment {
                 if (strFluid.equals("FLUID")) {
                     int fluidNum = ((buffer[pos + 1] & 0xFF) << 8) | (buffer[pos] & 0xFF);
                     pos += 2;
-                    for (int i = 0; i < fluidNum && !gameObject.isServerRunning(); i++) {
+                    for (int i = 0; i < fluidNum && !gameObject.gameServer.isShutDownSignal(); i++) {
                         byte[] byteArrayFluid = new byte[29];
                         System.arraycopy(buffer, pos, byteArrayFluid, 0, 29);
                         Block fluidBlock = Block.fromByteArray(byteArrayFluid, false);
@@ -807,7 +807,7 @@ public class LevelContainer implements GravityEnviroment {
 //                if (strSolid.equals("SOLID")) {
 //                    int solidNum = ((buffer[pos + 1] & 0xFF) << 8) | (buffer[pos] & 0xFF);
 //                    pos += 2;
-//                    for (int i = 0; i < solidNum && ! gameObject.isServerRunning(); i++) {
+//                    for (int i = 0; i < solidNum && ! gameObject.gameServer.isShutDownSignal(); i++) {
 //                        byte[] byteArraySolid = new byte[29];
 //                        System.arraycopy(buffer, pos, byteArraySolid, 0, 29);
 //                        Block solidBlock = Block.fromByteArray(byteArraySolid, true);
@@ -826,7 +826,7 @@ public class LevelContainer implements GravityEnviroment {
 //                    if (strFluid.equals("FLUID")) {
 //                        int fluidNum = ((buffer[pos + 1] & 0xFF) << 8) | (buffer[pos] & 0xFF);
 //                        pos += 2;
-//                        for (int i = 0; i < fluidNum && ! gameObject.isServerRunning(); i++) {
+//                        for (int i = 0; i < fluidNum && ! gameObject.gameServer.isShutDownSignal(); i++) {
 //                            byte[] byteArrayFluid = new byte[29];
 //                            System.arraycopy(buffer, pos, byteArrayFluid, 0, 29);
 //                            Block fluidBlock = Block.fromByteArray(byteArrayFluid, false);
@@ -859,7 +859,7 @@ public class LevelContainer implements GravityEnviroment {
 //            return okey;
 //        };
 //
-//        return GameObject.TASK_EXECUTOR.submit(task);
+//        return GameObject.SINGLE_THR_EXEC.submit(task);
 //    }
     public boolean loadLevelFromBufferNewFormat() throws UnsupportedEncodingException {
         working = true;
@@ -912,7 +912,7 @@ public class LevelContainer implements GravityEnviroment {
 
                     int count = (buffer[pos++] & 0xFF) | ((buffer[pos++] & 0xFF) << 8);
 
-                    for (int i = 0; i < count && !gameObject.isServerRunning(); i++) {
+                    for (int i = 0; i < count && !gameObject.gameServer.isShutDownSignal(); i++) {
                         byte[] byteArrayBlock = new byte[29];
                         System.arraycopy(texName.getBytes("US-ASCII"), 0, byteArrayBlock, 0, 5);
                         System.arraycopy(buffer, pos, byteArrayBlock, 5, 24);

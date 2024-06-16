@@ -74,7 +74,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     /**
      * Async Task Executor
      */
-    public static final ExecutorService TASK_EXECUTOR = Executors.newCachedThreadPool();
+    public static final ExecutorService SINGLE_THR_EXEC = Executors.newSingleThreadExecutor();
 
     /**
      * Update/Generate for Level Container Mutex. Responsible for read/write to
@@ -141,14 +141,15 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     }
 
     /**
-     * Start this game container. Starts loop and renderer.
+     * Start this game container. Starts server and 'game-server' loop
      */
     public void start() {
         //----------------------------------------------------------------------
-        DSLogger.reportDebug("Renderer started.", null);
+        DSLogger.reportDebug("Server .", null);
         DSLogger.reportDebug("Game will start soon.", null);
         //----------------------------------------------------------------------
-        game.go();
+        gameServer.startServer();
+        SINGLE_THR_EXEC.submit(() -> game.go());
     }
 
     // -------------------------------------------------------------------------
@@ -177,13 +178,9 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
             this.WINDOW.getProgBar().setValue(Math.round(levelContainer.getProgress()));
         } else { // working check avoids locking the monitor
             levelContainer.update();
-            // if single player gravity is affected or if multiplayer and player is registered
-            if (levelContainer.gravityOn && (Game.getCurrentMode() == Game.Mode.SINGLE_PLAYER)
-                    || ((Game.getCurrentMode() == Game.Mode.MULTIPLAYER_HOST || Game.getCurrentMode() == Game.Mode.MULTIPLAYER_JOIN) && levelContainer.levelActors.player.isRegistered())) {
-                boolean underGravity = levelContainer.gravityDo(deltaTime);
-                levelContainer.levelActors.player.setUnderGravity(underGravity);
-            }
-
+            WINDOW.upsertPosInfo(levelContainer.levelActors.getPosInfo());
+            WINDOW.upsertPlayerInfo(levelContainer.levelActors.getPlayerInfo());
+            WINDOW.upsertClientInfo(gameServer.getClientInfo());
             GameTime now = GameTime.Now();
             this.WINDOW.getGameTimeText().setText(String.format("Day %d %02d:%02d:%02d", now.days, now.hours, now.minutes, now.seconds));
         }
@@ -393,7 +390,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     * Load the window context and destroyes the window.
      */
     public void destroy() {
-        TASK_EXECUTOR.shutdown();
+        SINGLE_THR_EXEC.shutdown();
     }
 
     /**
@@ -466,12 +463,12 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         return chunkOperationPerformed;
     }
 
-    /**
-     * Is server running
-     *
-     * @return is server up & running
-     */
-    public boolean isServerRunning() {
-        return gameServer.running;
-    }
+//    /**
+//     * Is server running
+//     *
+//     * @return is server up & running
+//     */
+//    public boolean isServerRunning() {
+//        return gameServer.running;
+//    }
 }
