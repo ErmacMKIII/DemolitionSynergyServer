@@ -16,8 +16,6 @@
  */
 package rs.alexanderstojanovich.evgds.main;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
@@ -40,6 +38,10 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
 public final class GameObject { // is mutual object for {Main, Renderer, Random Level Generator}
     // this class protects levelContainer, waterRenderer & Random Level Generator between the threads
     // game logic is contained in here
+
+    public static enum MapLevelSize {
+        SMALL, MEDIUM, LARGE, HUGE
+    }
 
     /**
      * All Game Assets (Models, Textures etc.)
@@ -145,7 +147,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      */
     public void start() {
         //----------------------------------------------------------------------
-        DSLogger.reportDebug("Server .", null);
+        DSLogger.reportDebug("Initiating Game Server Start.", null);
         DSLogger.reportDebug("Game will start soon.", null);
         //----------------------------------------------------------------------
         gameServer.startServer();
@@ -323,55 +325,41 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     }
 
     /**
-     * Start new randomly generated level in single player. New level will be
-     * generated. Notice that there is no 'SMALL', 'MEDIUM', 'LARGE', 'HUGE'. It
-     * is coded to parameter 'numberOfBlocks'.
+     * Start new randomly generated level from editor. New level could be
+     * generated and subsequently edited from (game) client. Notice that there
+     * is no 'SMALL', 'MEDIUM', 'LARGE', 'HUGE'. It is coded to parameter
+     * 'numberOfBlocks'.
      *
      * Called from concurrent thread.
      *
-     * @param numberOfBlocks max number of blocks to generate
+     * @param levelSize Map Level Size
      * @return success of operation
      */
-    public boolean generateSinglePlayerLevel(int numberOfBlocks) {
+    public boolean generateRandomLevel(GameObject.MapLevelSize levelSize) {
         boolean ok = false;
         this.clearEverything();
         updateRenderLCLock.lock();
+        final int numberOfBlocks;
         try {
-            ok |= levelContainer.generateSinglePlayerLevel(randomLevelGenerator, numberOfBlocks);
+            switch (levelSize) {
+                default:
+                case SMALL:
+                    numberOfBlocks = 25000;
+                    break;
+                case MEDIUM:
+                    numberOfBlocks = 50000;
+                    break;
+                case LARGE:
+                    numberOfBlocks = 100000;
+                    break;
+                case HUGE:
+                    numberOfBlocks = 131070;
+                    break;
+            }
+            ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
         } finally {
             updateRenderLCLock.unlock();
         }
-
-        return ok;
-    }
-
-    /**
-     * Host new randomly generated level in multiplayer. All players on join
-     * will download the saved level from game server 'world name'.
-     *
-     * @param numberOfBlocks max number of blocks to generate
-     * @return success of operation
-     * @throws java.lang.InterruptedException
-     * @throws java.util.concurrent.ExecutionException
-     */
-    public boolean generateMultiPlayerLevelAsHost(int numberOfBlocks) throws InterruptedException, ExecutionException {
-        boolean ok = false;
-
-        this.clearEverything();
-        updateRenderLCLock.lock();
-        try {
-            ok |= levelContainer.generateMultiPlayerLevel(randomLevelGenerator, numberOfBlocks);
-        } finally {
-            updateRenderLCLock.unlock();
-        }
-
-        // Save level to file asynchronously
-        CompletableFuture.supplyAsync(() -> {
-            return levelContainer.saveLevelToFile(gameServer.getWorldName() + ".ndat");
-        }).thenApply((Boolean rez) -> {
-            levelContainer.levelActors.player.setRegistered(rez);
-            return null;
-        });
 
         return ok;
     }

@@ -4,17 +4,17 @@
   <NonVisualComponents>
     <Menu class="javax.swing.JMenuBar" name="mainMenu">
       <SubComponents>
-        <Menu class="javax.swing.JMenu" name="jMenu1">
+        <Menu class="javax.swing.JMenu" name="fileMenu">
           <Properties>
             <Property name="text" type="java.lang.String" value="File"/>
           </Properties>
           <SubComponents>
-            <MenuItem class="javax.swing.JMenuItem" name="jMenuItem1">
+            <MenuItem class="javax.swing.JMenuItem" name="fileMenuExit">
               <Properties>
                 <Property name="text" type="java.lang.String" value="Exit"/>
               </Properties>
               <Events>
-                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jMenuItem1ActionPerformed"/>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fileMenuExitActionPerformed"/>
               </Events>
             </MenuItem>
           </SubComponents>
@@ -111,6 +111,7 @@
               <Image iconType="3" name="/rs/alexanderstojanovich/evgds/resources/play.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Start"/>
+            <Property name="toolTipText" type="java.lang.String" value="Start the server specified by Local IP and Server Port"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnStartActionPerformed"/>
@@ -125,6 +126,7 @@
               <Image iconType="3" name="/rs/alexanderstojanovich/evgds/resources/stop.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Stop"/>
+            <Property name="toolTipText" type="java.lang.String" value="Stop Server Execution (Shutdown signal)"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>
@@ -140,6 +142,7 @@
               <Image iconType="3" name="/rs/alexanderstojanovich/evgds/resources/restart.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Restart"/>
+            <Property name="toolTipText" type="java.lang.String" value="Restart server (Start &amp; Stop)"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>
@@ -169,6 +172,9 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JComboBox" name="cmbLevelSize">
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cmbLevelSizeActionPerformed"/>
+          </Events>
           <AuxValues>
             <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
           </AuxValues>
@@ -183,6 +189,9 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="My World"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="tboxWorldNameActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JLabel" name="lblMapSeed">
           <Properties>
@@ -191,6 +200,9 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JSpinner" name="spinMapSeed">
+          <Events>
+            <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="spinMapSeedStateChanged"/>
+          </Events>
         </Component>
         <Container class="javax.swing.JPanel" name="jPanel1">
 
@@ -233,6 +245,9 @@
             <Property name="text" type="java.lang.String" value="Generate New"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnGenerateActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnImport">
           <Properties>
@@ -245,6 +260,9 @@
             <Property name="text" type="java.lang.String" value="Import World"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnImportActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnExport">
           <Properties>
@@ -257,6 +275,9 @@
             <Property name="text" type="java.lang.String" value="Export World"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnExportActionPerformed"/>
+          </Events>
         </Component>
         <Component class="javax.swing.JButton" name="btnErase">
           <Properties>
@@ -269,6 +290,9 @@
             <Property name="text" type="java.lang.String" value="Erase World"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEraseActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
@@ -309,6 +333,7 @@
                 <TitledBorder title="Progress:"/>
               </Border>
             </Property>
+            <Property name="opaque" type="boolean" value="true"/>
             <Property name="stringPainted" type="boolean" value="true"/>
           </Properties>
           <Constraints>

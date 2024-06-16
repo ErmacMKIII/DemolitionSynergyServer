@@ -137,7 +137,7 @@ public class GameServer implements DSMachine, Runnable {
                         if (u == null || u <= 1) {
                             GameServer.this.clients.remove(key);
                             String uniqueId = GameServer.this.whoIsMap.remove(key);
-                            GameServer.this.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + GameServer.this.worldName + " - Player Count: " + (1 + GameServer.this.clients.size()));
+                            GameServer.this.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + GameServer.this.worldName + " - Player Count: " + (GameServer.this.clients.size()));
                             if (uniqueId != null) {
                                 GameServer.performCleanUp(GameServer.this.gameObject, uniqueId, true);
                             }

@@ -22,6 +22,7 @@ import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -29,13 +30,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JTextArea;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import static rs.alexanderstojanovich.evgds.main.Game.RESOURCES_DIR;
+import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.HUGE;
+import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.LARGE;
+import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.MEDIUM;
+import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.SMALL;
 import rs.alexanderstojanovich.evgds.net.ClientInfo;
 import rs.alexanderstojanovich.evgds.net.PlayerInfo;
 import rs.alexanderstojanovich.evgds.net.PosInfo;
@@ -60,6 +69,9 @@ public class Window extends javax.swing.JFrame {
     public final DefaultTableModel posInfoModel = new DefaultTableModel();
     public final DefaultTableModel clientInfoModel = new DefaultTableModel();
 
+    public final JFileChooser fileImport = new JFileChooser();
+    public final JFileChooser fileExport = new JFileChooser();
+
     /**
      * Creates new form ServerIntrface
      *
@@ -72,6 +84,8 @@ public class Window extends javax.swing.JFrame {
         this.initInfoTables();
         setEnabledComponents(this.panelWorld, false);
         setEnabledComponents(this.panelInfo, false);
+        this.cmbLevelSize.setModel(new DefaultComboBoxModel(GameObject.MapLevelSize.values()));
+        this.initDialogs();
     }
 
     public void initCenterWindow() {
@@ -338,8 +352,8 @@ public class Window extends javax.swing.JFrame {
         spConsole = new javax.swing.JScrollPane();
         console = new javax.swing.JTextArea();
         mainMenu = new javax.swing.JMenuBar();
-        jMenu1 = new javax.swing.JMenu();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        fileMenu = new javax.swing.JMenu();
+        fileMenuExit = new javax.swing.JMenuItem();
         jMenu2 = new javax.swing.JMenu();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -370,6 +384,7 @@ public class Window extends javax.swing.JFrame {
         btnStart.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnStart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/play.png"))); // NOI18N
         btnStart.setText("Start");
+        btnStart.setToolTipText("Start the server specified by Local IP and Server Port");
         btnStart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnStartActionPerformed(evt);
@@ -380,6 +395,7 @@ public class Window extends javax.swing.JFrame {
         btnStop.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnStop.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/stop.png"))); // NOI18N
         btnStop.setText("Stop");
+        btnStop.setToolTipText("Stop Server Execution (Shutdown signal)");
         btnStop.setEnabled(false);
         btnStop.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -391,6 +407,7 @@ public class Window extends javax.swing.JFrame {
         btnRestart.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnRestart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/restart.png"))); // NOI18N
         btnRestart.setText("Restart");
+        btnRestart.setToolTipText("Restart server (Start & Stop)");
         btnRestart.setEnabled(false);
         btnRestart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -407,6 +424,12 @@ public class Window extends javax.swing.JFrame {
         lblLevelSize.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         lblLevelSize.setText("Level Size:");
         panelWorld.add(lblLevelSize);
+
+        cmbLevelSize.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cmbLevelSizeActionPerformed(evt);
+            }
+        });
         panelWorld.add(cmbLevelSize);
 
         lblWorldName.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
@@ -414,11 +437,22 @@ public class Window extends javax.swing.JFrame {
         panelWorld.add(lblWorldName);
 
         tboxWorldName.setText("My World");
+        tboxWorldName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tboxWorldNameActionPerformed(evt);
+            }
+        });
         panelWorld.add(tboxWorldName);
 
         lblMapSeed.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         lblMapSeed.setText("Seed:");
         panelWorld.add(lblMapSeed);
+
+        spinMapSeed.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                spinMapSeedStateChanged(evt);
+            }
+        });
         panelWorld.add(spinMapSeed);
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -451,24 +485,44 @@ public class Window extends javax.swing.JFrame {
         btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/new.png"))); // NOI18N
         btnGenerate.setText("Generate New");
         btnGenerate.setEnabled(false);
+        btnGenerate.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnGenerateActionPerformed(evt);
+            }
+        });
         panelWorld.add(btnGenerate);
 
         btnImport.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnImport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/import.png"))); // NOI18N
         btnImport.setText("Import World");
         btnImport.setEnabled(false);
+        btnImport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnImportActionPerformed(evt);
+            }
+        });
         panelWorld.add(btnImport);
 
         btnExport.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/export.png"))); // NOI18N
         btnExport.setText("Export World");
         btnExport.setEnabled(false);
+        btnExport.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnExportActionPerformed(evt);
+            }
+        });
         panelWorld.add(btnExport);
 
         btnErase.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnErase.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/trash.png"))); // NOI18N
         btnErase.setText("Erase World");
         btnErase.setEnabled(false);
+        btnErase.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEraseActionPerformed(evt);
+            }
+        });
         panelWorld.add(btnErase);
 
         getContentPane().add(panelWorld);
@@ -483,6 +537,7 @@ public class Window extends javax.swing.JFrame {
         panelInfo.add(gameTimeText, java.awt.BorderLayout.PAGE_START);
 
         progBar.setBorder(javax.swing.BorderFactory.createTitledBorder("Progress:"));
+        progBar.setOpaque(true);
         progBar.setStringPainted(true);
         panelInfo.add(progBar, java.awt.BorderLayout.PAGE_END);
 
@@ -586,17 +641,17 @@ public class Window extends javax.swing.JFrame {
 
         getContentPane().add(panelConsole);
 
-        jMenu1.setText("File");
+        fileMenu.setText("File");
 
-        jMenuItem1.setText("Exit");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        fileMenuExit.setText("Exit");
+        fileMenuExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
+                fileMenuExitActionPerformed(evt);
             }
         });
-        jMenu1.add(jMenuItem1);
+        fileMenu.add(fileMenuExit);
 
-        mainMenu.add(jMenu1);
+        mainMenu.add(fileMenu);
 
         jMenu2.setText("Edit");
         mainMenu.add(jMenu2);
@@ -611,14 +666,20 @@ public class Window extends javax.swing.JFrame {
         gameObject.start();
         setEnabledComponents(this.panelWorld, true);
         setEnabledComponents(this.panelInfo, true);
+        btnStart.setEnabled(false);
+        btnStop.setEnabled(true);
+        btnRestart.setEnabled(true);
     }//GEN-LAST:event_btnStartActionPerformed
 
     private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
-        // TODO add your handling code here:        
+        // TODO add your handling code here:                
         setEnabledComponents(this.panelWorld, false);
         setEnabledComponents(this.panelInfo, false);
         gameObject.gameServer.stopServer();
         gameObject.clearEverything();
+        btnStart.setEnabled(true);
+        btnStop.setEnabled(false);
+        btnRestart.setEnabled(false);
     }//GEN-LAST:event_btnStopActionPerformed
 
     private void btnRestartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRestartActionPerformed
@@ -629,10 +690,105 @@ public class Window extends javax.swing.JFrame {
         gameObject.start();
     }//GEN-LAST:event_btnRestartActionPerformed
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+    private void fileMenuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuExitActionPerformed
         // TODO add your handling code here:
         this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    }//GEN-LAST:event_fileMenuExitActionPerformed
+
+    private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
+        // TODO add your handling code here:
+        final GameObject.MapLevelSize levelSize = (GameObject.MapLevelSize) cmbLevelSize.getSelectedItem();
+        if (gameObject.generateRandomLevel(levelSize)) {
+            JOptionPane.showMessageDialog(this, "New world succesfully generated!", "Generate new world", JOptionPane.INFORMATION_MESSAGE);
+            btnErase.setEnabled(true);
+        } else {
+            JOptionPane.showMessageDialog(this, "New world generation resulted in failured!", "Generate new world", JOptionPane.ERROR_MESSAGE);
+        }
+    }//GEN-LAST:event_btnGenerateActionPerformed
+
+    private void cmbLevelSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLevelSizeActionPerformed
+        // TODO add your handling code here:
+        final int numberOfBlocks;
+        final GameObject.MapLevelSize levelSize = (GameObject.MapLevelSize) cmbLevelSize.getSelectedItem();
+        switch (levelSize) {
+            default:
+            case SMALL:
+                numberOfBlocks = 25000;
+                break;
+            case MEDIUM:
+                numberOfBlocks = 50000;
+                break;
+            case LARGE:
+                numberOfBlocks = 100000;
+                break;
+            case HUGE:
+                numberOfBlocks = 131070;
+                break;
+        }
+        gameObject.randomLevelGenerator.setNumberOfBlocks(numberOfBlocks);
+    }//GEN-LAST:event_cmbLevelSizeActionPerformed
+
+    private void spinMapSeedStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinMapSeedStateChanged
+        // TODO add your handling code here:
+        gameObject.randomLevelGenerator.setSeed((long) this.spinMapSeed.getValue());
+    }//GEN-LAST:event_spinMapSeedStateChanged
+
+    private void btnEraseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEraseActionPerformed
+        // TODO add your handling code here:
+        gameObject.clearEverything();
+        btnGenerate.setEnabled(true);
+    }//GEN-LAST:event_btnEraseActionPerformed
+
+    // init dialog for opening the files, setting it's filters
+    private void initDialogs() {
+        FileNameExtensionFilter datFilter = new FileNameExtensionFilter("Old Data Format (*.dat)", "dat");
+        FileNameExtensionFilter ndatFilter = new FileNameExtensionFilter("New Data Format (*.ndat)", "ndat");
+
+        fileImport.addChoosableFileFilter(datFilter);
+        fileExport.addChoosableFileFilter(ndatFilter);
+
+        fileImport.addChoosableFileFilter(datFilter);
+        fileImport.addChoosableFileFilter(ndatFilter);
+    }
+
+    private void worldImport() {
+        int option = fileImport.showOpenDialog(this);
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File file = fileImport.getSelectedFile();
+            if (gameObject.levelContainer.loadLevelFromFile(file.getAbsolutePath())) {
+                JOptionPane.showMessageDialog(this, "World sucessfully imported from file!", "Import world", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "World import resulted in failured!", "Import world", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void worldExport() {
+        int option = fileExport.showSaveDialog(this);
+        if (option == JFileChooser.APPROVE_OPTION) {
+            File file = fileExport.getSelectedFile();
+            if (gameObject.levelContainer.saveLevelToFile(file.getAbsolutePath())) {
+                JOptionPane.showMessageDialog(this, "World sucessfully imported from file!", "Import world", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(this, "World import resulted in failured!", "Import world", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void btnImportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImportActionPerformed
+        // TODO add your handling code here:
+        worldImport();
+    }//GEN-LAST:event_btnImportActionPerformed
+
+    private void btnExportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExportActionPerformed
+        // TODO add your handling code here:
+        worldExport();
+    }//GEN-LAST:event_btnExportActionPerformed
+
+    private void tboxWorldNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tboxWorldNameActionPerformed
+        // TODO add your handling code here:
+        gameObject.gameServer.setWorldName(this.tboxWorldName.getText());
+    }//GEN-LAST:event_tboxWorldNameActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnErase;
@@ -645,10 +801,10 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JTable clientInfoTbl;
     private javax.swing.JComboBox<String> cmbLevelSize;
     private javax.swing.JTextArea console;
+    private javax.swing.JMenu fileMenu;
+    private javax.swing.JMenuItem fileMenuExit;
     private javax.swing.JLabel gameTimeText;
-    private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel lblLevelSize;
