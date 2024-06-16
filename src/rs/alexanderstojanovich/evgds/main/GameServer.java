@@ -225,7 +225,7 @@ public class GameServer implements DSMachine, Runnable {
         try {
             // Bind the endpoint socket to a 'wildcard' IP address amd given port
             endpoint = new DatagramSocket(port, InetAddress.getByName(localIP));
-            gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + worldName + " - Player Count: " + (1 + clients.size()));
+            gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + worldName + " - Player Count: " + (clients.size()));
             DSLogger.reportInfo(String.format("Game Server (%s:%d) started!", this.localIP, this.port), null);
             gameObject.WINDOW.writeOnConsole((String.format("Game Server (%s:%d) started!", this.localIP, this.port)));
         } catch (IOException ex) {
@@ -277,6 +277,7 @@ public class GameServer implements DSMachine, Runnable {
         running = false;
         DSLogger.reportInfo("Game Server finished!", null);
         gameObject.WINDOW.writeOnConsole("Game Server finished!");
+        shutDownSignal = false;
     }
 
     /**

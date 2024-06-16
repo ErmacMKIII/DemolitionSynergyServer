@@ -181,7 +181,7 @@ public class GameServerProcessor {
                     response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                     gameServer.clients.add(clientHostName);
                     gameServer.timeToLiveMap.putIfAbsent(clientHostName, GameServer.TIME_TO_LIVE);
-                    gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (1 + gameServer.clients.size()));
+                    gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
                 }
                 response.send(gameServer, clientAddress, clientPort);
                 break;
@@ -243,7 +243,7 @@ public class GameServerProcessor {
                 response.send(gameServer, clientAddress, clientPort);
                 gameServer.timeToLiveMap.remove(clientHostName);
                 gameServer.clients.remove(clientHostName);
-                gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (1 + gameServer.clients.size()));
+                gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
                 String uniqueId = gameServer.whoIsMap.get(clientHostName);
                 if (uniqueId != null) {
                     GameServer.performCleanUp(gameServer.gameObject, uniqueId, false);

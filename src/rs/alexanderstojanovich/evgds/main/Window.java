@@ -23,6 +23,10 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
+import com.sun.management.OperatingSystemMXBean;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -37,6 +41,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
@@ -55,9 +60,16 @@ import rs.alexanderstojanovich.evgds.net.PosInfo;
  */
 public class Window extends javax.swing.JFrame {
 
+    // Get the OperatingSystemMXBean instance
+    OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
+
+    // Get the MemoryMXBean instance
+    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+
     public final GameObject gameObject;
     public static final Dimension DIM = Toolkit.getDefaultToolkit().getScreenSize();
 
+    public static final String LICENSE_LOGO_FILE_NAME = "gplv3_logo.png";
     public static final String LOGOX_FILE_NAME = "app-icon.png";
     public static final String LOGO_FILE_NAME = "app-icon-small.png";
 
@@ -71,6 +83,8 @@ public class Window extends javax.swing.JFrame {
 
     public final JFileChooser fileImport = new JFileChooser();
     public final JFileChooser fileExport = new JFileChooser();
+
+    public final Configuration config = Configuration.getInstance();
 
     /**
      * Creates new form ServerIntrface
@@ -86,6 +100,8 @@ public class Window extends javax.swing.JFrame {
         setEnabledComponents(this.panelInfo, false);
         this.cmbLevelSize.setModel(new DefaultComboBoxModel(GameObject.MapLevelSize.values()));
         this.initDialogs();
+        this.tboxLocalIP.setText(config.getLocalIP());
+        this.spinServerPort.setValue(config.getServerPort());
     }
 
     public void initCenterWindow() {
@@ -325,6 +341,7 @@ public class Window extends javax.swing.JFrame {
         btnStart = new javax.swing.JButton();
         btnStop = new javax.swing.JButton();
         btnRestart = new javax.swing.JButton();
+        btnHealth = new javax.swing.JButton();
         panelWorld = new javax.swing.JPanel();
         lblLevelSize = new javax.swing.JLabel();
         cmbLevelSize = new javax.swing.JComboBox<>();
@@ -354,7 +371,10 @@ public class Window extends javax.swing.JFrame {
         mainMenu = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         fileMenuExit = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
+        fileStatus = new javax.swing.JMenu();
+        statusMenuHealth = new javax.swing.JMenuItem();
+        fileHelp = new javax.swing.JMenu();
+        helpMenuAbout = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Demolition Synergy Server");
@@ -378,7 +398,7 @@ public class Window extends javax.swing.JFrame {
         lblServerPort.setText("Server Port:");
         panelNetwork.add(lblServerPort);
 
-        spinServerPort.setModel(new javax.swing.SpinnerNumberModel(13667, 13660, 13670, 1));
+        spinServerPort.setModel(new javax.swing.SpinnerNumberModel(13667, 13660, 13669, 1));
         panelNetwork.add(spinServerPort);
 
         btnStart.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
@@ -415,6 +435,17 @@ public class Window extends javax.swing.JFrame {
             }
         });
         panelNetwork.add(btnRestart);
+
+        btnHealth.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
+        btnHealth.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/health.png"))); // NOI18N
+        btnHealth.setText("Health");
+        btnHealth.setToolTipText("Show server health (CPU Load, Memory Usage etc.)");
+        btnHealth.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHealthActionPerformed(evt);
+            }
+        });
+        panelNetwork.add(btnHealth);
 
         getContentPane().add(panelNetwork);
 
@@ -530,6 +561,7 @@ public class Window extends javax.swing.JFrame {
         panelInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Info"));
         panelInfo.setLayout(new java.awt.BorderLayout());
 
+        gameTimeText.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         gameTimeText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         gameTimeText.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/day-night-cycle.png"))); // NOI18N
         gameTimeText.setText("Day 1 00:00:00");
@@ -634,6 +666,7 @@ public class Window extends javax.swing.JFrame {
 
         console.setEditable(false);
         console.setColumns(20);
+        console.setFont(new java.awt.Font("Segoe UI Symbol", 0, 14)); // NOI18N
         console.setRows(5);
         spConsole.setViewportView(console);
 
@@ -653,8 +686,31 @@ public class Window extends javax.swing.JFrame {
 
         mainMenu.add(fileMenu);
 
-        jMenu2.setText("Edit");
-        mainMenu.add(jMenu2);
+        fileStatus.setText("Status");
+
+        statusMenuHealth.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/health-mini.png"))); // NOI18N
+        statusMenuHealth.setText("Health");
+        statusMenuHealth.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                statusMenuHealthActionPerformed(evt);
+            }
+        });
+        fileStatus.add(statusMenuHealth);
+
+        mainMenu.add(fileStatus);
+
+        fileHelp.setText("Help");
+
+        helpMenuAbout.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/info-about.png"))); // NOI18N
+        helpMenuAbout.setText("About");
+        helpMenuAbout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                helpMenuAboutActionPerformed(evt);
+            }
+        });
+        fileHelp.add(helpMenuAbout);
+
+        mainMenu.add(fileHelp);
 
         setJMenuBar(mainMenu);
 
@@ -790,10 +846,82 @@ public class Window extends javax.swing.JFrame {
         gameObject.gameServer.setWorldName(this.tboxWorldName.getText());
     }//GEN-LAST:event_tboxWorldNameActionPerformed
 
+    private void checkHealth() {
+        // TODO add your handling code here:      
+        StringBuilder sb = new StringBuilder();
+        if (gameObject.gameServer.running) {
+            sb.append("Status: RUNNING");
+        } else if (gameObject.gameServer.shutDownSignal) {
+            sb.append("Status: PENDING SHUT DOWN");
+        } else {
+            sb.append("Status: NOT RUNNING");
+        }
+
+        sb.append("\n").append("\n");
+
+        // Get the CPU load
+        double cpuLoad = osBean.getSystemLoadAverage() * 100.0;
+        sb.append(String.format("CPU Load: %.2f%%\n", cpuLoad));
+
+        // Get the heap memory usage
+        MemoryUsage heapMemoryUsage = memoryBean.getHeapMemoryUsage();
+        long usedHeapMemory = heapMemoryUsage.getUsed();
+        long maxHeapMemory = heapMemoryUsage.getMax();
+        sb.append(String.format("Heap Memory: Used = %d MB, Max = %d MB\n", usedHeapMemory / (1024 * 1024), maxHeapMemory / (1024 * 1024)));
+
+        // Get the non-heap memory usage
+        MemoryUsage nonHeapMemoryUsage = memoryBean.getNonHeapMemoryUsage();
+        long usedNonHeapMemory = nonHeapMemoryUsage.getUsed();
+        long maxNonHeapMemory = nonHeapMemoryUsage.getMax();
+        sb.append(String.format("Non-Heap Memory: Used = %d MB, Max = %d MB\n", usedNonHeapMemory / (1024 * 1024), maxNonHeapMemory / (1024 * 1024)));
+
+        JTextArea textArea = new JTextArea(sb.toString(), 7, 20);
+        JScrollPane jsp = new JScrollPane(textArea);
+        textArea.setEditable(false);
+        JOptionPane.showMessageDialog(this, jsp, "Interface status", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void btnHealthActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHealthActionPerformed
+        // TODO add your handling code here:      
+        checkHealth();
+    }//GEN-LAST:event_btnHealthActionPerformed
+
+    private void statusMenuHealthActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_statusMenuHealthActionPerformed
+        // TODO add your handling code here:
+        checkHealth();
+    }//GEN-LAST:event_statusMenuHealthActionPerformed
+
+    private void infoAbout() {
+        URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
+        if (icon_url != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("VERSION v0.1 - ALPHA (PUBLIC BUILD reviewed on 2024-06-17 at 12:00 AM).\n");
+            sb.append("This software is free software, \n");
+            sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("Demolition Synergy version: 43\n");
+            sb.append("\n");
+            sb.append("Copyright © 2024");
+            sb.append("Alexander \"Ermac\" Stojanovich\n");
+            sb.append("\n");
+            ImageIcon icon = new ImageIcon(icon_url);
+            JTextArea textArea = new JTextArea(sb.toString(), 15, 50);
+            JScrollPane jsp = new JScrollPane(textArea);
+            textArea.setEditable(false);
+            JOptionPane.showMessageDialog(this, jsp, "About", JOptionPane.INFORMATION_MESSAGE, icon);
+        }
+    }
+
+    private void helpMenuAboutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpMenuAboutActionPerformed
+        // TODO add your handling code here:
+        infoAbout();
+    }//GEN-LAST:event_helpMenuAboutActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnErase;
     private javax.swing.JButton btnExport;
     private javax.swing.JButton btnGenerate;
+    private javax.swing.JButton btnHealth;
     private javax.swing.JButton btnImport;
     private javax.swing.JButton btnRestart;
     private javax.swing.JButton btnStart;
@@ -801,10 +929,12 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JTable clientInfoTbl;
     private javax.swing.JComboBox<String> cmbLevelSize;
     private javax.swing.JTextArea console;
+    private javax.swing.JMenu fileHelp;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenuItem fileMenuExit;
+    private javax.swing.JMenu fileStatus;
     private javax.swing.JLabel gameTimeText;
-    private javax.swing.JMenu jMenu2;
+    private javax.swing.JMenuItem helpMenuAbout;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JLabel lblLevelSize;
@@ -826,6 +956,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JScrollPane spPosInfo;
     private javax.swing.JSpinner spinMapSeed;
     private javax.swing.JSpinner spinServerPort;
+    private javax.swing.JMenuItem statusMenuHealth;
     private javax.swing.JTabbedPane tabPaneInfo;
     private javax.swing.JTextField tboxLocalIP;
     private javax.swing.JTextField tboxWorldName;
