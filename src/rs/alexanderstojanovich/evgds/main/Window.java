@@ -479,6 +479,7 @@ public class Window extends javax.swing.JFrame {
         lblMapSeed.setText("Seed:");
         panelWorld.add(lblMapSeed);
 
+        spinMapSeed.setModel(new javax.swing.SpinnerNumberModel(305419896, null, null, 1));
         spinMapSeed.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 spinMapSeedStateChanged(evt);
@@ -860,7 +861,7 @@ public class Window extends javax.swing.JFrame {
         sb.append("\n").append("\n");
 
         // Get the CPU load
-        double cpuLoad = osBean.getSystemLoadAverage() * 100.0;
+        double cpuLoad = osBean.getProcessCpuLoad() * 100.0;
         sb.append(String.format("CPU Load: %.2f%%\n", cpuLoad));
 
         // Get the heap memory usage
@@ -899,7 +900,7 @@ public class Window extends javax.swing.JFrame {
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
-            sb.append("Demolition Synergy version: 43\n");
+            sb.append("Demolition Synergy Version: 43\n");
             sb.append("\n");
             sb.append("Copyright © 2024");
             sb.append("Alexander \"Ermac\" Stojanovich\n");

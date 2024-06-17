@@ -39,7 +39,6 @@ public class Game implements DSMachine {
 
     public static final int TPS_ONE = 1; // One tick ~ 12.5 ms
     public static final int TPS_TWO = 2; // Two ticks ~ 25 ms (Used for Chunk Optimization) ~ default
-    public static final int TICKS_PER_UPDATE = config.getTicksPerUpdate(); // (1 - FLUID, 2 - EFFICIENT)
 
     public static final double TICK_TIME = 1.0 / (double) TPS;
 
@@ -53,7 +52,6 @@ public class Game implements DSMachine {
     public static final int RIGHT = 3;
 
     private static int ups; // current handleInput per second    
-    private static int fpsMax = config.getFpsCap(); // fps max or fps cap  
 
     // if this is reach game will close without exception!
     public static final double CRITICAL_TIME = 10.0;
@@ -104,7 +102,6 @@ public class Game implements DSMachine {
      * Connect to server stuff & endpoint
      */
     protected DatagramSocket serverEndpoint;
-    protected String serverHostName = config.getServerIP();
     protected InetAddress serverInetAddr = null;
 
     protected int port = config.getClientPort();
@@ -194,12 +191,9 @@ public class Game implements DSMachine {
      */
     public static Configuration makeConfig(GameObject gameObject) {
         Configuration cfg = Configuration.getInstance();
-        cfg.setFpsCap(fpsMax);
         cfg.setWidth(gameObject.WINDOW.getWidth());
         cfg.setHeight(gameObject.WINDOW.getHeight());
 //        cfg.setFullscreen(gameObject.WINDOW.isFullscreen());
-        cfg.setServerIP(gameObject.game.serverHostName);
-        cfg.setClientPort(gameObject.game.port);
         cfg.setLocalIP(gameObject.gameServer.localIP);
         cfg.setServerPort(gameObject.gameServer.port);
 
@@ -216,14 +210,6 @@ public class Game implements DSMachine {
 
     public static void setUps(int ups) {
         Game.ups = ups;
-    }
-
-    public static int getFpsMax() {
-        return fpsMax;
-    }
-
-    public static void setFpsMax(int fpsMax) {
-        Game.fpsMax = fpsMax;
     }
 
     public static double getAccumulator() {
@@ -293,24 +279,8 @@ public class Game implements DSMachine {
         this.serverEndpoint = serverEndpoint;
     }
 
-    public String getServerHostName() {
-        return serverHostName;
-    }
-
-    public void setServerHostName(String serverHostName) {
-        this.serverHostName = serverHostName;
-    }
-
     public InetAddress getServerInetAddr() {
         return serverInetAddr;
-    }
-
-    public int getPort() {
-        return port;
-    }
-
-    public void setPort(int port) {
-        this.port = port;
     }
 
     public int getTimeout() {
@@ -319,6 +289,18 @@ public class Game implements DSMachine {
 
     public Vector3f getPlayerServerPos() {
         return playerServerPos;
+    }
+
+    public static Configuration getConfig() {
+        return config;
+    }
+
+    public int getPort() {
+        return port;
+    }
+
+    public int getWeaponIndex() {
+        return weaponIndex;
     }
 
 }
