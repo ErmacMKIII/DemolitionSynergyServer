@@ -74,7 +74,7 @@ public interface ResponseIfc extends DSObject {
 
         byte[] dataContent = Arrays.copyOfRange(p.getData(), 0, p.getLength() - Long.BYTES);
         byte[] dataChksum = Arrays.copyOfRange(p.getData(), p.getLength() - Long.BYTES, p.getLength());
-        long checksum = Long.reverseBytes(new BigInteger(dataChksum).longValue());
+        long checksum = new BigInteger(dataChksum).longValue();
 
         ResponseIfc result = (ResponseIfc) new Response(checksum).deserialize(dataContent); // new response
 

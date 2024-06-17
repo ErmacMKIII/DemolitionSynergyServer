@@ -188,8 +188,11 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         }
 
         if (!isWorking() || this.getLevelContainer().getProgress() == 100.0f) {
-            this.getLevelContainer().setProgress(0.0f);
+            this.levelContainer.setProgress(0.0f);
         }
+
+        this.WINDOW.getProgBar().setValue(Math.round(this.levelContainer.getProgress()));
+        this.WINDOW.getProgBar().validate();
     }
 
     /**
@@ -247,8 +250,10 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         levelContainer.levelActors.spectator.setPos(new Vector3f());
         levelContainer.levelActors.npcList.clear();
         levelContainer.levelActors.otherPlayers.clear();
-        if (!gameServer.isShutDownSignal()) {
+        if (gameServer.isShutDownSignal() || !gameServer.isRunning()) {
             WINDOW.setTitle(GameObject.WINDOW_TITLE);
+        } else {
+            WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + gameServer.clients.size());
         }
         Game.setCurrentMode(Game.Mode.FREE);
     }
@@ -357,6 +362,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
                     break;
             }
             ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
+            ok |= levelContainer.storeLevelToBufferNewFormat();
         } finally {
             updateRenderLCLock.unlock();
         }

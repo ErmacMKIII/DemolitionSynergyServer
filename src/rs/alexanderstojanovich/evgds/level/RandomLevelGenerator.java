@@ -92,7 +92,7 @@ public class RandomLevelGenerator {
         return LevelContainer.AllBlockMap.isLocationPopulated(pos)
                 || levelContainer.getLevelActors().getPlayer().body.containsInsideEqually(pos)
                 || levelContainer.getLevelActors().spectator.getPos().equals(pos)
-                || !levelContainer.gameObject.gameServer.isShutDownSignal();
+                || levelContainer.gameObject.gameServer.isShutDownSignal();
     }
 
     private Block generateRandomSolidBlock(int posMin, int posMax, int hMin, int hMax) {
@@ -458,7 +458,7 @@ public class RandomLevelGenerator {
         levelContainer.setProgress(0.0f);
         IList<Vector3f> allFluidPos = LevelContainer.AllBlockMap.getPopulatedLocations(tb -> !tb.solid);
         for (Vector3f fldPos : allFluidPos) {
-            if (! !levelContainer.gameObject.gameServer.isShutDownSignal()) {
+            if (levelContainer.gameObject.gameServer.isShutDownSignal()) {
                 break;
             }
 

@@ -141,7 +141,7 @@ public interface RequestIfc extends DSObject {
 
         byte[] dataContent = Arrays.copyOfRange(p.getData(), 0, p.getLength() - Long.BYTES);
         byte[] dataChksum = Arrays.copyOfRange(p.getData(), p.getLength() - Long.BYTES, p.getLength());
-        long checksum = Long.reverseBytes(new BigInteger(dataChksum).longValue());
+        long checksum = new BigInteger(dataChksum).longValue();
 
         RequestIfc result = (RequestIfc) new Request(p.getAddress(), p.getPort(), checksum).deserialize(dataContent); // new request                
 

@@ -16,6 +16,7 @@
  */
 package rs.alexanderstojanovich.evgds.main;
 
+import com.sun.management.OperatingSystemMXBean;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -26,7 +27,6 @@ import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
-import com.sun.management.OperatingSystemMXBean;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -34,6 +34,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -43,8 +44,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import static rs.alexanderstojanovich.evgds.main.Game.RESOURCES_DIR;
 import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.HUGE;
 import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.LARGE;
@@ -53,6 +56,7 @@ import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.SMALL;
 import rs.alexanderstojanovich.evgds.net.ClientInfo;
 import rs.alexanderstojanovich.evgds.net.PlayerInfo;
 import rs.alexanderstojanovich.evgds.net.PosInfo;
+import rs.alexanderstojanovich.evgds.util.DSLogger;
 
 /**
  *
@@ -61,10 +65,10 @@ import rs.alexanderstojanovich.evgds.net.PosInfo;
 public class Window extends javax.swing.JFrame {
 
     // Get the OperatingSystemMXBean instance
-    OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
+    public final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 
     // Get the MemoryMXBean instance
-    MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
+    public final MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
 
     public final GameObject gameObject;
     public static final Dimension DIM = Toolkit.getDefaultToolkit().getScreenSize();
@@ -349,8 +353,8 @@ public class Window extends javax.swing.JFrame {
         tboxWorldName = new javax.swing.JTextField();
         lblMapSeed = new javax.swing.JLabel();
         spinMapSeed = new javax.swing.JSpinner();
-        jPanel1 = new javax.swing.JPanel();
-        jPanel2 = new javax.swing.JPanel();
+        lblBlockNum = new javax.swing.JLabel();
+        tboxBlockNum = new javax.swing.JTextField();
         btnGenerate = new javax.swing.JButton();
         btnImport = new javax.swing.JButton();
         btnExport = new javax.swing.JButton();
@@ -427,7 +431,7 @@ public class Window extends javax.swing.JFrame {
         btnRestart.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnRestart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/restart.png"))); // NOI18N
         btnRestart.setText("Restart");
-        btnRestart.setToolTipText("Restart server (Start & Stop)");
+        btnRestart.setToolTipText("Restart server (Start & Stop, Erase world)");
         btnRestart.setEnabled(false);
         btnRestart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -487,31 +491,13 @@ public class Window extends javax.swing.JFrame {
         });
         panelWorld.add(spinMapSeed);
 
-        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-        jPanel1.setLayout(jPanel1Layout);
-        jPanel1Layout.setHorizontalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 157, Short.MAX_VALUE)
-        );
-        jPanel1Layout.setVerticalGroup(
-            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 108, Short.MAX_VALUE)
-        );
+        lblBlockNum.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblBlockNum.setText("Block Number:");
+        panelWorld.add(lblBlockNum);
 
-        panelWorld.add(jPanel1);
-
-        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
-        jPanel2.setLayout(jPanel2Layout);
-        jPanel2Layout.setHorizontalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 157, Short.MAX_VALUE)
-        );
-        jPanel2Layout.setVerticalGroup(
-            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 108, Short.MAX_VALUE)
-        );
-
-        panelWorld.add(jPanel2);
+        tboxBlockNum.setEditable(false);
+        tboxBlockNum.setText("0");
+        panelWorld.add(tboxBlockNum);
 
         btnGenerate.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/new.png"))); // NOI18N
@@ -677,6 +663,7 @@ public class Window extends javax.swing.JFrame {
 
         fileMenu.setText("File");
 
+        fileMenuExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/exit_icon_small.png"))); // NOI18N
         fileMenuExit.setText("Exit");
         fileMenuExit.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -742,7 +729,8 @@ public class Window extends javax.swing.JFrame {
     private void btnRestartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRestartActionPerformed
         // TODO add your handling code here:
         gameObject.gameServer.stopServer();
-        gameObject.clearEverything();
+
+        eraseWorld();
 
         gameObject.start();
     }//GEN-LAST:event_btnRestartActionPerformed
@@ -753,14 +741,30 @@ public class Window extends javax.swing.JFrame {
     }//GEN-LAST:event_fileMenuExitActionPerformed
 
     private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
-        // TODO add your handling code here:
+        // TODO add your handling code here:       
         final GameObject.MapLevelSize levelSize = (GameObject.MapLevelSize) cmbLevelSize.getSelectedItem();
-        if (gameObject.generateRandomLevel(levelSize)) {
-            JOptionPane.showMessageDialog(this, "New world succesfully generated!", "Generate new world", JOptionPane.INFORMATION_MESSAGE);
-            btnErase.setEnabled(true);
-        } else {
-            JOptionPane.showMessageDialog(this, "New world generation resulted in failured!", "Generate new world", JOptionPane.ERROR_MESSAGE);
-        }
+        SwingWorker<Boolean, Void> swingWorker = new SwingWorker<Boolean, Void>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                return gameObject.generateRandomLevel(levelSize);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    if (get()) {
+                        JOptionPane.showMessageDialog(Window.this, "New world succesfully generated!", "Generate New World", JOptionPane.INFORMATION_MESSAGE);
+                        tboxBlockNum.setText(String.valueOf(LevelContainer.AllBlockMap.getPopulation()));
+                        btnErase.setEnabled(true);
+                    } else {
+                        JOptionPane.showMessageDialog(Window.this, "New world generation resulted in failured!", "Generate New World", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    DSLogger.reportError(ex.getMessage(), ex);
+                }
+            }
+        };
+        swingWorker.execute();
     }//GEN-LAST:event_btnGenerateActionPerformed
 
     private void cmbLevelSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLevelSizeActionPerformed
@@ -790,10 +794,19 @@ public class Window extends javax.swing.JFrame {
         gameObject.randomLevelGenerator.setSeed((long) this.spinMapSeed.getValue());
     }//GEN-LAST:event_spinMapSeedStateChanged
 
+    private void eraseWorld() {
+        if (LevelContainer.AllBlockMap.getPopulation() == 0) {
+            JOptionPane.showMessageDialog(Window.this, "World is empty - Please create or import one!", "Erase World", JOptionPane.ERROR_MESSAGE);
+        } else {
+            gameObject.clearEverything();
+            JOptionPane.showMessageDialog(Window.this, "World erased! New world can be created or imported.", "Erase World", JOptionPane.INFORMATION_MESSAGE);
+            tboxBlockNum.setText(String.valueOf(LevelContainer.AllBlockMap.getPopulation()));
+        }
+    }
+
     private void btnEraseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEraseActionPerformed
         // TODO add your handling code here:
-        gameObject.clearEverything();
-        btnGenerate.setEnabled(true);
+        eraseWorld();
     }//GEN-LAST:event_btnEraseActionPerformed
 
     // init dialog for opening the files, setting it's filters
@@ -811,24 +824,65 @@ public class Window extends javax.swing.JFrame {
     private void worldImport() {
         int option = fileImport.showOpenDialog(this);
         if (option == JFileChooser.APPROVE_OPTION) {
-            File file = fileImport.getSelectedFile();
-            if (gameObject.levelContainer.loadLevelFromFile(file.getAbsolutePath())) {
-                JOptionPane.showMessageDialog(this, "World sucessfully imported from file!", "Import world", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "World import resulted in failured!", "Import world", JOptionPane.ERROR_MESSAGE);
-            }
+            final File file = fileImport.getSelectedFile();
+
+            SwingWorker<Boolean, Void> swingWorker = new SwingWorker<Boolean, Void>() {
+                @Override
+                protected Boolean doInBackground() throws Exception {
+                    return gameObject.levelContainer.loadLevelFromFile(file.getAbsolutePath());
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        if (get()) {
+                            JOptionPane.showMessageDialog(Window.this, "World sucessfully imported from file!", "Import World", JOptionPane.INFORMATION_MESSAGE);
+                            tboxBlockNum.setText(String.valueOf(LevelContainer.AllBlockMap.getPopulation()));
+                            btnErase.setEnabled(true);
+                        } else {
+                            JOptionPane.showMessageDialog(Window.this, "World import resulted in failure!", "Import World", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (InterruptedException | ExecutionException ex) {
+                        DSLogger.reportError(ex.getMessage(), ex);
+                    }
+                }
+            };
+
+            swingWorker.execute();
         }
     }
 
     private void worldExport() {
+        if (LevelContainer.AllBlockMap.getPopulation() == 0) {
+            JOptionPane.showMessageDialog(Window.this, "World is empty - Please create or import one!", "Export World", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         int option = fileExport.showSaveDialog(this);
         if (option == JFileChooser.APPROVE_OPTION) {
-            File file = fileExport.getSelectedFile();
-            if (gameObject.levelContainer.saveLevelToFile(file.getAbsolutePath())) {
-                JOptionPane.showMessageDialog(this, "World sucessfully imported from file!", "Import world", JOptionPane.INFORMATION_MESSAGE);
-            } else {
-                JOptionPane.showMessageDialog(this, "World import resulted in failured!", "Import world", JOptionPane.ERROR_MESSAGE);
-            }
+            final File file = fileExport.getSelectedFile();
+
+            SwingWorker<Boolean, Void> swingWorker = new SwingWorker<Boolean, Void>() {
+                @Override
+                protected Boolean doInBackground() throws Exception {
+                    return gameObject.levelContainer.saveLevelToFile(file.getAbsolutePath());
+                }
+
+                @Override
+                protected void done() {
+                    try {
+                        if (get()) {
+                            JOptionPane.showMessageDialog(Window.this, "World sucessfully exported from file!", "Export World", JOptionPane.INFORMATION_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(Window.this, "World export resulted in failure!", "Export World", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (InterruptedException | ExecutionException ex) {
+                        DSLogger.reportError(ex.getMessage(), ex);
+                    }
+                }
+            };
+
+            swingWorker.execute();
         }
     }
 
@@ -879,7 +933,7 @@ public class Window extends javax.swing.JFrame {
         JTextArea textArea = new JTextArea(sb.toString(), 7, 20);
         JScrollPane jsp = new JScrollPane(textArea);
         textArea.setEditable(false);
-        JOptionPane.showMessageDialog(this, jsp, "Interface status", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(this, jsp, "Server Health", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void btnHealthActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHealthActionPerformed
@@ -936,8 +990,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JMenu fileStatus;
     private javax.swing.JLabel gameTimeText;
     private javax.swing.JMenuItem helpMenuAbout;
-    private javax.swing.JPanel jPanel1;
-    private javax.swing.JPanel jPanel2;
+    private javax.swing.JLabel lblBlockNum;
     private javax.swing.JLabel lblLevelSize;
     private javax.swing.JLabel lblLocalIP;
     private javax.swing.JLabel lblMapSeed;
@@ -959,6 +1012,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JSpinner spinServerPort;
     private javax.swing.JMenuItem statusMenuHealth;
     private javax.swing.JTabbedPane tabPaneInfo;
+    private javax.swing.JTextField tboxBlockNum;
     private javax.swing.JTextField tboxLocalIP;
     private javax.swing.JTextField tboxWorldName;
     // End of variables declaration//GEN-END:variables
