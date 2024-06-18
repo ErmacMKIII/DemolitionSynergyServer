@@ -335,7 +335,7 @@ public class GameServerProcessor {
             case DOWNLOAD:
                 // Server alraedy saved the level
                 gameServer.gameObject.levelContainer.storeLevelToBufferNewFormat();
-                System.arraycopy(gameServer.gameObject.levelContainer.buffer, 0,gameServer.gameObject.levelContainer.bak_buffer, 0, gameServer.gameObject.levelContainer.pos);
+                System.arraycopy(gameServer.gameObject.levelContainer.buffer, 0, gameServer.gameObject.levelContainer.bak_buffer, 0, gameServer.gameObject.levelContainer.pos);
                 gameServer.gameObject.levelContainer.bak_pos = gameServer.gameObject.levelContainer.pos;
                 totalBytes = gameServer.gameObject.levelContainer.bak_pos;
                 final int bytesPerFragment = BUFF_SIZE;

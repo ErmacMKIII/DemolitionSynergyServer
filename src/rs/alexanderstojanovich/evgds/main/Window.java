@@ -385,6 +385,7 @@ public class Window extends javax.swing.JFrame {
         statusMenuHealth = new javax.swing.JMenuItem();
         fileHelp = new javax.swing.JMenu();
         helpMenuAbout = new javax.swing.JMenuItem();
+        helpMenuHowToUse = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Demolition Synergy Server");
@@ -711,6 +712,15 @@ public class Window extends javax.swing.JFrame {
         });
         fileHelp.add(helpMenuAbout);
 
+        helpMenuHowToUse.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/qmark.png"))); // NOI18N
+        helpMenuHowToUse.setText("How to use");
+        helpMenuHowToUse.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                helpMenuHowToUseActionPerformed(evt);
+            }
+        });
+        fileHelp.add(helpMenuHowToUse);
+
         mainMenu.add(fileHelp);
 
         setJMenuBar(mainMenu);
@@ -969,11 +979,11 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v0.1 - ALPHA (PUBLIC BUILD reviewed on 2024-06-17 at 12:00 AM).\n");
+            sb.append("VERSION v0.1 - ALPHA (PUBLIC BUILD reviewed on 2024-06-19 at 01:00 AM).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
-            sb.append("Demolition Synergy Version: 43\n");
+            sb.append("Demolition Synergy Version: 43-beta2\n");
             sb.append("\n");
             sb.append("Copyright © 2024\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
@@ -990,6 +1000,41 @@ public class Window extends javax.swing.JFrame {
         // TODO add your handling code here:
         infoAbout();
     }//GEN-LAST:event_helpMenuAboutActionPerformed
+
+    private void helpMenuHowToUseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_helpMenuHowToUseActionPerformed
+        // TODO add your handling code here:
+        infoHelp();
+    }//GEN-LAST:event_helpMenuHowToUseActionPerformed
+
+    private void infoHelp() {
+        URL icon_url = getClass().getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
+        if (icon_url != null) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("- FOR THE PURPOSE ABOUT THIS PROGRAM, \n");
+            sb.append("check About. Make sure that you checked it first.\n");
+            sb.append("\n");
+            sb.append("- Quick start guide:\n");
+            sb.append("\t1. Enter your local IP (Local Area Network) and (local) server port.\n");
+            sb.append("\t2. Start the server by click on 'Start' button.\n");
+            sb.append("\t3. Generate new world by click 'Generate New' button\n");
+            sb.append("\t4. Alternatively, use 'Import World' to import earlier created level map.\n");
+            sb.append("\t5. (Optional) World could be exported with 'Export World' to import earlier created level map.\n");
+            sb.append("\n");
+            sb.append("[*] Trivia:\n");
+            sb.append("- Local IP is your local IP address (obtained from home or office router). Check ipconfig on Windows.\n");
+            sb.append("- There is no conceptual difference between 'DSynergy' client/server and dedicated server.\n");
+            sb.append("- Dedicated server originated direcly from 'DSynergy' by removing code.\n");
+            sb.append("- Level Map formats are offered in: 'Old data level format' (*.dat) and 'New data level format' (*.ndat)\n");
+            sb.append("- 'Old data level format' (*.dat) is around for quite a while. 'New data level format' (*.ndat) is recent supporting uncapped level sizes.\n");
+            sb.append("\n");
+            sb.append("\n");
+            ImageIcon icon = new ImageIcon(icon_url);
+            JTextArea textArea = new JTextArea(sb.toString(), 15, 50);
+            JScrollPane jsp = new JScrollPane(textArea);
+            textArea.setEditable(false);
+            JOptionPane.showMessageDialog(this, jsp, "How to use", JOptionPane.INFORMATION_MESSAGE, icon);
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnErase;
@@ -1009,6 +1054,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JMenu fileStatus;
     private javax.swing.JLabel gameTimeText;
     private javax.swing.JMenuItem helpMenuAbout;
+    private javax.swing.JMenuItem helpMenuHowToUse;
     private javax.swing.JLabel lblBlockNum;
     private javax.swing.JLabel lblLevelSize;
     private javax.swing.JLabel lblLocalIP;
