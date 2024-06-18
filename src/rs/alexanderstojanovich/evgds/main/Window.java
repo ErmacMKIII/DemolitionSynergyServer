@@ -30,10 +30,8 @@ import java.lang.management.MemoryUsage;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
@@ -47,6 +45,8 @@ import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import org.magicwerk.brownies.collections.GapList;
+import org.magicwerk.brownies.collections.IList;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import static rs.alexanderstojanovich.evgds.main.Game.RESOURCES_DIR;
 import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.HUGE;
@@ -60,7 +60,7 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
 
 /**
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Alexander Stojanovich
  */
 public class Window extends javax.swing.JFrame {
 
@@ -77,13 +77,28 @@ public class Window extends javax.swing.JFrame {
     public static final String LOGOX_FILE_NAME = "app-icon.png";
     public static final String LOGO_FILE_NAME = "app-icon-small.png";
 
-    public final Map<String, Integer> playerInfoMap = new LinkedHashMap<>();
-    public final Map<String, Integer> posInfoMap = new LinkedHashMap<>();
-    public final Map<String, Integer> clientInfoMap = new LinkedHashMap<>();
+    public final IList<PlayerInfo> playerInfos = new GapList<>();
+    public final IList<PosInfo> posInfos = new GapList<>();
+    public final IList<ClientInfo> clientInfos = new GapList<>();
 
-    public final DefaultTableModel playerInfoModel = new DefaultTableModel();
-    public final DefaultTableModel posInfoModel = new DefaultTableModel();
-    public final DefaultTableModel clientInfoModel = new DefaultTableModel();
+    public final DefaultTableModel playerInfoModel = new DefaultTableModel() {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+    public final DefaultTableModel posInfoModel = new DefaultTableModel() {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
+    public final DefaultTableModel clientInfoModel = new DefaultTableModel() {
+        @Override
+        public boolean isCellEditable(int row, int column) {
+            return false;
+        }
+    };
 
     public final JFileChooser fileImport = new JFileChooser();
     public final JFileChooser fileExport = new JFileChooser();
@@ -91,7 +106,7 @@ public class Window extends javax.swing.JFrame {
     public final Configuration config = Configuration.getInstance();
 
     /**
-     * Creates new form ServerIntrface
+     * Creates new form ServerInterface
      *
      * @param gameObject game object linking everything
      */
@@ -140,6 +155,12 @@ public class Window extends javax.swing.JFrame {
     private void initInfoTables() {
         this.playerInfoTbl.setModel(playerInfoModel);
         this.posInfoTbl.setModel(posInfoModel);
+        this.clientInfoTbl.setModel(clientInfoModel);
+
+        // Initialize columns for the tables
+        playerInfoModel.setColumnIdentifiers(new String[]{"Name", "Texture Model", "Unique ID", "Color"});
+        posInfoModel.setColumnIdentifiers(new String[]{"Unique ID", "Position", "Front"});
+        clientInfoModel.setColumnIdentifiers(new String[]{"Host Name", "Unique ID", "Time to Live"});
     }
 
     public static void setEnabledComponents(Component component, boolean enabled) {
@@ -152,140 +173,125 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
-    /**
-     * Upserts player information into the table.
-     *
-     * @param playerInfos Array of playerInfoMap objects to be upserted.
-     */
-    public void upsertPlayerInfo(PlayerInfo[] playerInfos) {
-        for (PlayerInfo playerInfo : playerInfos) {
-            if (playerInfoMap.containsKey(playerInfo.getUniqueId())) {
-                int rowIndex = playerInfoMap.get(playerInfo.getUniqueId());
-                updateRowPlayerInfo(rowIndex, playerInfo);
-            } else {
-                addRowPlayerInfo(playerInfo);
+    public void upsertPlayerInfo(PlayerInfo[] newPlayerInfos) {
+        // Remove rows not in the new data
+        for (int i = playerInfoModel.getRowCount() - 1; i >= 0; i--) {
+            String uniqueId = (String) playerInfoModel.getValueAt(i, 0);
+            boolean exists = false;
+            for (PlayerInfo info : newPlayerInfos) {
+                if (info.getUniqueId().equals(uniqueId)) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                playerInfoModel.removeRow(i);
+            }
+        }
+
+        // Add or update rows
+        for (PlayerInfo info : newPlayerInfos) {
+            boolean found = false;
+            for (int i = 0; i < playerInfoModel.getRowCount(); i++) {
+                if (playerInfoModel.getValueAt(i, 0).equals(info.getUniqueId())) {
+                    playerInfoModel.setValueAt(info.name, i, 1);
+                    playerInfoModel.setValueAt(info.texModel, i, 2);
+                    playerInfoModel.setValueAt(info.color.toString(NumberFormat.getInstance(Locale.US)), i, 3);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                playerInfoModel.addRow(new Object[]{
+                    info.name,
+                    info.texModel,
+                    info.uniqueId,
+                    info.color.toString(NumberFormat.getInstance(Locale.US))
+                });
+            }
+        }
+    }
+
+    public void upsertPosInfo(PosInfo[] newPosInfos) {
+        // Remove rows not in the new data
+        for (int i = posInfoModel.getRowCount() - 1; i >= 0; i--) {
+            String uniqueId = (String) posInfoModel.getValueAt(i, 0);
+            boolean exists = false;
+            for (PosInfo info : newPosInfos) {
+                if (info.getUniqueId().equals(uniqueId)) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                posInfoModel.removeRow(i);
+            }
+        }
+
+        // Add or update rows
+        for (PosInfo info : newPosInfos) {
+            boolean found = false;
+            for (int i = 0; i < posInfoModel.getRowCount(); i++) {
+                if (posInfoModel.getValueAt(i, 0).equals(info.getUniqueId())) {
+                    posInfoModel.setValueAt(info.getPos().toString(NumberFormat.getNumberInstance(Locale.US)), i, 1);
+                    posInfoModel.setValueAt(info.getFront().toString(NumberFormat.getNumberInstance(Locale.US)), i, 2);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                posInfoModel.addRow(new Object[]{
+                    info.getUniqueId(),
+                    info.getPos().toString(NumberFormat.getNumberInstance(Locale.US)),
+                    info.getFront().toString(NumberFormat.getNumberInstance(Locale.US))
+                });
+            }
+        }
+    }
+
+    public void upsertClientInfo(ClientInfo[] newClientInfos) {
+        // Remove rows not in the new data
+        for (int i = clientInfoModel.getRowCount() - 1; i >= 0; i--) {
+            String hostName = (String) clientInfoModel.getValueAt(i, 0);
+            boolean exists = false;
+            for (ClientInfo info : newClientInfos) {
+                if (info.getHostName().equals(hostName)) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                clientInfoModel.removeRow(i);
+            }
+        }
+
+        // Add or update rows
+        for (ClientInfo info : newClientInfos) {
+            boolean found = false;
+            for (int i = 0; i < clientInfoModel.getRowCount(); i++) {
+                if (clientInfoModel.getValueAt(i, 0).equals(info.getHostName())) {
+                    clientInfoModel.setValueAt(info.getUniqueId(), i, 1);
+                    clientInfoModel.setValueAt(info.getTimeToLive(), i, 2);
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                clientInfoModel.addRow(new Object[]{info.getHostName(), info.getUniqueId(), info.getTimeToLive()});
             }
         }
     }
 
     /**
-     * Adds a new row to the table with player information.
+     * Remove all rows from a DefaultTableModel.
      *
-     * @param playerInfo playerInfoMap object containing the data for the new
-     * row.
+     * @param rowIndex Index of the row to be removed.
+     * @param model DefaultTableModel from which the row will be removed.
      */
-    private void addRowPlayerInfo(PlayerInfo playerInfo) {
-        Object[] rowData = {
-            playerInfo.getName(),
-            playerInfo.getTexModel(),
-            playerInfo.getUniqueId(),
-            playerInfo.getColor().toString(NumberFormat.getInstance(Locale.US))
-        };
-        playerInfoModel.addRow(rowData);
-        int rowIndex = playerInfoModel.getRowCount() - 1;
-        playerInfoMap.put(playerInfo.getUniqueId(), rowIndex);
-    }
-
-    /**
-     * Updates an existing row in the table with new player information.
-     *
-     * @param rowIndex Index of the row to be updated.
-     * @param playerInfo playerInfoMap object containing the updated data.
-     */
-    private void updateRowPlayerInfo(int rowIndex, PlayerInfo playerInfo) {
-        playerInfoModel.setValueAt(playerInfo.getName(), rowIndex, 0);
-        playerInfoModel.setValueAt(playerInfo.getTexModel(), rowIndex, 1);
-        playerInfoModel.setValueAt(playerInfo.getUniqueId(), rowIndex, 2);
-        playerInfoModel.setValueAt((playerInfo.getColor().toString(NumberFormat.getInstance(Locale.US))), rowIndex, 3);
-    }
-
-    /**
-     * Upserts position information into the table.
-     *
-     * @param posInfos Array of posInfoMap objects to be upserted.
-     */
-    public void upsertPosInfo(PosInfo[] posInfos) {
-        for (PosInfo posInfo : posInfos) {
-            if (playerInfoMap.containsKey(posInfo.getUniqueId())) {
-                int rowIndex = posInfoMap.get(posInfo.getUniqueId());
-                updateRowPosInfo(rowIndex, posInfo);
-            } else {
-                addRowPosInfo(posInfo);
-            }
+    private void removeAllRows(DefaultTableModel model) {
+        for (int i = 0; i < model.getRowCount(); i++) {
+            model.removeRow(i);
         }
-    }
-
-    /**
-     * Adds a new row to the table with position information.
-     *
-     * @param posInfo posInfoMap object containing the data for the new row.
-     */
-    private void addRowPosInfo(PosInfo posInfo) {
-        Object[] rowData = {
-            posInfo.getUniqueId(),
-            posInfo.getPos().toString(NumberFormat.getNumberInstance(Locale.US)),
-            posInfo.getFront().toString(NumberFormat.getNumberInstance(Locale.US)),};
-
-        posInfoModel.addRow(rowData);
-        int rowIndex = posInfoModel.getRowCount() - 1;
-        playerInfoMap.put(posInfo.getUniqueId(), rowIndex);
-    }
-
-    /**
-     * Updates an existing row in the table with new position information.
-     *
-     * @param rowIndex Index of the row to be updated.
-     * @param posInfo posInfoMap object containing the updated data.
-     */
-    private void updateRowPosInfo(int rowIndex, PosInfo posInfo) {
-        posInfoModel.setValueAt(posInfo.getUniqueId(), rowIndex, 0);
-        posInfoModel.setValueAt((posInfo.getPos()), rowIndex, 1);
-        posInfoModel.setValueAt((posInfo.getFront()), rowIndex, 2);
-    }
-
-    /**
-     * Upserts client information into the table.
-     *
-     * @param clientInfos Array of clientInfoMap objects to be upserted.
-     */
-    public void upsertClientInfo(ClientInfo[] clientInfos) {
-        for (ClientInfo clientInfo : clientInfos) {
-            if (clientInfoMap.containsKey(clientInfo.getUniqueId())) {
-                int rowIndex = clientInfoMap.get(clientInfo.getUniqueId());
-                updateRowClentInfo(rowIndex, clientInfo);
-            } else {
-                addRowClientInfo(clientInfo);
-            }
-        }
-    }
-
-    /**
-     * Adds a new row to the table with client information.
-     *
-     * @param clientInfo clientInfoMap object containing the data for the new
-     * row.
-     */
-    private void addRowClientInfo(ClientInfo clientInfo) {
-        Object[] rowData = {
-            clientInfo.getHostName(),
-            clientInfo.getUniqueId(),
-            clientInfo.getTimeToLive()
-        };
-        clientInfoModel.addRow(rowData);
-        int rowIndex = clientInfoModel.getRowCount() - 1;
-        clientInfoMap.put(clientInfo.getUniqueId(), rowIndex);
-    }
-
-    /**
-     * Updates an existing row in the table with new client information.
-     *
-     * @param rowIndex Index of the row to be updated.
-     * @param clientInfo clientInfoMap object containing the updated data.
-     */
-    private void updateRowClentInfo(int rowIndex, ClientInfo clientInfo) {
-        clientInfoModel.setValueAt(clientInfo.getHostName(), rowIndex, 0);
-        clientInfoModel.setValueAt(clientInfo.getUniqueId(), rowIndex, 1);
-        clientInfoModel.setValueAt(clientInfo.getTimeToLive(), rowIndex, 2);
     }
 
     public JTextArea getConsole() {
@@ -396,6 +402,7 @@ public class Window extends javax.swing.JFrame {
         panelNetwork.add(lblLocalIP);
 
         tboxLocalIP.setText("127.0.0.1");
+        tboxLocalIP.setToolTipText("Local IP, check Network options on OS if unsure (ipconfig on Windows)");
         panelNetwork.add(tboxLocalIP);
 
         lblServerPort.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
@@ -403,6 +410,7 @@ public class Window extends javax.swing.JFrame {
         panelNetwork.add(lblServerPort);
 
         spinServerPort.setModel(new javax.swing.SpinnerNumberModel(13667, 13660, 13669, 1));
+        spinServerPort.setToolTipText("Server port used by the server to run on");
         panelNetwork.add(spinServerPort);
 
         btnStart.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
@@ -431,7 +439,7 @@ public class Window extends javax.swing.JFrame {
         btnRestart.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnRestart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/restart.png"))); // NOI18N
         btnRestart.setText("Restart");
-        btnRestart.setToolTipText("Restart server (Start & Stop, Erase world)");
+        btnRestart.setToolTipText("Restart server (Start & Stop, World is perserved)");
         btnRestart.setEnabled(false);
         btnRestart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -556,7 +564,6 @@ public class Window extends javax.swing.JFrame {
         panelInfo.add(gameTimeText, java.awt.BorderLayout.PAGE_START);
 
         progBar.setBorder(javax.swing.BorderFactory.createTitledBorder("Progress:"));
-        progBar.setOpaque(true);
         progBar.setStringPainted(true);
         panelInfo.add(progBar, java.awt.BorderLayout.PAGE_END);
 
@@ -565,7 +572,7 @@ public class Window extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Hostname", "PlayerId", "Time to Live"
+                "Host Name", "Unique Id", "Time to Live"
             }
         ) {
             Class[] types = new Class [] {
@@ -593,7 +600,7 @@ public class Window extends javax.swing.JFrame {
 
             },
             new String [] {
-                "PlayerId", "PlayerName", "Color", "Texture"
+                "Name", "Texture Model", "Unique Id", "Color"
             }
         ) {
             Class[] types = new Class [] {
@@ -621,7 +628,7 @@ public class Window extends javax.swing.JFrame {
 
             },
             new String [] {
-                "PlayerId", "Pos", "Front"
+                "Unique Id", "Position", "Front"
             }
         ) {
             Class[] types = new Class [] {
@@ -715,7 +722,7 @@ public class Window extends javax.swing.JFrame {
         btnRestart.setEnabled(true);
     }//GEN-LAST:event_btnStartActionPerformed
 
-    private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
+    public void stopServerAndUpdate() {
         // TODO add your handling code here:                
         setEnabledComponents(this.panelWorld, false);
         setEnabledComponents(this.panelInfo, false);
@@ -724,13 +731,19 @@ public class Window extends javax.swing.JFrame {
         btnStart.setEnabled(true);
         btnStop.setEnabled(false);
         btnRestart.setEnabled(false);
+
+        removeAllRows(posInfoModel);
+        removeAllRows(clientInfoModel);
+        removeAllRows(playerInfoModel);
+    }
+
+    private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
+        stopServerAndUpdate();
     }//GEN-LAST:event_btnStopActionPerformed
 
     private void btnRestartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRestartActionPerformed
         // TODO add your handling code here:
         gameObject.gameServer.stopServer();
-
-        eraseWorld();
 
         gameObject.start();
     }//GEN-LAST:event_btnRestartActionPerformed
@@ -956,7 +969,7 @@ public class Window extends javax.swing.JFrame {
             sb.append("\n");
             sb.append("Demolition Synergy Version: 43\n");
             sb.append("\n");
-            sb.append("Copyright © 2024");
+            sb.append("Copyright © 2024\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
@@ -1016,4 +1029,5 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JTextField tboxLocalIP;
     private javax.swing.JTextField tboxWorldName;
     // End of variables declaration//GEN-END:variables
+
 }

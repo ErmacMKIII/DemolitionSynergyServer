@@ -71,11 +71,10 @@ public class GameServer implements DSMachine, Runnable {
      */
     public final ExecutorService serverExecutor = Executors.newSingleThreadExecutor();
 
-    /**
-     * Server Task worker (handles heavy tasks)
-     */
-    public final ExecutorService serverTaskExecutor = Executors.newFixedThreadPool(GameServer.MAX_CLIENTS);
-
+//    /**
+//     * Server Task worker (handles heavy tasks)
+//     */
+//    public final ExecutorService serverTaskExecutor = Executors.newFixedThreadPool(GameServer.MAX_CLIENTS);
     /**
      * Who is Client hostname <==> Player UniqueId
      */
@@ -179,7 +178,7 @@ public class GameServer implements DSMachine, Runnable {
      */
     public void shutDown() {
         this.serverExecutor.shutdown();
-        this.serverTaskExecutor.shutdown();
+//        this.serverTaskExecutor.shutdown();
         this.timerClientChk.cancel();
     }
 
@@ -277,7 +276,6 @@ public class GameServer implements DSMachine, Runnable {
         running = false;
         DSLogger.reportInfo("Game Server finished!", null);
         gameObject.WINDOW.writeOnConsole("Game Server finished!");
-        shutDownSignal = false;
     }
 
     /**
@@ -297,7 +295,6 @@ public class GameServer implements DSMachine, Runnable {
 
     public ClientInfo[] getClientInfo() {
         ClientInfo[] result = new ClientInfo[clients.size()];
-
         int index = 0;
         for (String cli : clients) {
             ClientInfo ci = new ClientInfo(cli, whoIsMap.getOrDefault(cli, "N/A"), timeToLiveMap.getOrDefault(cli, -1));

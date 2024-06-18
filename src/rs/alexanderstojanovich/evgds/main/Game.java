@@ -80,7 +80,7 @@ public class Game implements DSMachine {
     public static enum Mode {
         FREE, SINGLE_PLAYER, MULTIPLAYER_HOST, MULTIPLAYER_JOIN, EDITOR
     };
-    private static Mode currentMode = Mode.SINGLE_PLAYER;
+    private static Mode currentMode = Mode.FREE;
 
     protected static boolean actionPerformed = false; // movement for all actors (critters)
     protected static boolean jumpPerformed = false; // jump for player
@@ -141,8 +141,10 @@ public class Game implements DSMachine {
     /**
      * Starts the main loop. Main loop is called from main method. (From
      * GameObject indirectly)
+     *
+     * @throws java.lang.Exception if status is critical
      */
-    public void go() {
+    public void go() throws Exception {
         this.running = true;
         Game.setCurrentMode(Mode.FREE);
         ups = 0;
@@ -167,8 +169,8 @@ public class Game implements DSMachine {
             // Detecting critical status
             if (ups == 0 && deltaTime > CRITICAL_TIME) {
                 DSLogger.reportFatalError("Game status critical!", null);
-                gameObject.gameServer.stopServer();
-                break;
+                gameObject.WINDOW.stopServerAndUpdate();
+                throw new Exception("Game status critical!");
             }
 
             while (accumulator >= TICK_TIME) {

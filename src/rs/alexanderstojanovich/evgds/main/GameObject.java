@@ -16,6 +16,7 @@
  */
 package rs.alexanderstojanovich.evgds.main;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
@@ -77,17 +78,11 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      * Async Task Executor
      */
     public static final ExecutorService SINGLE_THR_EXEC = Executors.newSingleThreadExecutor();
-
     /**
      * Update/Generate for Level Container Mutex. Responsible for read/write to
      * chunks.
      */
     public static final Lock updateRenderLCLock = new ReentrantLock();
-
-    /**
-     * Update/Render for Interface Mutex
-     */
-    public static final Object UPDATE_RENDER_IFC_MUTEX = new Object();
 
     protected static GameObject instance = null;
     protected boolean chunkOperationPerformed = false;
@@ -146,12 +141,25 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      * Start this game container. Starts server and 'game-server' loop
      */
     public void start() {
-        //----------------------------------------------------------------------
-        DSLogger.reportDebug("Initiating Game Server Start.", null);
-        DSLogger.reportDebug("Game will start soon.", null);
-        //----------------------------------------------------------------------
-        gameServer.startServer();
-        SINGLE_THR_EXEC.submit(() -> game.go());
+        try {
+            //----------------------------------------------------------------------
+            DSLogger.reportDebug("Initiating Game Server Start.", null);
+            DSLogger.reportDebug("Game will start soon.", null);
+            //----------------------------------------------------------------------
+            gameServer.startServer();
+            Callable<Object> gameLoop = Executors.callable(() -> {
+                try {
+                    game.go();
+                } catch (Exception ex) {
+                    DSLogger.reportError("Game exited abruptly!", ex);
+                    DSLogger.reportError(ex.getMessage(), ex);
+                }
+            });
+            SINGLE_THR_EXEC.submit(gameLoop);
+        } catch (Exception ex) {
+            DSLogger.reportFatalError("Fatal error in Game Loop!", ex);
+            DSLogger.reportFatalError(ex.getMessage(), ex);
+        }
     }
 
     // -------------------------------------------------------------------------
@@ -176,16 +184,13 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
             return;
         }
 
-        if (levelContainer.isWorking()) {
-            this.WINDOW.getProgBar().setValue(Math.round(levelContainer.getProgress()));
-        } else { // working check avoids locking the monitor
-            levelContainer.update();
-            WINDOW.upsertPosInfo(levelContainer.levelActors.getPosInfo());
-            WINDOW.upsertPlayerInfo(levelContainer.levelActors.getPlayerInfo());
-            WINDOW.upsertClientInfo(gameServer.getClientInfo());
-            GameTime now = GameTime.Now();
-            this.WINDOW.getGameTimeText().setText(String.format("Day %d %02d:%02d:%02d", now.days, now.hours, now.minutes, now.seconds));
-        }
+        // working check avoids locking the monitor
+        levelContainer.update();
+        WINDOW.upsertPosInfo(levelContainer.levelActors.getPosInfo());
+        WINDOW.upsertPlayerInfo(levelContainer.levelActors.getPlayerInfo());
+        WINDOW.upsertClientInfo(gameServer.getClientInfo());
+        GameTime now = GameTime.Now();
+        this.WINDOW.getGameTimeText().setText(String.format("Day %d %02d:%02d:%02d", now.days, now.hours, now.minutes, now.seconds));
 
         if (!isWorking() || this.getLevelContainer().getProgress() == 100.0f) {
             this.levelContainer.setProgress(0.0f);
@@ -383,10 +388,9 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     /*    
     * Load the window context and destroyes the window.
      */
-    public void destroy() {
-        SINGLE_THR_EXEC.shutdown();
-    }
-
+//    public void destroy() {
+//        SINGLE_THR_EXEC.shutdown();
+//    }
     /**
      * Test collision with Environment. Must not leave the SKYBOX and not
      * collide with solid objects or critters.

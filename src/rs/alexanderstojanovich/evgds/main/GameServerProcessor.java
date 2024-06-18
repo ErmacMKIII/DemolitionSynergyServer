@@ -239,6 +239,7 @@ public class GameServerProcessor {
                 msg = "Goodbye, hope we will see you again!";
                 response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                 response.send(gameServer, clientAddress, clientPort);
+                gameServer.whoIsMap.remove(clientHostName);
                 gameServer.timeToLiveMap.remove(clientHostName);
                 gameServer.clients.remove(clientHostName);
                 gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
@@ -373,7 +374,6 @@ public class GameServerProcessor {
                 levelActors = gameServer.gameObject.game.gameObject.levelContainer.levelActors;
                 Gson gson = new Gson();
                 IList<PlayerInfo> playerInfos = new GapList<>();
-                playerInfos.add(new PlayerInfo(levelActors.player.getName(), levelActors.player.body.texName, levelActors.player.uniqueId, levelActors.player.body.getPrimaryRGBAColor()));
                 levelActors.otherPlayers.forEach(op -> {
                     playerInfos.add(new PlayerInfo(op.getName(), op.body.texName, op.uniqueId, op.body.getPrimaryRGBAColor()));
                 });

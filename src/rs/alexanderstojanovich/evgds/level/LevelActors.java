@@ -199,7 +199,7 @@ public class LevelActors {
         for (Critter crit : otherPlayers) {
             PlayerInfo pi = new PlayerInfo(crit.getName(), crit.getBody().texName, crit.uniqueId, crit.body.getPrimaryRGBAColor());
             result[index++] = pi;
-        };
+        }
 
         return result;
     }
