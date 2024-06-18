@@ -239,6 +239,7 @@
         <Component class="javax.swing.JTextField" name="tboxWorldName">
           <Properties>
             <Property name="text" type="java.lang.String" value="My World"/>
+            <Property name="toolTipText" type="java.lang.String" value="World Name"/>
           </Properties>
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="tboxWorldNameActionPerformed"/>
@@ -270,6 +271,7 @@
           <Properties>
             <Property name="editable" type="boolean" value="false"/>
             <Property name="text" type="java.lang.String" value="0"/>
+            <Property name="toolTipText" type="java.lang.String" value="Number of blocks in the level map. (Players won&apos;t load Empty World)"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="btnGenerate">
@@ -281,6 +283,7 @@
               <Image iconType="3" name="/rs/alexanderstojanovich/evgds/resources/new.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Generate New"/>
+            <Property name="toolTipText" type="java.lang.String" value="Generate new world using Random Level Generator"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>
@@ -296,6 +299,7 @@
               <Image iconType="3" name="/rs/alexanderstojanovich/evgds/resources/import.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Import World"/>
+            <Property name="toolTipText" type="java.lang.String" value="Import world from binary file (*.dat, *.ndat)"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>
@@ -311,6 +315,7 @@
               <Image iconType="3" name="/rs/alexanderstojanovich/evgds/resources/export.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Export World"/>
+            <Property name="toolTipText" type="java.lang.String" value="Export world to binary file (*.dat, *.ndat)"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>
@@ -326,6 +331,7 @@
               <Image iconType="3" name="/rs/alexanderstojanovich/evgds/resources/trash.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Erase World"/>
+            <Property name="toolTipText" type="java.lang.String" value="Erase World. World will have to be created or imported again."/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>

@@ -480,6 +480,7 @@ public class Window extends javax.swing.JFrame {
         panelWorld.add(lblWorldName);
 
         tboxWorldName.setText("My World");
+        tboxWorldName.setToolTipText("World Name");
         tboxWorldName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 tboxWorldNameActionPerformed(evt);
@@ -505,11 +506,13 @@ public class Window extends javax.swing.JFrame {
 
         tboxBlockNum.setEditable(false);
         tboxBlockNum.setText("0");
+        tboxBlockNum.setToolTipText("Number of blocks in the level map. (Players won't load Empty World)");
         panelWorld.add(tboxBlockNum);
 
         btnGenerate.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/new.png"))); // NOI18N
         btnGenerate.setText("Generate New");
+        btnGenerate.setToolTipText("Generate new world using Random Level Generator");
         btnGenerate.setEnabled(false);
         btnGenerate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -521,6 +524,7 @@ public class Window extends javax.swing.JFrame {
         btnImport.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnImport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/import.png"))); // NOI18N
         btnImport.setText("Import World");
+        btnImport.setToolTipText("Import world from binary file (*.dat, *.ndat)");
         btnImport.setEnabled(false);
         btnImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -532,6 +536,7 @@ public class Window extends javax.swing.JFrame {
         btnExport.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/export.png"))); // NOI18N
         btnExport.setText("Export World");
+        btnExport.setToolTipText("Export world to binary file (*.dat, *.ndat)");
         btnExport.setEnabled(false);
         btnExport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -543,6 +548,7 @@ public class Window extends javax.swing.JFrame {
         btnErase.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnErase.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/trash.png"))); // NOI18N
         btnErase.setText("Erase World");
+        btnErase.setToolTipText("Erase World. World will have to be created or imported again.");
         btnErase.setEnabled(false);
         btnErase.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -828,10 +834,10 @@ public class Window extends javax.swing.JFrame {
         FileNameExtensionFilter ndatFilter = new FileNameExtensionFilter("New Data Format (*.ndat)", "ndat");
 
         fileImport.addChoosableFileFilter(datFilter);
-        fileExport.addChoosableFileFilter(ndatFilter);
-
-        fileImport.addChoosableFileFilter(datFilter);
         fileImport.addChoosableFileFilter(ndatFilter);
+
+        fileExport.addChoosableFileFilter(datFilter);
+        fileExport.addChoosableFileFilter(ndatFilter);
     }
 
     private void worldImport() {

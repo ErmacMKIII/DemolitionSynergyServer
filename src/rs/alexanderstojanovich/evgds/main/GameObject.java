@@ -16,6 +16,7 @@
  */
 package rs.alexanderstojanovich.evgds.main;
 
+import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -250,6 +251,12 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         LevelContainer.AllBlockMap.init();
         levelContainer.chunks.clear();
         levelContainer.blockEnvironment.clear();
+        
+        Arrays.fill(levelContainer.buffer, (byte)0x00);
+        Arrays.fill(levelContainer.bak_buffer, (byte)0x00);
+        levelContainer.pos = 0;
+        levelContainer.bak_pos = 0;
+        
         levelContainer.levelActors.player.setPos(new Vector3f());
         levelContainer.levelActors.player.setRegistered(false);
         levelContainer.levelActors.spectator.setPos(new Vector3f());
@@ -259,7 +266,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
             WINDOW.setTitle(GameObject.WINDOW_TITLE);
         } else {
             WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + gameServer.clients.size());
-        }
+        }        
         Game.setCurrentMode(Game.Mode.FREE);
     }
 

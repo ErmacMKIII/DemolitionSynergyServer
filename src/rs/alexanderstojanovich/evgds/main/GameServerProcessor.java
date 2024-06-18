@@ -239,13 +239,13 @@ public class GameServerProcessor {
                 msg = "Goodbye, hope we will see you again!";
                 response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                 response.send(gameServer, clientAddress, clientPort);
-                gameServer.whoIsMap.remove(clientHostName);
                 gameServer.timeToLiveMap.remove(clientHostName);
                 gameServer.clients.remove(clientHostName);
                 gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
                 String uniqueId = gameServer.whoIsMap.get(clientHostName);
                 if (uniqueId != null) {
                     GameServer.performCleanUp(gameServer.gameObject, uniqueId, false);
+                    gameServer.whoIsMap.remove(clientHostName);
                 }
                 break;
             case GET_TIME:
@@ -334,7 +334,10 @@ public class GameServerProcessor {
                 break;
             case DOWNLOAD:
                 // Server alraedy saved the level
-                totalBytes = gameServer.gameObject.levelContainer.pos;
+                gameServer.gameObject.levelContainer.storeLevelToBufferNewFormat();
+                System.arraycopy(gameServer.gameObject.levelContainer.buffer, 0,gameServer.gameObject.levelContainer.bak_buffer, 0, gameServer.gameObject.levelContainer.pos);
+                gameServer.gameObject.levelContainer.bak_pos = gameServer.gameObject.levelContainer.pos;
+                totalBytes = gameServer.gameObject.levelContainer.bak_pos;
                 final int bytesPerFragment = BUFF_SIZE;
                 int fullFragments = totalBytes / bytesPerFragment;
                 int remainingBytes = totalBytes % bytesPerFragment;
@@ -350,8 +353,8 @@ public class GameServerProcessor {
                 break;
             case GET_FRAGMENT:
                 int n = (int) request.getData(); // Assuming the N-th fragment number is sent in the request data
-                totalBytes = gameServer.gameObject.levelContainer.pos;
-                final byte[] buffer = gameServer.gameObject.levelContainer.buffer;
+                totalBytes = gameServer.gameObject.levelContainer.bak_pos;
+                final byte[] buffer = gameServer.gameObject.levelContainer.bak_buffer;
 
                 if (n < 0 || n * BUFF_SIZE >= totalBytes) {
                     response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Invalid fragment number");
