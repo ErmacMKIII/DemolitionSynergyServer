@@ -17,6 +17,8 @@
 package rs.alexanderstojanovich.evgds.main;
 
 import java.util.Arrays;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.UnsupportedLookAndFeelException;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
@@ -77,6 +79,16 @@ public class Main {
                     outCfg.writeConfigFile();  // writes configuration to the output file
                 }
             });
+            
+            // Schedule timer task to monitor CPU and RAM
+            Timer timer0 = new Timer("Timer Utils");
+            TimerTask task1 = new TimerTask() {
+                @Override
+                public void run() {
+                    gameObject.WINDOW.checkHealthMini();
+                }
+            };
+            timer0.scheduleAtFixedRate(task1, 1000L, 1000L);
         } catch (Exception ex) {
             DSLogger.reportFatalError("Unable to create game object - Application will exit!", null);
         }

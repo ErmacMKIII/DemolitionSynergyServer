@@ -64,6 +64,8 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
  */
 public class Window extends javax.swing.JFrame {
 
+    public final Configuration config = Configuration.getInstance();
+    
     // Get the OperatingSystemMXBean instance
     public final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 
@@ -102,8 +104,6 @@ public class Window extends javax.swing.JFrame {
 
     public final JFileChooser fileImport = new JFileChooser();
     public final JFileChooser fileExport = new JFileChooser();
-
-    public final Configuration config = Configuration.getInstance();
 
     /**
      * Creates new form ServerInterface
@@ -378,8 +378,12 @@ public class Window extends javax.swing.JFrame {
         panelConsole = new javax.swing.JPanel();
         spConsole = new javax.swing.JScrollPane();
         console = new javax.swing.JTextArea();
+        lblHealthMini = new javax.swing.JLabel();
         mainMenu = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
+        fileMenuStart = new javax.swing.JMenuItem();
+        fileMenuStop = new javax.swing.JMenuItem();
+        fileMenuRestart = new javax.swing.JMenuItem();
         fileMenuExit = new javax.swing.JMenuItem();
         fileStatus = new javax.swing.JMenu();
         statusMenuHealth = new javax.swing.JMenuItem();
@@ -440,7 +444,7 @@ public class Window extends javax.swing.JFrame {
         btnRestart.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnRestart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/restart.png"))); // NOI18N
         btnRestart.setText("Restart");
-        btnRestart.setToolTipText("Restart server (Start & Stop, World is perserved)");
+        btnRestart.setToolTipText("Restart server (Start & Stop, World is perserved and Game Time is reset)");
         btnRestart.setEnabled(false);
         btnRestart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -600,7 +604,7 @@ public class Window extends javax.swing.JFrame {
         clientInfoTbl.setShowGrid(true);
         spClientInfo.setViewportView(clientInfoTbl);
 
-        tabPaneInfo.addTab("Client", spClientInfo);
+        tabPaneInfo.addTab("Client", new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/monitor_icon.png")), spClientInfo, ""); // NOI18N
 
         playerInfoTbl.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -628,7 +632,7 @@ public class Window extends javax.swing.JFrame {
         playerInfoTbl.setShowGrid(true);
         spPlayerInfo.setViewportView(playerInfoTbl);
 
-        tabPaneInfo.addTab("Player Info", spPlayerInfo);
+        tabPaneInfo.addTab("Player", new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/player.png")), spPlayerInfo); // NOI18N
 
         posInfoTbl.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -656,7 +660,7 @@ public class Window extends javax.swing.JFrame {
         posInfoTbl.setShowGrid(true);
         spPosInfo.setViewportView(posInfoTbl);
 
-        tabPaneInfo.addTab("Position", spPosInfo);
+        tabPaneInfo.addTab("Position", new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/xyz.png")), spPosInfo); // NOI18N
 
         panelInfo.add(tabPaneInfo, java.awt.BorderLayout.CENTER);
 
@@ -673,9 +677,41 @@ public class Window extends javax.swing.JFrame {
 
         panelConsole.add(spConsole, java.awt.BorderLayout.CENTER);
 
+        lblHealthMini.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblHealthMini.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/health-mini.png"))); // NOI18N
+        lblHealthMini.setText("CPU: 0% RAM: 0 MB");
+        panelConsole.add(lblHealthMini, java.awt.BorderLayout.PAGE_END);
+
         getContentPane().add(panelConsole);
 
-        fileMenu.setText("File");
+        fileMenu.setText("Server");
+
+        fileMenuStart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/play.png"))); // NOI18N
+        fileMenuStart.setText("Start");
+        fileMenuStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileMenuStartActionPerformed(evt);
+            }
+        });
+        fileMenu.add(fileMenuStart);
+
+        fileMenuStop.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/stop.png"))); // NOI18N
+        fileMenuStop.setText("Stop");
+        fileMenuStop.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileMenuStopActionPerformed(evt);
+            }
+        });
+        fileMenu.add(fileMenuStop);
+
+        fileMenuRestart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/restart.png"))); // NOI18N
+        fileMenuRestart.setText("Restart");
+        fileMenuRestart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                fileMenuRestartActionPerformed(evt);
+            }
+        });
+        fileMenu.add(fileMenuRestart);
 
         fileMenuExit.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/exit_icon_small.png"))); // NOI18N
         fileMenuExit.setText("Exit");
@@ -754,21 +790,29 @@ public class Window extends javax.swing.JFrame {
     }
 
     private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
-        stopServerAndUpdate();
+        stopServerAndUpdate();        
     }//GEN-LAST:event_btnStopActionPerformed
 
     private void btnRestartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRestartActionPerformed
         // TODO add your handling code here:
         gameObject.gameServer.stopServer();
-
+        Game.setGameTicks(config.getGameTicks());
+        
         gameObject.start();
     }//GEN-LAST:event_btnRestartActionPerformed
 
-    private void fileMenuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuExitActionPerformed
+    private void fileMenuStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuStartActionPerformed
         // TODO add your handling code here:
-        this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
-    }//GEN-LAST:event_fileMenuExitActionPerformed
+        gameObject.start();
+        setEnabledComponents(this.panelWorld, true);
+        setEnabledComponents(this.panelInfo, true);
+        btnStart.setEnabled(false);
+        btnStop.setEnabled(true);
+        btnRestart.setEnabled(true);        
+    }//GEN-LAST:event_fileMenuStartActionPerformed
 
+    
+    
     private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
         // TODO add your handling code here:       
         final GameObject.MapLevelSize levelSize = (GameObject.MapLevelSize) cmbLevelSize.getSelectedItem();
@@ -930,12 +974,32 @@ public class Window extends javax.swing.JFrame {
         gameObject.gameServer.setWorldName(this.tboxWorldName.getText());
     }//GEN-LAST:event_tboxWorldNameActionPerformed
 
+    public void checkHealthMini() {
+        StringBuilder sb = new StringBuilder();
+        // Get the CPU load
+        double cpuLoad = osBean.getProcessCpuLoad() * 100.0;
+        sb.append(String.format("CPU: %.2f%%", cpuLoad));
+
+        // Get the heap memory usage
+        MemoryUsage heapMemoryUsage = memoryBean.getHeapMemoryUsage();
+        long usedHeapMemory = heapMemoryUsage.getUsed();        
+
+        // Get the non-heap memory usage
+        MemoryUsage nonHeapMemoryUsage = memoryBean.getNonHeapMemoryUsage();
+        long usedNonHeapMemory = nonHeapMemoryUsage.getUsed();
+        
+        long totalMem = usedHeapMemory + usedNonHeapMemory;
+        sb.append(String.format(" RAM: %d MB", totalMem / (1024 * 1024)));
+        
+        this.lblHealthMini.setText(sb.toString());
+    }
+    
     private void checkHealth() {
         // TODO add your handling code here:      
         StringBuilder sb = new StringBuilder();
-        if (gameObject.gameServer.running) {
+        if (gameObject.gameServer.running && !gameObject.gameServer.shutDownSignal) {
             sb.append("Status: RUNNING");
-        } else if (gameObject.gameServer.shutDownSignal) {
+        } else if (gameObject.gameServer.running && gameObject.gameServer.shutDownSignal) {
             sb.append("Status: PENDING SHUT DOWN");
         } else {
             sb.append("Status: NOT RUNNING");
@@ -979,7 +1043,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v0.1 - ALPHA (PUBLIC BUILD reviewed on 2024-06-19 at 01:00 AM).\n");
+            sb.append("VERSION v0.9 - BETA (PUBLIC BUILD reviewed on 2024-06-21 at 12:30 PM).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1005,6 +1069,26 @@ public class Window extends javax.swing.JFrame {
         // TODO add your handling code here:
         infoHelp();
     }//GEN-LAST:event_helpMenuHowToUseActionPerformed
+
+    private void fileMenuStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuStopActionPerformed
+        // TODO add your handling code here:        
+        gameObject.gameServer.stopServer();
+        Game.setGameTicks(0.0);
+        gameObject.start();
+    }//GEN-LAST:event_fileMenuStopActionPerformed
+
+    private void fileMenuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuExitActionPerformed
+        // TODO add your handling code here:
+        this.dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
+    }//GEN-LAST:event_fileMenuExitActionPerformed
+
+    private void fileMenuRestartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuRestartActionPerformed
+        // TODO add your handling code here:
+        gameObject.gameServer.stopServer();
+        Game.setGameTicks(config.getGameTicks());
+        gameObject.start();
+        
+    }//GEN-LAST:event_fileMenuRestartActionPerformed
 
     private void infoHelp() {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
@@ -1051,11 +1135,15 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JMenu fileHelp;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenuItem fileMenuExit;
+    private javax.swing.JMenuItem fileMenuRestart;
+    private javax.swing.JMenuItem fileMenuStart;
+    private javax.swing.JMenuItem fileMenuStop;
     private javax.swing.JMenu fileStatus;
     private javax.swing.JLabel gameTimeText;
     private javax.swing.JMenuItem helpMenuAbout;
     private javax.swing.JMenuItem helpMenuHowToUse;
     private javax.swing.JLabel lblBlockNum;
+    private javax.swing.JLabel lblHealthMini;
     private javax.swing.JLabel lblLevelSize;
     private javax.swing.JLabel lblLocalIP;
     private javax.swing.JLabel lblMapSeed;
