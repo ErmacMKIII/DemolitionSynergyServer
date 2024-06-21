@@ -493,7 +493,7 @@ public class Window extends javax.swing.JFrame {
         lblMapSeed.setText("Seed:");
         panelWorld.add(lblMapSeed);
 
-        spinMapSeed.setModel(new javax.swing.SpinnerNumberModel(305419896, null, null, 1));
+        spinMapSeed.setModel(new javax.swing.SpinnerNumberModel(305419896L, null, null, 1L));
         spinMapSeed.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 spinMapSeedStateChanged(evt);
@@ -1016,7 +1016,7 @@ public class Window extends javax.swing.JFrame {
             sb.append("- Quick start guide:\n");
             sb.append("\t1. Enter your local IP (Local Area Network) and (local) server port.\n");
             sb.append("\t2. Start the server by click on 'Start' button.\n");
-            sb.append("\t3. Generate new world by click 'Generate New' button\n");
+            sb.append("\t3. Generate new world by click 'Generate New' button.\n");
             sb.append("\t4. Alternatively, use 'Import World' to import earlier created level map.\n");
             sb.append("\t5. (Optional) World could be exported with 'Export World' to import earlier created level map.\n");
             sb.append("\n");
@@ -1024,7 +1024,7 @@ public class Window extends javax.swing.JFrame {
             sb.append("- Local IP is your local IP address (obtained from home or office router). Check ipconfig on Windows.\n");
             sb.append("- There is no conceptual difference between 'DSynergy' client/server and dedicated server.\n");
             sb.append("- Dedicated server originated direcly from 'DSynergy' by removing code.\n");
-            sb.append("- Level Map formats are offered in: 'Old data level format' (*.dat) and 'New data level format' (*.ndat)\n");
+            sb.append("- Level Map formats are offered in: 'Old data level format' (*.dat) and 'New data level format' (*.ndat).\n");
             sb.append("- 'Old data level format' (*.dat) is around for quite a while. 'New data level format' (*.ndat) is recent supporting uncapped level sizes.\n");
             sb.append("\n");
             sb.append("\n");
