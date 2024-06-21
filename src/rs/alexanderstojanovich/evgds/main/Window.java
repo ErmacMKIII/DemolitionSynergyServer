@@ -1072,9 +1072,7 @@ public class Window extends javax.swing.JFrame {
 
     private void fileMenuStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuStopActionPerformed
         // TODO add your handling code here:        
-        gameObject.gameServer.stopServer();
-        Game.setGameTicks(0.0);
-        gameObject.start();
+        stopServerAndUpdate();
     }//GEN-LAST:event_fileMenuStopActionPerformed
 
     private void fileMenuExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuExitActionPerformed
