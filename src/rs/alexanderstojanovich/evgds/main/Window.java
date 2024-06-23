@@ -420,13 +420,14 @@ public class Window extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Demolition Synergy Server");
-        setMinimumSize(new java.awt.Dimension(1024, 576));
+        setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        setMinimumSize(new java.awt.Dimension(640, 360));
         setName("windowFrame"); // NOI18N
-        setPreferredSize(new java.awt.Dimension(1280, 720));
-        setSize(new java.awt.Dimension(1280, 720));
+        setPreferredSize(new java.awt.Dimension(640, 360));
+        setSize(new java.awt.Dimension(640, 360));
         getContentPane().setLayout(new java.awt.GridLayout(2, 2));
 
-        panelNetwork.setBorder(javax.swing.BorderFactory.createTitledBorder("Network"));
+        panelNetwork.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Network", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
         panelNetwork.setLayout(new java.awt.GridLayout(4, 1));
 
         lblLocalIP.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
@@ -503,7 +504,7 @@ public class Window extends javax.swing.JFrame {
 
         getContentPane().add(panelNetwork);
 
-        panelWorld.setBorder(javax.swing.BorderFactory.createTitledBorder("World"));
+        panelWorld.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "World", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
         panelWorld.setLayout(new java.awt.GridLayout(3, 6));
 
         lblLevelSize.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
@@ -543,7 +544,7 @@ public class Window extends javax.swing.JFrame {
         panelWorld.add(spinMapSeed);
 
         lblBlockNum.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        lblBlockNum.setText("Block Number:");
+        lblBlockNum.setText("Blocks:");
         panelWorld.add(lblBlockNum);
 
         tboxBlockNum.setEditable(false);
@@ -553,9 +554,12 @@ public class Window extends javax.swing.JFrame {
 
         btnGenerate.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnGenerate.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/new.png"))); // NOI18N
-        btnGenerate.setText("Generate New");
+        btnGenerate.setText("Generate");
         btnGenerate.setToolTipText("Generate new world using Random Level Generator");
         btnGenerate.setEnabled(false);
+        btnGenerate.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnGenerate.setIconTextGap(2);
+        btnGenerate.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnGenerate.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnGenerateActionPerformed(evt);
@@ -565,9 +569,12 @@ public class Window extends javax.swing.JFrame {
 
         btnImport.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnImport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/import.png"))); // NOI18N
-        btnImport.setText("Import World");
+        btnImport.setText("Import");
         btnImport.setToolTipText("Import world from binary file (*.dat, *.ndat)");
         btnImport.setEnabled(false);
+        btnImport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnImport.setIconTextGap(2);
+        btnImport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnImport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnImportActionPerformed(evt);
@@ -577,9 +584,12 @@ public class Window extends javax.swing.JFrame {
 
         btnExport.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnExport.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/export.png"))); // NOI18N
-        btnExport.setText("Export World");
+        btnExport.setText("Export");
         btnExport.setToolTipText("Export world to binary file (*.dat, *.ndat)");
         btnExport.setEnabled(false);
+        btnExport.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnExport.setIconTextGap(2);
+        btnExport.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnExport.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnExportActionPerformed(evt);
@@ -589,9 +599,12 @@ public class Window extends javax.swing.JFrame {
 
         btnErase.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         btnErase.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/trash.png"))); // NOI18N
-        btnErase.setText("Erase World");
+        btnErase.setText("Erase");
         btnErase.setToolTipText("Erase World. World will have to be created or imported again.");
         btnErase.setEnabled(false);
+        btnErase.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        btnErase.setIconTextGap(2);
+        btnErase.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
         btnErase.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEraseActionPerformed(evt);
@@ -601,17 +614,19 @@ public class Window extends javax.swing.JFrame {
 
         getContentPane().add(panelWorld);
 
-        panelInfo.setBorder(javax.swing.BorderFactory.createTitledBorder("Info"));
+        panelInfo.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Info", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
         panelInfo.setLayout(new java.awt.BorderLayout());
 
-        gameTimeText.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        gameTimeText.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         gameTimeText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         gameTimeText.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/daynight0.png"))); // NOI18N
         gameTimeText.setText("Day 1 00:00:00");
-        gameTimeText.setBorder(javax.swing.BorderFactory.createTitledBorder("Game Time"));
+        gameTimeText.setToolTipText("");
+        gameTimeText.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Game Time", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
         panelInfo.add(gameTimeText, java.awt.BorderLayout.PAGE_START);
 
-        progBar.setBorder(javax.swing.BorderFactory.createTitledBorder("Progress:"));
+        progBar.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Progress:", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
+        progBar.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         progBar.setStringPainted(true);
         panelInfo.add(progBar, java.awt.BorderLayout.PAGE_END);
 
@@ -703,7 +718,7 @@ public class Window extends javax.swing.JFrame {
 
         getContentPane().add(panelInfo);
 
-        panelConsole.setBorder(javax.swing.BorderFactory.createTitledBorder("Console"));
+        panelConsole.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Console", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
         panelConsole.setLayout(new java.awt.BorderLayout());
 
         console.setEditable(false);
@@ -714,6 +729,7 @@ public class Window extends javax.swing.JFrame {
 
         panelConsole.add(spConsole, java.awt.BorderLayout.CENTER);
 
+        lblHealthMini.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
         lblHealthMini.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         lblHealthMini.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/health-mini.png"))); // NOI18N
         lblHealthMini.setText("CPU: 0% RAM: 0 MB");
@@ -1087,7 +1103,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v0.9.1 - BETA (PUBLIC BUILD reviewed on 2024-06-23 at 03:00 AM).\n");
+            sb.append("VERSION v1.0 (PUBLIC BUILD reviewed on 2024-06-23 at 09:10 AM).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
