@@ -49,12 +49,12 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      * All Game Assets (Models, Textures etc.)
      */
     public final Assets GameAssets = new Assets();
-
+    
     protected boolean initializedWindow = false;
     protected boolean initializedCore = false;
-
+    
     private final Configuration cfg = Configuration.getInstance();
-
+    
     public static final int VERSION = 43;
     public static final String WINDOW_TITLE = String.format("Demolition Synergy - v%s", VERSION);
     // makes default window -> Renderer sets resolution from config
@@ -63,10 +63,10 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      * Game GLFW Window
      */
     public final Window WINDOW;
-
+    
     public final LevelContainer levelContainer;
     public final RandomLevelGenerator randomLevelGenerator;
-
+    
     public final Game game;
     public final GameServer gameServer;
 
@@ -84,7 +84,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      * chunks.
      */
     public static final Lock updateRenderLCLock = new ReentrantLock();
-
+    
     protected static GameObject instance = null;
     protected boolean chunkOperationPerformed = false;
 
@@ -117,6 +117,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         WINDOW.setSize(width, height);
         WINDOW.setVisible(true);
         WINDOW.initCenterWindow();
+        WINDOW.setTitle(WINDOW_TITLE);
         //----------------------------------------------------------------------        
 
         //----------------------------------------------------------------------        
@@ -192,11 +193,13 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         WINDOW.upsertClientInfo(gameServer.getClientInfo());
         GameTime now = GameTime.Now();
         this.WINDOW.getGameTimeText().setText(String.format("Day %d %02d:%02d:%02d", now.days, now.hours, now.minutes, now.seconds));
-
+        
         if (!isWorking() || this.getLevelContainer().getProgress() == 100.0f) {
             this.levelContainer.setProgress(0.0f);
         }
-
+        
+        this.WINDOW.updateDayNightCycle();
+        
         this.WINDOW.getProgBar().setValue(Math.round(this.levelContainer.getProgress()));
         this.WINDOW.getProgBar().validate();
     }
@@ -251,12 +254,12 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         LevelContainer.AllBlockMap.init();
         levelContainer.chunks.clear();
         levelContainer.blockEnvironment.clear();
-
+        
         Arrays.fill(levelContainer.buffer, (byte) 0x00);
         Arrays.fill(levelContainer.bak_buffer, (byte) 0x00);
         levelContainer.pos = 0;
         levelContainer.bak_pos = 0;
-
+        
         levelContainer.levelActors.player.setPos(new Vector3f());
         levelContainer.levelActors.player.setRegistered(false);
         levelContainer.levelActors.spectator.setPos(new Vector3f());
@@ -294,7 +297,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         } finally {
             updateRenderLCLock.unlock();
         }
-
+        
         return ok;
     }
 
@@ -313,7 +316,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         } finally {
             updateRenderLCLock.unlock();
         }
-
+        
         return ok;
     }
 
@@ -337,7 +340,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         } finally {
             updateRenderLCLock.unlock();
         }
-
+        
         return ok;
     }
 
@@ -378,7 +381,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         } finally {
             updateRenderLCLock.unlock();
         }
-
+        
         return ok;
     }
 
@@ -435,35 +438,35 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     public void printInfo() {
 //        levelContainer.chunks.printInfo();
     }
-
+    
     public LevelContainer getLevelContainer() {
         return levelContainer;
     }
-
+    
     public RandomLevelGenerator getRandomLevelGenerator() {
         return randomLevelGenerator;
     }
-
+    
     public boolean isInitializedWindow() {
         return initializedWindow;
     }
-
+    
     public Configuration getCfg() {
         return cfg;
     }
-
+    
     public Game getGame() {
         return game;
     }
-
+    
     public boolean isInitializedCore() {
         return initializedCore;
     }
-
+    
     public GameServer getGameServer() {
         return gameServer;
     }
-
+    
     public boolean isChunkOperationPerformed() {
         return chunkOperationPerformed;
     }

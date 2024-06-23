@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -65,7 +66,7 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
 public class Window extends javax.swing.JFrame {
 
     public final Configuration config = Configuration.getInstance();
-    
+
     // Get the OperatingSystemMXBean instance
     public final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
 
@@ -76,12 +77,27 @@ public class Window extends javax.swing.JFrame {
     public static final Dimension DIM = Toolkit.getDefaultToolkit().getScreenSize();
 
     public static final String LICENSE_LOGO_FILE_NAME = "gplv3_logo.png";
+
+    public static final String DAY_NIGHT0 = "daynight0.png";
+    public static final String DAY_NIGHT1 = "daynight1.png";
+    public static final String DAY_NIGHT2 = "daynight2.png";
+    public static final String DAY_NIGHT3 = "daynight3.png";
+    public static final String DAY_NIGHT4 = "daynight4.png";
+    public static final String DAY_NIGHT5 = "daynight5.png";
+    public static final String DAY_NIGHT6 = "daynight6.png";
+    public static final String DAY_NIGHT7 = "daynight7.png";
+
     public static final String LOGOX_FILE_NAME = "app-icon.png";
     public static final String LOGO_FILE_NAME = "app-icon-small.png";
 
     public final IList<PlayerInfo> playerInfos = new GapList<>();
     public final IList<PosInfo> posInfos = new GapList<>();
     public final IList<ClientInfo> clientInfos = new GapList<>();
+
+    /**
+     * Init day/night icons (clock)
+     */
+    public static final List<Icon> dayNightIcons = initDayNight();
 
     public final DefaultTableModel playerInfoModel = new DefaultTableModel() {
         @Override
@@ -147,6 +163,17 @@ public class Window extends javax.swing.JFrame {
 
             result.add(logo.getImage());
             result.add(logox.getImage());
+        }
+
+        return result;
+    }
+
+    private static IList<Icon> initDayNight() {
+        IList<Icon> result = new GapList<>();
+        for (int i = 0; i < 8; i++) {
+            URL url = Window.class.getResource(RESOURCES_DIR + String.format("daynight%d.png", i));
+            ImageIcon icon = new ImageIcon(url);
+            result.add(icon);
         }
 
         return result;
@@ -408,6 +435,11 @@ public class Window extends javax.swing.JFrame {
 
         tboxLocalIP.setText("127.0.0.1");
         tboxLocalIP.setToolTipText("Local IP, check Network options on OS if unsure (ipconfig on Windows)");
+        tboxLocalIP.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                tboxLocalIPActionPerformed(evt);
+            }
+        });
         panelNetwork.add(tboxLocalIP);
 
         lblServerPort.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
@@ -416,6 +448,11 @@ public class Window extends javax.swing.JFrame {
 
         spinServerPort.setModel(new javax.swing.SpinnerNumberModel(13667, 13660, 13669, 1));
         spinServerPort.setToolTipText("Server port used by the server to run on");
+        spinServerPort.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                spinServerPortStateChanged(evt);
+            }
+        });
         panelNetwork.add(spinServerPort);
 
         btnStart.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
@@ -569,7 +606,7 @@ public class Window extends javax.swing.JFrame {
 
         gameTimeText.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         gameTimeText.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        gameTimeText.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/day-night-cycle.png"))); // NOI18N
+        gameTimeText.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/daynight0.png"))); // NOI18N
         gameTimeText.setText("Day 1 00:00:00");
         gameTimeText.setBorder(javax.swing.BorderFactory.createTitledBorder("Game Time"));
         panelInfo.add(gameTimeText, java.awt.BorderLayout.PAGE_START);
@@ -766,13 +803,20 @@ public class Window extends javax.swing.JFrame {
 
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         // TODO add your handling code here:
+        startServerAndUpdate();
+    }//GEN-LAST:event_btnStartActionPerformed
+
+    public void startServerAndUpdate() {
         gameObject.start();
         setEnabledComponents(this.panelWorld, true);
         setEnabledComponents(this.panelInfo, true);
         btnStart.setEnabled(false);
         btnStop.setEnabled(true);
         btnRestart.setEnabled(true);
-    }//GEN-LAST:event_btnStartActionPerformed
+
+        tboxLocalIP.setEnabled(false);
+        spinServerPort.setEnabled(false);
+    }
 
     public void stopServerAndUpdate() {
         // TODO add your handling code here:                
@@ -787,32 +831,32 @@ public class Window extends javax.swing.JFrame {
         removeAllRows(posInfoModel);
         removeAllRows(clientInfoModel);
         removeAllRows(playerInfoModel);
+
+        tboxLocalIP.setEnabled(true);
+        spinServerPort.setEnabled(true);
     }
 
     private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
-        stopServerAndUpdate();        
+        stopServerAndUpdate();
     }//GEN-LAST:event_btnStopActionPerformed
+
+    public void restartServerAndUpdate() {
+        gameObject.gameServer.stopServer();
+        Game.setGameTicks(config.getGameTicks());
+
+        gameObject.start();
+    }
 
     private void btnRestartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRestartActionPerformed
         // TODO add your handling code here:
-        gameObject.gameServer.stopServer();
-        Game.setGameTicks(config.getGameTicks());
-        
-        gameObject.start();
+        restartServerAndUpdate();
     }//GEN-LAST:event_btnRestartActionPerformed
 
     private void fileMenuStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuStartActionPerformed
         // TODO add your handling code here:
-        gameObject.start();
-        setEnabledComponents(this.panelWorld, true);
-        setEnabledComponents(this.panelInfo, true);
-        btnStart.setEnabled(false);
-        btnStop.setEnabled(true);
-        btnRestart.setEnabled(true);        
+        startServerAndUpdate();
     }//GEN-LAST:event_fileMenuStartActionPerformed
 
-    
-    
     private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
         // TODO add your handling code here:       
         final GameObject.MapLevelSize levelSize = (GameObject.MapLevelSize) cmbLevelSize.getSelectedItem();
@@ -982,18 +1026,18 @@ public class Window extends javax.swing.JFrame {
 
         // Get the heap memory usage
         MemoryUsage heapMemoryUsage = memoryBean.getHeapMemoryUsage();
-        long usedHeapMemory = heapMemoryUsage.getUsed();        
+        long usedHeapMemory = heapMemoryUsage.getUsed();
 
         // Get the non-heap memory usage
         MemoryUsage nonHeapMemoryUsage = memoryBean.getNonHeapMemoryUsage();
         long usedNonHeapMemory = nonHeapMemoryUsage.getUsed();
-        
+
         long totalMem = usedHeapMemory + usedNonHeapMemory;
         sb.append(String.format(" RAM: %d MB", totalMem / (1024 * 1024)));
-        
+
         this.lblHealthMini.setText(sb.toString());
     }
-    
+
     private void checkHealth() {
         // TODO add your handling code here:      
         StringBuilder sb = new StringBuilder();
@@ -1043,7 +1087,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v0.9 - BETA (PUBLIC BUILD reviewed on 2024-06-21 at 12:30 PM).\n");
+            sb.append("VERSION v0.9.1 - BETA (PUBLIC BUILD reviewed on 2024-06-23 at 03:00 AM).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1082,11 +1126,18 @@ public class Window extends javax.swing.JFrame {
 
     private void fileMenuRestartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fileMenuRestartActionPerformed
         // TODO add your handling code here:
-        gameObject.gameServer.stopServer();
-        Game.setGameTicks(config.getGameTicks());
-        gameObject.start();
-        
+        restartServerAndUpdate();
     }//GEN-LAST:event_fileMenuRestartActionPerformed
+
+    private void tboxLocalIPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_tboxLocalIPActionPerformed
+        // TODO add your handling code here:
+        gameObject.gameServer.setLocalIP(tboxLocalIP.getText());
+    }//GEN-LAST:event_tboxLocalIPActionPerformed
+
+    private void spinServerPortStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinServerPortStateChanged
+        // TODO add your handling code here:
+        gameObject.gameServer.setPort((int) spinServerPort.getValue());
+    }//GEN-LAST:event_spinServerPortStateChanged
 
     private void infoHelp() {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
@@ -1116,6 +1167,16 @@ public class Window extends javax.swing.JFrame {
             textArea.setEditable(false);
             JOptionPane.showMessageDialog(this, jsp, "How to use", JOptionPane.INFORMATION_MESSAGE, icon);
         }
+    }
+
+    /**
+     * Call this method to update cycle based on ingame time.
+     */
+    public void updateDayNightCycle() {
+        int index = (GameTime.Now().hours / 3) & 7;
+        Icon icon = dayNightIcons.get(index);
+
+        gameTimeText.setIcon(icon);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -79,7 +79,7 @@ public class Main {
                     outCfg.writeConfigFile();  // writes configuration to the output file
                 }
             });
-            
+
             // Schedule timer task to monitor CPU and RAM
             Timer timer0 = new Timer("Timer Utils");
             TimerTask task1 = new TimerTask() {
