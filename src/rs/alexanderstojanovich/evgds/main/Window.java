@@ -22,6 +22,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -46,12 +47,15 @@ import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumn;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
 import oshi.SystemInfo;
 import oshi.hardware.GlobalMemory;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.NetworkIF;
+import rs.alexanderstojanovich.evgds.helper.ButtonEditor;
+import rs.alexanderstojanovich.evgds.helper.ButtonRenderer;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import static rs.alexanderstojanovich.evgds.main.Game.RESOURCES_DIR;
 import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.HUGE;
@@ -124,7 +128,7 @@ public class Window extends javax.swing.JFrame {
     public final DefaultTableModel clientInfoModel = new DefaultTableModel() {
         @Override
         public boolean isCellEditable(int row, int column) {
-            return false;
+            return column == this.getColumnCount() - 1;
         }
     };
 
@@ -197,7 +201,7 @@ public class Window extends javax.swing.JFrame {
         // Initialize columns for the tables
         playerInfoModel.setColumnIdentifiers(new String[]{"Name", "Texture Model", "Unique ID", "Color"});
         posInfoModel.setColumnIdentifiers(new String[]{"Unique ID", "Position", "Front"});
-        clientInfoModel.setColumnIdentifiers(new String[]{"Host Name", "Unique ID", "Time to Live"});
+        clientInfoModel.setColumnIdentifiers(new String[]{"Host Name", "Unique ID", "Time to Live", "Kick Client"});
     }
 
     public static void setEnabledComponents(Component component, boolean enabled) {
@@ -287,6 +291,20 @@ public class Window extends javax.swing.JFrame {
     }
 
     public void upsertClientInfo(ClientInfo[] newClientInfos) {
+        final ButtonEditor kickBtnEdit = new ButtonEditor(new JButton("Kick"));
+        kickBtnEdit.getButton().addActionListener((ActionEvent e) -> {
+            final int srow = this.clientInfoTbl.getSelectedRow();
+            String client = this.clientInfoModel.getValueAt(srow, clientInfoModel.findColumn("Host Name")).toString();
+            DSLogger.reportInfo("Kick player: " + client, null);
+            writeOnConsole("Kick player: " + client);
+            gameObject.gameServer.kickPlayer(client);
+        });
+        final ButtonRenderer btnKickRend = new ButtonRenderer(kickBtnEdit.getButton());
+
+        TableColumn kickCliCol = this.clientInfoTbl.getColumn("Kick Client");
+        kickCliCol.setCellEditor(kickBtnEdit);
+        kickCliCol.setCellRenderer(btnKickRend);
+        
         // Remove rows not in the new data
         for (int i = clientInfoModel.getRowCount() - 1; i >= 0; i--) {
             String hostName = (String) clientInfoModel.getValueAt(i, 0);
@@ -663,6 +681,8 @@ public class Window extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        clientInfoTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        clientInfoTbl.setRowHeight(24);
         clientInfoTbl.setShowGrid(true);
         spClientInfo.setViewportView(clientInfoTbl);
 
@@ -691,6 +711,8 @@ public class Window extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        playerInfoTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        playerInfoTbl.setRowHeight(24);
         playerInfoTbl.setShowGrid(true);
         spPlayerInfo.setViewportView(playerInfoTbl);
 
@@ -719,6 +741,8 @@ public class Window extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        posInfoTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
+        posInfoTbl.setRowHeight(24);
         posInfoTbl.setShowGrid(true);
         spPosInfo.setViewportView(posInfoTbl);
 

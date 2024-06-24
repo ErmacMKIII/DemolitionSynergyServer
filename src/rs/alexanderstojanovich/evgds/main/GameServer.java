@@ -19,6 +19,7 @@ package rs.alexanderstojanovich.evgds.main;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.LinkedHashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -29,6 +30,9 @@ import org.magicwerk.brownies.collections.IList;
 import rs.alexanderstojanovich.evgds.level.LevelActors;
 import rs.alexanderstojanovich.evgds.net.ClientInfo;
 import rs.alexanderstojanovich.evgds.net.DSMachine;
+import rs.alexanderstojanovich.evgds.net.DSObject;
+import rs.alexanderstojanovich.evgds.net.Response;
+import rs.alexanderstojanovich.evgds.net.ResponseIfc;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
 
 /**
@@ -306,6 +310,18 @@ public class GameServer implements DSMachine, Runnable {
         return result;
     }
 
+    public void kickPlayer(String client) {
+        try {
+            ResponseIfc resp = new Response(0L, ResponseIfc.ResponseStatus.OK, DSObject.DataType.INT, 1);
+            resp.send(this, InetAddress.getByName(client), port);
+        } catch (UnknownHostException ex) {
+            DSLogger.reportError("Kick player -> unknown IP address", ex);
+            DSLogger.reportError(ex.getMessage(), ex);
+        } catch (Exception ex) {
+            DSLogger.reportFatalError(ex.getMessage(), ex);
+        }
+    }
+    
     public String getWorldName() {
         return worldName;
     }
