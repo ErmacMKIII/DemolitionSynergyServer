@@ -384,6 +384,19 @@ public class GameServerProcessor {
                 response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
                 response.send(gameServer, clientAddress, clientPort);
                 break;
+            case SAY:
+                levelActors = gameServer.gameObject.levelContainer.levelActors;
+                String senderGuid = gameServer.whoIsMap.get(clientHostName);
+                String senderName = "?";
+                Critter otherPlayerOrNull = levelActors.otherPlayers.getIf(player -> player.uniqueId.equals(senderGuid));
+                if (otherPlayerOrNull != null) {
+                    senderName = otherPlayerOrNull.getName();
+                }
+                response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, senderName + ":" + request.getData());
+                for (String client : gameServer.clients) {
+                    response.send(gameServer, InetAddress.getByName(client), clientPort);
+                }
+                break;
         }
 
         return new Result(Status.OK, clientHostName);

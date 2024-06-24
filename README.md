@@ -24,7 +24,8 @@ In order to build the project you are gonna need NetBeans IDE 16 (or later) and 
 2. GapList & BigList (for Block lists) (installed),
 3. Apache logger (Log4J) with dependecies (installed),
 4. Google Gson (installed),
-5. Darcula library, for dark theme (installed)
+5. Darcula library, for dark theme (installed),
+6. Sigar library, for monitoring (installed)
 
 Project could be compiled and run immediately.
 (No additional steps are needed.)

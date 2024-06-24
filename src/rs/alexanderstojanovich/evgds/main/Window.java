@@ -26,10 +26,10 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
@@ -48,6 +48,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
+import oshi.SystemInfo;
+import oshi.hardware.GlobalMemory;
+import oshi.hardware.HardwareAbstractionLayer;
+import oshi.hardware.NetworkIF;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import static rs.alexanderstojanovich.evgds.main.Game.RESOURCES_DIR;
 import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.HUGE;
@@ -64,6 +68,12 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
  * @author Alexander Stojanovich
  */
 public class Window extends javax.swing.JFrame {
+
+    protected long bytesReceived = 0L;
+    protected long bytesSent = 0L;
+
+    public final SystemInfo si = new SystemInfo();
+    public final HardwareAbstractionLayer hal = si.getHardware();
 
     public final Configuration config = Configuration.getInstance();
 
@@ -729,10 +739,10 @@ public class Window extends javax.swing.JFrame {
 
         panelConsole.add(spConsole, java.awt.BorderLayout.CENTER);
 
-        lblHealthMini.setFont(new java.awt.Font("Segoe UI Semibold", 0, 12)); // NOI18N
-        lblHealthMini.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblHealthMini.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         lblHealthMini.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/health-mini.png"))); // NOI18N
-        lblHealthMini.setText("CPU: 0% RAM: 0 MB");
+        lblHealthMini.setText("CPU: 0% RAM: 0 MB In/Out: 0 bytes/0 bytes");
+        lblHealthMini.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Health", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
         panelConsole.add(lblHealthMini, java.awt.BorderLayout.PAGE_END);
 
         getContentPane().add(panelConsole);
@@ -823,6 +833,9 @@ public class Window extends javax.swing.JFrame {
     }//GEN-LAST:event_btnStartActionPerformed
 
     public void startServerAndUpdate() {
+        gameObject.gameServer.setLocalIP(tboxLocalIP.getText());
+        gameObject.gameServer.setPort((int) spinServerPort.getValue());
+
         gameObject.start();
         setEnabledComponents(this.panelWorld, true);
         setEnabledComponents(this.panelInfo, true);
@@ -1034,29 +1047,33 @@ public class Window extends javax.swing.JFrame {
         gameObject.gameServer.setWorldName(this.tboxWorldName.getText());
     }//GEN-LAST:event_tboxWorldNameActionPerformed
 
+    /**
+     * Display 'Health' of the Server as CPU usage, Memory usage and Network
+     * usage (Local IP interface). In short notation.
+     */
     public void checkHealthMini() {
         StringBuilder sb = new StringBuilder();
-        // Get the CPU load
-        double cpuLoad = osBean.getProcessCpuLoad() * 100.0;
-        sb.append(String.format("CPU: %.2f%%", cpuLoad));
 
-        // Get the heap memory usage
-        MemoryUsage heapMemoryUsage = memoryBean.getHeapMemoryUsage();
-        long usedHeapMemory = heapMemoryUsage.getUsed();
+        // Append CPU load
+        appendCpuLoad(sb, true);
+        sb.append(" ");
 
-        // Get the non-heap memory usage
-        MemoryUsage nonHeapMemoryUsage = memoryBean.getNonHeapMemoryUsage();
-        long usedNonHeapMemory = nonHeapMemoryUsage.getUsed();
+        // Append memory usage
+        appendMemoryUsage(sb, true);
+        sb.append(" ");
 
-        long totalMem = usedHeapMemory + usedNonHeapMemory;
-        sb.append(String.format(" RAM: %d MB", totalMem / (1024 * 1024)));
+        // Append network usage for local IP
+        appendNetworkUsage(sb, gameObject.gameServer.localIP, true);
 
         this.lblHealthMini.setText(sb.toString());
     }
 
-    private void checkHealth() {
-        // TODO add your handling code here:      
-        StringBuilder sb = new StringBuilder();
+    /**
+     * Appends the server status to the provided StringBuilder.
+     *
+     * @param sb the StringBuilder to append the server status to
+     */
+    private void appendServerStatus(StringBuilder sb) {
         if (gameObject.gameServer.running && !gameObject.gameServer.shutDownSignal) {
             sb.append("Status: RUNNING");
         } else if (gameObject.gameServer.running && gameObject.gameServer.shutDownSignal) {
@@ -1064,29 +1081,93 @@ public class Window extends javax.swing.JFrame {
         } else {
             sb.append("Status: NOT RUNNING");
         }
+        sb.append("\n\n");
+    }
 
-        sb.append("\n").append("\n");
+    /**
+     * Appends the CPU load to the provided StringBuilder.
+     *
+     * @param sb the StringBuilder to append the CPU load to
+     * @param shortNotation short notation
+     */
+    private void appendCpuLoad(StringBuilder sb, boolean shortNotation) {
+        double cpuLoad = hal.getProcessor().getSystemCpuLoad(1000L) * 100;
+        sb.append((shortNotation) ? String.format("CPU: %.1f%%\n", cpuLoad) : String.format("CPU Load: %.2f%%\n", cpuLoad));
+    }
 
-        // Get the CPU load
-        double cpuLoad = osBean.getProcessCpuLoad() * 100.0;
-        sb.append(String.format("CPU Load: %.2f%%\n", cpuLoad));
+    /**
+     * Appends the memory usage (heap and non-heap) to the provided
+     * StringBuilder.
+     *
+     * @param sb the StringBuilder to append the memory usage to
+     * @param shortNotation short notation
+     */
+    private void appendMemoryUsage(StringBuilder sb, boolean shortNotation) {
+        GlobalMemory memory = hal.getMemory();
+        long usedMemory = memory.getTotal() - memory.getAvailable();
+        long totalMemory = memory.getTotal();
+        if (shortNotation) {
+            sb.append(String.format("RAM: %d MB\n", usedMemory / (1024 * 1024)));
+        } else {
+            sb.append(String.format("Memory: Used = %d MB, Total = %d MB\n", usedMemory / (1024 * 1024), totalMemory / (1024 * 1024)));
+        }
+    }
 
-        // Get the heap memory usage
-        MemoryUsage heapMemoryUsage = memoryBean.getHeapMemoryUsage();
-        long usedHeapMemory = heapMemoryUsage.getUsed();
-        long maxHeapMemory = heapMemoryUsage.getMax();
-        sb.append(String.format("Heap Memory: Used = %d MB, Max = %d MB\n", usedHeapMemory / (1024 * 1024), maxHeapMemory / (1024 * 1024)));
+    /**
+     * Appends the network usage to the provided StringBuilder for the specified
+     * IP address.
+     *
+     * @param sb the StringBuilder to append the network usage to
+     * @param targetIpAddress the local IP address to check (e.g.,
+     * "192.168.1.3")
+     * @param shortNotation short notation
+     */
+    private void appendNetworkUsage(StringBuilder sb, String targetIpAddress, boolean shortNotation) {
+        List<NetworkIF> networkIFs = hal.getNetworkIFs(true); // true -> include local interfaces
+        for (NetworkIF netIF : networkIFs) {
+            if (netIF.getIfOperStatus() == NetworkIF.IfOperStatus.UP) {
+                List<String> listOfIPv4 = Arrays.asList(netIF.getIPv4addr());
+                if (listOfIPv4.contains(targetIpAddress)) {
+                    // for first time
+                    if (bytesReceived == 0L) {
+                        bytesReceived = netIF.getBytesRecv();
+                    }
 
-        // Get the non-heap memory usage
-        MemoryUsage nonHeapMemoryUsage = memoryBean.getNonHeapMemoryUsage();
-        long usedNonHeapMemory = nonHeapMemoryUsage.getUsed();
-        long maxNonHeapMemory = nonHeapMemoryUsage.getMax();
-        sb.append(String.format("Non-Heap Memory: Used = %d MB, Max = %d MB\n", usedNonHeapMemory / (1024 * 1024), maxNonHeapMemory / (1024 * 1024)));
+                    // for first time
+                    if (bytesSent == 0L) {
+                        bytesSent = netIF.getBytesSent();
+                    }
 
-        JTextArea textArea = new JTextArea(sb.toString(), 7, 20);
+                    if (shortNotation) {
+                        sb.append(String.format("In/Out: %d bytes/%d bytes\n",
+                                netIF.getBytesRecv() - bytesReceived, netIF.getBytesSent() - bytesSent));
+                    } else {
+                        sb.append(String.format("Network: %s, Received = %d bytes, Sent = %d bytes\n",
+                                netIF.getName(), netIF.getBytesRecv() - bytesReceived, netIF.getBytesSent() - bytesSent));
+                    }
+                    bytesReceived = netIF.getBytesRecv();
+                    bytesSent = netIF.getBytesSent();
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Method to check and display the server's health status as CPU usage,
+     * Memory usage and Network usage (Local IP interface).
+     */
+    private void checkHealth() {
+        StringBuilder sb = new StringBuilder();
+        appendServerStatus(sb);
+        appendCpuLoad(sb, false);
+        appendMemoryUsage(sb, false);
+        appendNetworkUsage(sb, gameObject.gameServer.localIP, false);
+
+        JTextArea textArea = new JTextArea(sb.toString(), 10, 50);
         JScrollPane jsp = new JScrollPane(textArea);
         textArea.setEditable(false);
-        JOptionPane.showMessageDialog(this, jsp, "Server Health", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, jsp, "Server Health", JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void btnHealthActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHealthActionPerformed
@@ -1103,11 +1184,11 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.0 (PUBLIC BUILD reviewed on 2024-06-23 at 09:10 AM).\n");
+            sb.append("VERSION v1.0 (PUBLIC BUILD reviewed on 2024-06-24 at 10:40 AM).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
-            sb.append("Demolition Synergy Version: 43-beta2\n");
+            sb.append("Demolition Synergy Version: 44\n");
             sb.append("\n");
             sb.append("Copyright © 2024\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
