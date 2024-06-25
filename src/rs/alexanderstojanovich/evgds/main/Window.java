@@ -462,6 +462,7 @@ public class Window extends javax.swing.JFrame {
         lblLocalIP.setText("Local IP:");
         panelNetwork.add(lblLocalIP);
 
+        tboxLocalIP.setHorizontalAlignment(javax.swing.JTextField.TRAILING);
         tboxLocalIP.setText("127.0.0.1");
         tboxLocalIP.setToolTipText("Local IP, check Network options on OS if unsure (ipconfig on Windows)");
         tboxLocalIP.addActionListener(new java.awt.event.ActionListener() {
@@ -1208,9 +1209,11 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.0 (PUBLIC BUILD reviewed on 2024-06-24 at 10:40 AM).\n");
+            sb.append("VERSION v1.0 (PUBLIC BUILD reviewed on 2024-06-25 at 19:30 PM).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
+            sb.append("\n");
+            sb.append("For latest release changelog please check GitHub page. \n");
             sb.append("\n");
             sb.append("Demolition Synergy Version: 44\n");
             sb.append("\n");
