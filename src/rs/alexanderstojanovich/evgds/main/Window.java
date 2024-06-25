@@ -297,14 +297,14 @@ public class Window extends javax.swing.JFrame {
             String client = this.clientInfoModel.getValueAt(srow, clientInfoModel.findColumn("Host Name")).toString();
             DSLogger.reportInfo("Kick player: " + client, null);
             writeOnConsole("Kick player: " + client);
-            gameObject.gameServer.kickPlayer(client);
+            GameServer.kickPlayer(gameObject.gameServer, client);
         });
         final ButtonRenderer btnKickRend = new ButtonRenderer(kickBtnEdit.getButton());
 
         TableColumn kickCliCol = this.clientInfoTbl.getColumn("Kick Client");
         kickCliCol.setCellEditor(kickBtnEdit);
         kickCliCol.setCellRenderer(btnKickRend);
-        
+
         // Remove rows not in the new data
         for (int i = clientInfoModel.getRowCount() - 1; i >= 0; i--) {
             String hostName = (String) clientInfoModel.getValueAt(i, 0);

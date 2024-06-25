@@ -20,6 +20,7 @@ import java.util.UUID;
 import org.joml.Vector3f;
 import rs.alexanderstojanovich.evgds.core.Camera;
 import rs.alexanderstojanovich.evgds.models.Model;
+import rs.alexanderstojanovich.evgds.util.HardwareUtils;
 
 /**
  * Critter is class of living things. Has capabilities moving. Is collision
@@ -53,7 +54,7 @@ public class Critter implements Predictable, Moveable {
     public Critter(Model body) {
         this.body = body;
         this.predictor = new Vector3f(body.pos); // separate predictor from the body
-        this.uniqueId = UUID.randomUUID().toString();
+        this.uniqueId = HardwareUtils.generateHardwareUUID();
     }
 
     /**
@@ -66,7 +67,7 @@ public class Critter implements Predictable, Moveable {
     public Critter(Vector3f pos, Model body) {
         this.body = body;
         this.predictor = new Vector3f(body.pos); // separate predictor from the body
-        this.uniqueId = UUID.randomUUID().toString();
+        this.uniqueId = HardwareUtils.generateHardwareUUID();
     }
 
     /**

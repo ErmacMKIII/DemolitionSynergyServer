@@ -33,7 +33,7 @@ public class Configuration {
     private int monitor = 0;
     private int fpsCap = 100;
     private int width = 640;
-    private int height = 480;
+    private int height = 360;
     private boolean fullscreen = false;
     private DSLogger.DSLogLevel logLevel = DSLogger.DSLogLevel.ERR;
     private boolean logToFile = false;

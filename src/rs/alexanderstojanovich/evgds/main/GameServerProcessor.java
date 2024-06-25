@@ -129,7 +129,6 @@ public class GameServerProcessor {
 //            }
 //        } else {
         request = RequestIfc.receive(gameServer);
-//        }
 
         if (request == null || request.getClientAddress() == null) {
             // avoid processing invalid requests requests
@@ -139,6 +138,13 @@ public class GameServerProcessor {
         final InetAddress clientAddress = request.getClientAddress();
         final int clientPort = request.getClientPort();
         String clientHostName = clientAddress.getHostName();
+        if (gameServer.kicklist.contains(clientHostName)) {
+            ResponseIfc response = new Response(0L, ResponseIfc.ResponseStatus.OK, INT, 1);
+            response.send(gameServer, clientAddress, clientPort);
+
+            return new Result(Status.OK, clientHostName);
+        }
+
         if (request == Request.INVALID) {
             // avoid processing invalid requests requests
             return new Result(Status.INTERNAL_ERROR, request.getClientAddress().getHostName());
@@ -188,8 +194,7 @@ public class GameServerProcessor {
                     case STRING: {
                         String newPlayerUniqueId = request.getData().toString();
                         levelActors = gameServer.gameObject.game.gameObject.levelContainer.levelActors;
-                        if (!levelActors.player.uniqueId.equals(newPlayerUniqueId)
-                                && (levelActors.otherPlayers.getIf(ot -> ot.uniqueId.equals(newPlayerUniqueId)) == null)) {
+                        if ((levelActors.otherPlayers.getIf(ot -> ot.uniqueId.equals(newPlayerUniqueId)) == null)) {
                             levelActors.otherPlayers.add(new Critter(newPlayerUniqueId, new Model(gameServer.gameObject.GameAssets.PLAYER_BODY_DEFAULT)));
                             msg = String.format("Player ID is registered!", gameServer.worldName, gameServer.version);
                             response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
@@ -208,8 +213,7 @@ public class GameServerProcessor {
                         String jsonStr = request.getData().toString();
                         PlayerInfo info = PlayerInfo.fromJson(jsonStr);
                         levelActors = gameServer.gameObject.game.gameObject.levelContainer.levelActors;
-                        if (!levelActors.player.uniqueId.equals(info.uniqueId)
-                                && (levelActors.otherPlayers.getIf(ot -> ot.uniqueId.equals(info.uniqueId)) == null)) {
+                        if ((levelActors.otherPlayers.getIf(ot -> ot.uniqueId.equals(info.uniqueId)) == null)) {
                             Critter critter = new Critter(info.uniqueId, new Model(gameServer.gameObject.GameAssets.PLAYER_BODY_DEFAULT));
                             critter.setName(info.name);
                             critter.body.setPrimaryRGBAColor(info.color);
