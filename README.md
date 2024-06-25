@@ -53,7 +53,7 @@ Project structure:
 ```
 Server GUI is contained in `Window` class.
 
-#Additional notes
+# Additional notes
 
 Tested to work with Ubuntu 14.04.6 LTS.
 
