@@ -58,10 +58,11 @@ Server GUI is contained in `Window` class.
 Tested to work with Ubuntu 14.04.6 LTS.
 
 Install Open JDK 11 with following commands (in Terminal)
-`sudo add-apt-repository ppa:openjdk-r/ppa`
-`sudo apt-get update`
-`sudo apt install openjdk-11-jdk`
-
+```
+sudo add-apt-repository ppa:openjdk-r/ppa`
+sudo apt-get update`
+sudo apt install openjdk-11-jdk`
+```
 ![Alt text](/misc/Screenshot2.png?raw=true "DSS Ubuntu 14.04 LTS")
 
 # Game Assets
