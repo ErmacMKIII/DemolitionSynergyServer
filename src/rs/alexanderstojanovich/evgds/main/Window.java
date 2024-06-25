@@ -1209,7 +1209,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.0 (PUBLIC BUILD reviewed on 2024-06-25 at 19:30 PM).\n");
+            sb.append("VERSION v1.0 (PUBLIC BUILD reviewed on 2024-06-25 at 19:30).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
