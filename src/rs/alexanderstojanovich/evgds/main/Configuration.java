@@ -34,7 +34,7 @@ public class Configuration {
 //    private int fpsCap = 100;
     private int width = 640;
     private int height = 360;
-    private boolean fullscreen = false;
+//    private boolean fullscreen = false;
     private DSLogger.DSLogLevel logLevel = DSLogger.DSLogLevel.ERR;
     private boolean logToFile = false;
     private int blockDynamicSize = 50;
@@ -108,9 +108,9 @@ public class Configuration {
                             case "height":
                                 height = Integer.parseInt(words[1]);
                                 break;
-                            case "fullscreen":
-                                fullscreen = Boolean.parseBoolean(words[1].toLowerCase());
-                                break;
+//                            case "fullscreen":
+//                                fullscreen = Boolean.parseBoolean(words[1].toLowerCase());
+//                                break;
                             case "loglevel":
                                 int logLevelInt = Integer.parseInt(words[1].toLowerCase());
                                 logLevel = DSLogger.DSLogLevel.values()[logLevelInt];
@@ -226,8 +226,8 @@ public class Configuration {
 //            pw.println("FPSCap = " + fpsCap);
             pw.println("Width = " + width);
             pw.println("Height = " + height);
-            pw.println("Fullscreen = " + fullscreen);
-            pw.println("# Maximum Framerate set to refresh rate if is enabled");
+//            pw.println("Fullscreen = " + fullscreen);
+//            pw.println("# Maximum Framerate set to refresh rate if is enabled");
             pw.println("# Log Level {ERR=0(default), DEBUG=1, ALL=2}");
             pw.println("LogLevel = " + logLevel.ordinal());
             pw.println("# If true generate log file, otherwise print only to console. Used in conjuction with log level.");
@@ -292,13 +292,13 @@ public class Configuration {
         this.height = height;
     }
 
-    public boolean isFullscreen() {
-        return fullscreen;
-    }
-
-    public void setFullscreen(boolean fullscreen) {
-        this.fullscreen = fullscreen;
-    }
+//    public boolean isFullscreen() {
+//        return fullscreen;
+//    }
+//
+//    public void setFullscreen(boolean fullscreen) {
+//        this.fullscreen = fullscreen;
+//    }
 
     public DSLogger.DSLogLevel getLogLevel() {
         return logLevel;
