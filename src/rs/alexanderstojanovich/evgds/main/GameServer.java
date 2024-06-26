@@ -19,7 +19,6 @@ package rs.alexanderstojanovich.evgds.main;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -29,9 +28,6 @@ import org.magicwerk.brownies.collections.IList;
 import rs.alexanderstojanovich.evgds.level.LevelActors;
 import rs.alexanderstojanovich.evgds.net.ClientInfo;
 import rs.alexanderstojanovich.evgds.net.DSMachine;
-import rs.alexanderstojanovich.evgds.net.DSObject;
-import rs.alexanderstojanovich.evgds.net.Response;
-import rs.alexanderstojanovich.evgds.net.ResponseIfc;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
 
 /**
