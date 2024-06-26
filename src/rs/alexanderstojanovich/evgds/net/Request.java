@@ -47,6 +47,7 @@ import static rs.alexanderstojanovich.evgds.net.DSObject.DataType.VOID;
  */
 public class Request implements RequestIfc {
 
+    protected String guid = "*";
     protected byte[] content;
     protected RequestType requestType;
     protected DataType dataType;
@@ -119,6 +120,9 @@ public class Request implements RequestIfc {
             // Write magic bytes
             out.write(RequestIfc.MAGIC_BYTES);
 
+            // Write sender
+            out.write(machine.getGuid().getBytes(StandardCharsets.UTF_8));
+
             // Write machine type, object type, request type, data type
             out.writeInt(machine.getMachineType().ordinal());
             out.writeInt(getObjectType().ordinal());
@@ -185,9 +189,16 @@ public class Request implements RequestIfc {
             // Read magic bytes
             byte[] magicBytes = new byte[RequestIfc.MAGIC_BYTES.length];
             in.readFully(magicBytes);
+
             if (!Arrays.equals(magicBytes, RequestIfc.MAGIC_BYTES)) {
                 return Request.INVALID; // Magic bytes mismatch
             }   // Read machine type, object type, request type, and data type
+
+            // Read guid of sender
+            byte[] senderBytes = new byte[RequestIfc.GUID_LENGTH];
+            in.readFully(senderBytes);
+            guid = new String(senderBytes);
+
             int machineTypeOrdinal = in.readInt();
             int objTypeOrdinal = in.readInt();
             reqTypeOrdinal = in.readInt();
@@ -295,6 +306,11 @@ public class Request implements RequestIfc {
     @Override
     public int getClientPort() {
         return clientPort;
+    }
+
+    @Override
+    public String getGuid() {
+        return guid;
     }
 
 }

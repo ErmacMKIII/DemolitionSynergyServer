@@ -305,4 +305,9 @@ public class Game implements DSMachine {
         return weaponIndex;
     }
 
+    @Override
+    public String getGuid() {
+        return "*";
+    }
+
 }

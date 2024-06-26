@@ -201,7 +201,7 @@ public class Window extends javax.swing.JFrame {
         // Initialize columns for the tables
         playerInfoModel.setColumnIdentifiers(new String[]{"Name", "Texture Model", "Unique ID", "Color"});
         posInfoModel.setColumnIdentifiers(new String[]{"Unique ID", "Position", "Front"});
-        clientInfoModel.setColumnIdentifiers(new String[]{"Host Name", "Unique ID", "Time to Live", "Kick Client"});
+        clientInfoModel.setColumnIdentifiers(new String[]{"Host Name", "Unique ID", "Time to Live", "Date Assigned", "Kick Client"});
     }
 
     public static void setEnabledComponents(Component component, boolean enabled) {
@@ -294,7 +294,7 @@ public class Window extends javax.swing.JFrame {
         final ButtonEditor kickBtnEdit = new ButtonEditor(new JButton("Kick"));
         kickBtnEdit.getButton().addActionListener((ActionEvent e) -> {
             final int srow = this.clientInfoTbl.getSelectedRow();
-            String client = this.clientInfoModel.getValueAt(srow, clientInfoModel.findColumn("Host Name")).toString();
+            String client = this.clientInfoModel.getValueAt(srow, clientInfoModel.findColumn("Unique ID")).toString();
             DSLogger.reportInfo("Kick player: " + client, null);
             writeOnConsole("Kick player: " + client);
             GameServer.kickPlayer(gameObject.gameServer, client);
@@ -332,7 +332,7 @@ public class Window extends javax.swing.JFrame {
                 }
             }
             if (!found) {
-                clientInfoModel.addRow(new Object[]{info.getHostName(), info.getUniqueId(), info.getTimeToLive()});
+                clientInfoModel.addRow(new Object[]{info.getHostName(), info.getUniqueId(), info.getTimeToLive(), info.dateAssigned.toString()});
             }
         }
     }
@@ -1209,7 +1209,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.0 (PUBLIC BUILD reviewed on 2024-06-25 at 19:30).\n");
+            sb.append("VERSION v1.0 (PUBLIC BUILD reviewed on 2024-06-26 at 05:30).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
