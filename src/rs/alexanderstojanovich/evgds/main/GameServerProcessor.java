@@ -51,12 +51,12 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
 public class GameServerProcessor {
-    
+
     public static final int BUFF_SIZE = 8192; // append bytes (chunk) buffer size
 
     public static final int FAIL_ATTEMPT_MAX = 10;
     public static final int TOTAL_FAIL_ATTEMPT_MAX = 3000;
-    
+
     public static int TotalFailedAttempts = 0;
 
     /**
@@ -90,14 +90,14 @@ public class GameServerProcessor {
     public static GameServerProcessor.Result process(GameServer gameServer, DatagramSocket endpoint) throws Exception {
         // Handle endpoint request and response
         final RequestIfc request;
-        
+
         request = RequestIfc.receive(gameServer);
-        
+
         if (request == null || request.getClientAddress() == null) {
             // avoid processing invalid requests requests
             return new Result(Status.INTERNAL_ERROR, null, null, "Invalid request - Is null or client address is null");
         }
-        
+
         String clientGuid = request.getGuid();
         final InetAddress clientAddress = request.getClientAddress();
         final int clientPort = request.getClientPort();
@@ -106,7 +106,7 @@ public class GameServerProcessor {
         // defence against duping packets (possibility bridged connections)
         long currTime = System.nanoTime();
         double deltaTime = (currTime - lastTime) / 1E9D;
-        if (request.getChecksum() == lastChecksum && deltaTime < Game.TICK_TIME / 16.0) {
+        if (request.getRequestType() != GET_POS && request.getChecksum() == lastChecksum && deltaTime < Game.TICK_TIME / 16.0) {
             // avoid processing duplicate packages
             return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Sent duplicate packet - rejecting");
         }
@@ -114,13 +114,16 @@ public class GameServerProcessor {
         lastTime = currTime;
 
         // pending kick
-        if (gameServer.kicklist.contains(clientHostName)) {
-            ResponseIfc response = new Response(0L, ResponseIfc.ResponseStatus.OK, INT, 1);
+        if (gameServer.kicklist.contains(clientGuid)) {
+            ResponseIfc response = new Response(0L, ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, clientGuid);
             response.send(gameServer, clientAddress, clientPort);
+            
+            gameServer.kicklist.remove(clientGuid);
+            gameServer.clients.removeIf(c -> c.uniqueId.equals(clientGuid));
             
             return new Result(Status.OK, clientHostName, clientGuid, "OK => kick issued to the client!");
         }
-        
+
         if (request == Request.INVALID) {
             // avoid processing invalid requests requests
             return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Invalid request - Reason Unknown!");
@@ -130,27 +133,27 @@ public class GameServerProcessor {
         if (request.getDataType() == null) {
             Response response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
             response.send(gameServer, clientAddress, clientPort);
-            
+
             return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Bad Request - Bad data type!");
         }
-        
+
         if (!gameServer.clients.containsIf(c -> c.getUniqueId().equals(clientGuid)) && request.getRequestType() != RequestIfc.RequestType.HELLO && request.getRequestType() != RequestIfc.RequestType.GOODBYE) {
             gameServer.assertTstFailure(clientHostName, clientGuid);
-            
+
             return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Client issued invalid request type (HELLO, GOODBYE)");
         }
-        
+
         if (gameServer.blacklist.contains(clientHostName) || gameServer.clients.size() >= MAX_CLIENTS) {
             gameServer.assertTstFailure(clientHostName, clientGuid);
-            
+
             return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Client is banned");
         }
-        
+
         final ResponseIfc response;
         String msg;
         LevelActors levelActors;
         final int totalBytes;
-        
+
         double gameTime;
         switch (request.getRequestType()) {
             case HELLO:
@@ -175,10 +178,10 @@ public class GameServerProcessor {
                             levelActors.otherPlayers.add(new Critter(newPlayerUniqueId, new Model(gameServer.gameObject.GameAssets.PLAYER_BODY_DEFAULT)));
                             msg = String.format("Player ID is registered!", gameServer.worldName, gameServer.version);
                             response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
-                            
+
                             gameServer.gameObject.WINDOW.writeOnConsole((String.format("Player %s has connected.", newPlayerUniqueId)));
                             DSLogger.reportInfo(String.format("Player %s has connected.", newPlayerUniqueId), null);
-                            
+
                         } else {
                             msg = String.format("Player ID is invalid or already exists!", gameServer.worldName, gameServer.version);
                             response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
@@ -195,10 +198,10 @@ public class GameServerProcessor {
                             critter.body.setPrimaryRGBAColor(info.color);
                             critter.body.texName = info.texModel;
                             levelActors.otherPlayers.add(critter);
-                            
+
                             gameServer.gameObject.WINDOW.writeOnConsole((String.format("Player %s (%s) has connected.", info.name, info.uniqueId)));
                             DSLogger.reportInfo(String.format("Player %s (%s) has connected.", info.name, info.uniqueId), null);
-                            
+
                             msg = String.format("Player ID is registered!", gameServer.worldName, gameServer.version);
                             response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                         } else {
@@ -220,6 +223,7 @@ public class GameServerProcessor {
                 gameServer.clients.removeIf(c -> c.uniqueId.equals(clientGuid));
                 gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
                 if (clientGuid != null) {
+                    gameServer.kicklist.remove(clientGuid);
                     GameServer.performCleanUp(gameServer.gameObject, clientGuid, false);
                 }
                 break;
@@ -316,7 +320,7 @@ public class GameServerProcessor {
                 final int bytesPerFragment = BUFF_SIZE;
                 int fullFragments = totalBytes / bytesPerFragment;
                 int remainingBytes = totalBytes % bytesPerFragment;
-                
+
                 int totalFragments = fullFragments + (remainingBytes > 0 ? 1 : 0);
                 final ResponseIfc downloadResponse = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.INT, totalFragments);
                 try {
@@ -330,22 +334,22 @@ public class GameServerProcessor {
                 int n = (int) request.getData(); // Assuming the N-th fragment number is sent in the request data
                 totalBytes = gameServer.gameObject.levelContainer.bak_pos;
                 final byte[] buffer = gameServer.gameObject.levelContainer.bak_buffer;
-                
+
                 if (n < 0 || n * BUFF_SIZE >= totalBytes) {
                     response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Invalid fragment number");
                     response.send(gameServer, clientAddress, clientPort);
                     return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Invalid fragment number!");
                 }
-                
+
                 int fragmentStart = n * BUFF_SIZE;
                 int fragmentEnd = Math.min(fragmentStart + BUFF_SIZE, totalBytes);
                 int fragmentSize = fragmentEnd - fragmentStart;
                 byte[] fragment = new byte[fragmentSize];
                 System.arraycopy(buffer, fragmentStart, fragment, 0, fragmentSize);
-                
+
                 DatagramPacket packet = new DatagramPacket(fragment, fragmentSize, clientAddress, clientPort);
                 endpoint.send(packet);
-                
+
                 DSLogger.reportInfo(String.format("Sent %d fragment, %d total bytes written", n, fragmentSize), null);
                 break;
             case PLAYER_INFO:
@@ -372,7 +376,7 @@ public class GameServerProcessor {
                 }
                 break;
         }
-        
+
         return new Result(Status.OK, clientHostName, clientGuid, String.format("%s data= %s", request.getRequestType().name(), String.valueOf(request.getData())));
     }
 
@@ -408,7 +412,7 @@ public class GameServerProcessor {
          * @param guid Client guid
          * @param message message explanation
          */
-        public Result(Status status, String hostname, String guid, String message) {            
+        public Result(Status status, String hostname, String guid, String message) {
             this.status = status;
             this.hostname = hostname;
             this.guid = guid;
@@ -451,7 +455,7 @@ public class GameServerProcessor {
         public String getMessage() {
             return message;
         }
-        
+
     }
 
     /**
@@ -471,11 +475,11 @@ public class GameServerProcessor {
          */
         OK;
     }
-    
+
     public static int getBUFF_SIZE() {
         return BUFF_SIZE;
     }
-    
+
     public static int getTotalFailedAttempts() {
         return TotalFailedAttempts;
     }
