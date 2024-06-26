@@ -7,7 +7,7 @@ and dark mode (darcula library).
 Split into four segments.
 - Network interface,
 - World operations,
-- General information,
+- General information (tabular),
 - Console output (all information).
 
 All information is provided in game time.
