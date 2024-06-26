@@ -30,8 +30,8 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
  */
 public class Configuration {
 
-    private int monitor = 0;
-    private int fpsCap = 100;
+//    private int monitor = 0;
+//    private int fpsCap = 100;
     private int width = 640;
     private int height = 360;
     private boolean fullscreen = false;
@@ -51,10 +51,13 @@ public class Configuration {
     private int serverPort = 13667; // used in conjunction with local IP
     private int clientPort = 13667; // used in conjunction with server IP
 
+    private boolean useBakGuid = false;
+    
     private static final String CONFIG_PATH = "dsynergy.ini";
 
     private static Configuration instance;
-
+    
+    
     public static Configuration getInstance() {
         if (instance == null) {
             instance = new Configuration();
@@ -94,11 +97,11 @@ public class Configuration {
                     if (words.length == 2) {
                         switch (words[0].toLowerCase()) {
                             case "monitor":
-                                monitor = Integer.parseInt(words[1]);
-                                break;
-                            case "fpscap":
-                                fpsCap = Integer.parseInt(words[1]);
-                                break;
+//                                monitor = Integer.parseInt(words[1]);
+//                                break;
+//                            case "fpscap":
+//                                fpsCap = Integer.parseInt(words[1]);
+//                                break;
                             case "width":
                                 width = Integer.parseInt(words[1]);
                                 break;
@@ -186,6 +189,9 @@ public class Configuration {
                                     clientPort = number;
                                 }
                                 break;
+                            case "usebakguid":
+                                useBakGuid = Boolean.parseBoolean(words[1].toLowerCase());
+                                break;
                         }
                     }
                 }
@@ -215,9 +221,9 @@ public class Configuration {
         try {
             pw = new PrintWriter(cfg);
             pw.println("# Monitor (0 - Window; !=0 available monitors)");
-            pw.println("Monitor = " + monitor);
-            pw.println("# Maximum framerate. Depedends on VSync.");
-            pw.println("FPSCap = " + fpsCap);
+//            pw.println("Monitor = " + monitor);
+//            pw.println("# Maximum framerate. Depedends on VSync.");
+//            pw.println("FPSCap = " + fpsCap);
             pw.println("Width = " + width);
             pw.println("Height = " + height);
             pw.println("Fullscreen = " + fullscreen);
@@ -247,6 +253,8 @@ public class Configuration {
             pw.println("ServerPort = " + serverPort);
             pw.println("# Client port set to connect to game server. Varying");
             pw.println("ClientPort = " + clientPort);
+            pw.println("# Use backup guid. Testing purposes.");
+            pw.println("UseBakGuid = " + useBakGuid);
         } catch (FileNotFoundException ex) {
             DSLogger.reportFatalError(ex.getMessage(), ex);
         } finally {
@@ -256,17 +264,17 @@ public class Configuration {
         }
     }
 
-    public int getMonitor() {
-        return monitor;
-    }
+//    public int getMonitor() {
+//        return monitor;
+//    }
 
-    public int getFpsCap() {
-        return fpsCap;
-    }
-
-    public void setFpsCap(int fpsCap) {
-        this.fpsCap = fpsCap;
-    }
+//    public int getFpsCap() {
+//        return fpsCap;
+//    }
+//
+//    public void setFpsCap(int fpsCap) {
+//        this.fpsCap = fpsCap;
+//    }
 
     public int getWidth() {
         return width;
@@ -372,4 +380,8 @@ public class Configuration {
         this.clientPort = clientPort;
     }
 
+    public boolean isUseBakGuid() {
+        return useBakGuid;
+    }
+    
 }
