@@ -234,7 +234,7 @@
               <Image iconType="3" name="/rs/alexanderstojanovich/evgds/resources/restart.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Restart"/>
-            <Property name="toolTipText" type="java.lang.String" value="Restart server (Start &amp; Stop, World is perserved and Game Time is reset)"/>
+            <Property name="toolTipText" type="java.lang.String" value="Restart server (Start &amp; Stop, all players are kicked, World is perserved and Game Time is reset)"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>
