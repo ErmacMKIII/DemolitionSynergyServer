@@ -315,7 +315,7 @@ public class Window extends javax.swing.JFrame {
         for (ClientInfo info : newClientInfos) {
             boolean found = false;
             for (int i = 0; i < clientInfoModel.getRowCount(); i++) {
-                if (clientInfoModel.getValueAt(i, 0).equals(info.uniqueId)) {
+                if (clientInfoModel.getValueAt(i, 1).equals(info.uniqueId)) {
                     clientInfoModel.setValueAt(info.hostName, i, 0);
                     clientInfoModel.setValueAt(info.uniqueId, i, 1);
                     clientInfoModel.setValueAt(info.timeToLive, i, 2);
