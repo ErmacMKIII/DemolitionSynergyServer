@@ -16,7 +16,6 @@
  */
 package rs.alexanderstojanovich.evgds.main;
 
-import com.sun.management.OperatingSystemMXBean;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -25,8 +24,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -80,12 +77,6 @@ public class Window extends javax.swing.JFrame {
     public final HardwareAbstractionLayer hal = si.getHardware();
 
     public final Configuration config = Configuration.getInstance();
-
-    // Get the OperatingSystemMXBean instance
-    public final OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);
-
-    // Get the MemoryMXBean instance
-    public final MemoryMXBean memoryBean = ManagementFactory.getMemoryMXBean();
 
     public final GameObject gameObject;
     public static final Dimension DIM = Toolkit.getDefaultToolkit().getScreenSize();
@@ -307,10 +298,10 @@ public class Window extends javax.swing.JFrame {
 
         // Remove rows not in the new data
         for (int i = clientInfoModel.getRowCount() - 1; i >= 0; i--) {
-            String hostName = (String) clientInfoModel.getValueAt(i, 0);
+            String guid = (String) clientInfoModel.getValueAt(i, clientInfoModel.findColumn("Unique ID"));
             boolean exists = false;
             for (ClientInfo info : newClientInfos) {
-                if (info.getHostName().equals(hostName)) {
+                if (info.uniqueId.equals(guid)) {
                     exists = true;
                     break;
                 }
@@ -324,9 +315,11 @@ public class Window extends javax.swing.JFrame {
         for (ClientInfo info : newClientInfos) {
             boolean found = false;
             for (int i = 0; i < clientInfoModel.getRowCount(); i++) {
-                if (clientInfoModel.getValueAt(i, 0).equals(info.getHostName())) {
-                    clientInfoModel.setValueAt(info.getUniqueId(), i, 1);
-                    clientInfoModel.setValueAt(info.getTimeToLive(), i, 2);
+                if (clientInfoModel.getValueAt(i, 0).equals(info.uniqueId)) {
+                    clientInfoModel.setValueAt(info.hostName, i, 0);
+                    clientInfoModel.setValueAt(info.uniqueId, i, 1);
+                    clientInfoModel.setValueAt(info.timeToLive, i, 2);
+                    clientInfoModel.setValueAt(info.dateAssigned, i, 3);
                     found = true;
                     break;
                 }
@@ -664,14 +657,14 @@ public class Window extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Host Name", "Unique Id", "Time to Live"
+                "Host Name", "Unique Id", "Time to Live", "Date Assigned"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Integer.class
+                java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Object.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false
+                false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
