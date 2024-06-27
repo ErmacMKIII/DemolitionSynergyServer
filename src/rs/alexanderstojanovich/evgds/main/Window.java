@@ -504,7 +504,7 @@ public class Window extends javax.swing.JFrame {
         btnRestart.setFont(new java.awt.Font("Segoe UI Semibold", 0, 14)); // NOI18N
         btnRestart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/restart.png"))); // NOI18N
         btnRestart.setText("Restart");
-        btnRestart.setToolTipText("Restart server (Start & Stop, World is perserved and Game Time is reset)");
+        btnRestart.setToolTipText("Restart server (Start & Stop, all players are kicked, World is perserved and Game Time is reset)");
         btnRestart.setEnabled(false);
         btnRestart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -870,7 +870,7 @@ public class Window extends javax.swing.JFrame {
         setEnabledComponents(this.panelWorld, false);
         setEnabledComponents(this.panelInfo, false);
         gameObject.gameServer.stopServer();
-        gameObject.clearEverything();
+        
         btnStart.setEnabled(true);
         btnStop.setEnabled(false);
         btnRestart.setEnabled(false);
@@ -887,7 +887,7 @@ public class Window extends javax.swing.JFrame {
         stopServerAndUpdate();
     }//GEN-LAST:event_btnStopActionPerformed
 
-    public void restartServerAndUpdate() {
+    public void restartServerAndUpdate() {        
         gameObject.gameServer.stopServer();
         Game.setGameTicks(config.getGameTicks());
 
@@ -904,7 +904,7 @@ public class Window extends javax.swing.JFrame {
         startServerAndUpdate();
     }//GEN-LAST:event_fileMenuStartActionPerformed
 
-    private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
+    public void generateWorld() {
         // TODO add your handling code here:       
         final GameObject.MapLevelSize levelSize = (GameObject.MapLevelSize) cmbLevelSize.getSelectedItem();
         SwingWorker<Boolean, Void> swingWorker = new SwingWorker<Boolean, Void>() {
@@ -929,6 +929,10 @@ public class Window extends javax.swing.JFrame {
             }
         };
         swingWorker.execute();
+    }
+    
+    private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
+        generateWorld();
     }//GEN-LAST:event_btnGenerateActionPerformed
 
     private void cmbLevelSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLevelSizeActionPerformed
@@ -985,7 +989,10 @@ public class Window extends javax.swing.JFrame {
         fileExport.addChoosableFileFilter(ndatFilter);
     }
 
-    private void worldImport() {
+    /**
+     * Import world into Dedicated server. Player(s) which are connecting are gonna download that world. File Dialog is used.
+     */
+    public void worldImport() {
         int option = fileImport.showOpenDialog(this);
         if (option == JFileChooser.APPROVE_OPTION) {
             final File file = fileImport.getSelectedFile();
@@ -1014,6 +1021,41 @@ public class Window extends javax.swing.JFrame {
 
             swingWorker.execute();
         }
+    }
+    
+    /**
+     * Import world into Dedicated server. Player(s) which are connecting are gonna download that world.
+     * @param fileImport file to import
+     * @throws java.lang.Exception if file not found
+     */
+    public void worldImport(File fileImport) throws Exception {
+        if (!fileImport.exists()) {
+            throw new Exception("World not imported - file not found!");
+        }
+
+        SwingWorker<Boolean, Void> swingWorker = new SwingWorker<Boolean, Void>() {
+            @Override
+            protected Boolean doInBackground() throws Exception {
+                return gameObject.levelContainer.loadLevelFromFile(fileImport.getAbsolutePath());
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    if (get()) {
+                        JOptionPane.showMessageDialog(Window.this, "World sucessfully imported from file!", "Import World", JOptionPane.INFORMATION_MESSAGE);
+                        tboxBlockNum.setText(String.valueOf(LevelContainer.AllBlockMap.getPopulation()));
+                        btnErase.setEnabled(true);
+                    } else {
+                        JOptionPane.showMessageDialog(Window.this, "World import resulted in failure!", "Import World", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (InterruptedException | ExecutionException ex) {
+                    DSLogger.reportError(ex.getMessage(), ex);
+                }
+            }
+        };
+
+        swingWorker.execute();
     }
 
     private void worldExport() {
@@ -1202,13 +1244,13 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.0 (PUBLIC BUILD reviewed on 2024-06-26 at 05:30).\n");
+            sb.append("VERSION v1.1 (PUBLIC BUILD reviewed on 2024-06-27 at 10:45).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
             sb.append("For latest release changelog please check GitHub page. \n");
             sb.append("\n");
-            sb.append("Demolition Synergy Version: 44\n");
+            sb.append("Demolition Synergy Version: 45\n");
             sb.append("\n");
             sb.append("Copyright © 2024\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");

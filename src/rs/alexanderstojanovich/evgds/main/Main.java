@@ -17,6 +17,7 @@
 package rs.alexanderstojanovich.evgds.main;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -34,6 +35,8 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String args[]) {
+        List<String> argList = Arrays.asList(args);
+        
         // Init Config and Logging
         Configuration inCfg = Configuration.getInstance();
         inCfg.readConfigFile(); // this line reads if input file exists otherwise uses defaults
@@ -71,6 +74,22 @@ public class Main {
         // initialize game creation (only creates window)
         try {
             final GameObject gameObject = new GameObject(); // throws ex
+            // parse arguments
+            if (argList.contains("-runonstart")) {
+                gameObject.WINDOW.startServerAndUpdate();          
+            
+                if (argList.contains("-genworld")) {
+                    if (argList.contains("-seed")) {
+                        String someString = argList.get(argsList.indexOf("-seed"));
+                        if (someString.matches("^-?\\d{1,19}$")) {
+                            long seed = Long.parseLong(someString);
+                            gameObject.randomLevelGenerator.setSeed(seed);
+                        }
+                    }
+                    gameObject.WINDOW.generateWorld();
+                }                     
+            }
+            
             // start the game loop
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override

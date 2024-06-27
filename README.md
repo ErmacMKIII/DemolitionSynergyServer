@@ -25,7 +25,7 @@ In order to build the project you are gonna need NetBeans IDE 16 (or later) and 
 3. Apache logger (Log4J) with dependecies (installed),
 4. Google Gson (installed),
 5. Darcula library, for dark theme (installed),
-6. Sigar library, for monitoring (installed)
+6. OSHI library, for monitoring (installed)
 
 Project could be compiled and run immediately.
 (No additional steps are needed.)
@@ -53,7 +53,7 @@ Project structure:
 ```
 Server GUI is contained in `Window` class.
 
-# Additional notes
+# Additional Notes
 
 Tested to work with Ubuntu 14.04.6 LTS.
 
@@ -64,6 +64,29 @@ sudo apt-get update`
 sudo apt install openjdk-11-jdk`
 ```
 ![Alt text](/misc/Screenshot2.png?raw=true "DSS Ubuntu 14.04 LTS")
+
+# Game Server Arguments 
+
+Configure Server in dsynergy.ini.
+Make sure is configured first.
+Double check that local IP (ipconfig on Windows) and server port (default 13667)
+are okey.
+
+There are three arguments:
+1) Run server on start '-runonstart'
+2) If above is used '-genworld' could be used to generate world after the server has started.
+3) In conjuction with '-genworld' seed could be provided as numeric value.
+
+All in one example:
+`-runonstart -genworld -seed 305419896`
+
+So program (server binary) would be run with:
+`java -jar DSS.jar -runonstart -genworld -seed 305419896`
+
+Which would run the server on designated local IP and port and
+generate world with supplied seed.
+
+Done.
 
 # Game Assets
 Project may use assets from Demolition Synergy.

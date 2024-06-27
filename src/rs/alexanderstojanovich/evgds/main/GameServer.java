@@ -146,13 +146,13 @@ public class GameServer implements DSMachine, Runnable {
      */
     public void stopServer() {
         if (running) {
-            // Attempt to disconnect clients            
-            this.endpoint.close();
+            // kick all players
+            clients.forEach(cli -> GameServer.kickPlayer(gameObject.gameServer, cli.uniqueId));                      
 
             gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE);
             this.shutDownSignal = true;
 
-            clients.clear();
+            clients.clear();                       
         }
     }
 
@@ -251,6 +251,10 @@ public class GameServer implements DSMachine, Runnable {
 
         clients.clear();
         running = false;
+        
+        // Close end endpoint
+        this.endpoint.close();
+        
         DSLogger.reportInfo("Game Server finished!", null);
         gameObject.WINDOW.writeOnConsole("Game Server finished!");
     }
