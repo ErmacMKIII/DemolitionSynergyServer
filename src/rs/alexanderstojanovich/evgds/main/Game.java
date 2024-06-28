@@ -106,7 +106,6 @@ public class Game implements DSMachine {
 
     protected int port = config.getClientPort();
     protected int timeout = DEFAULT_TIMEOUT;
-    public static final int BUFF_SIZE = 8192; // read bytes (chunk) buffer size
 
     /**
      * Player alleged position on the game server

@@ -81,7 +81,7 @@ public interface ResponseIfc extends DSObject {
             long checksum = buffer.getLong();
 
             // Construct response (involves deserialization)
-            ResponseIfc result = (ResponseIfc) new Response(checksum).deserialize(dataContent).deserialize(dataContent); // new request                
+            ResponseIfc result = (ResponseIfc) new Response(checksum).deserialize(dataContent); // new request                
 
             return result;
         }
