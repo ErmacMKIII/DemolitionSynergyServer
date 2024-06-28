@@ -35,11 +35,13 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -935,8 +937,11 @@ public class Window extends javax.swing.JFrame {
         generateWorld();
     }//GEN-LAST:event_btnGenerateActionPerformed
 
-    private void cmbLevelSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLevelSizeActionPerformed
-        // TODO add your handling code here:
+    /**
+     * Set world size (closed form) {SMALL=25k, MEDIUM=50k, LARGE=100k,
+     * HUGE=131070 }
+     */
+    public void setWorldLevelSize() {
         final int numberOfBlocks;
         final GameObject.MapLevelSize levelSize = (GameObject.MapLevelSize) cmbLevelSize.getSelectedItem();
         switch (levelSize) {
@@ -955,6 +960,39 @@ public class Window extends javax.swing.JFrame {
                 break;
         }
         gameObject.randomLevelGenerator.setNumberOfBlocks(numberOfBlocks);
+    }
+
+    /**
+     * Set world size (closed form) {SMALL=25k, MEDIUM=50k, LARGE=100k,
+     * HUGE=131070 }
+     *
+     * @param newLevelSize world size to set
+     */
+    public void setWorldLevelSize(String newLevelSize) {
+        final int numberOfBlocks;
+        final GameObject.MapLevelSize levelSize = GameObject.MapLevelSize.valueOf(newLevelSize.toUpperCase());
+        switch (levelSize) {
+            default:
+            case SMALL:
+                numberOfBlocks = 25000;
+                break;
+            case MEDIUM:
+                numberOfBlocks = 50000;
+                break;
+            case LARGE:
+                numberOfBlocks = 100000;
+                break;
+            case HUGE:
+                numberOfBlocks = 131070;
+                break;
+        }
+        this.getCmbLevelSize().setSelectedItem(levelSize);
+        gameObject.randomLevelGenerator.setNumberOfBlocks(numberOfBlocks);
+    }
+
+    private void cmbLevelSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLevelSizeActionPerformed
+        // TODO add your handling code here:
+        setWorldLevelSize();
     }//GEN-LAST:event_cmbLevelSizeActionPerformed
 
     private void spinMapSeedStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinMapSeedStateChanged
@@ -1247,7 +1285,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.1 (PUBLIC BUILD reviewed on 2024-06-28 at 21:50).\n");
+            sb.append("VERSION v1.1 (PUBLIC BUILD reviewed on 2024-06-28 at 23:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1341,6 +1379,14 @@ public class Window extends javax.swing.JFrame {
         gameTimeText.setIcon(icon);
     }
 
+    public JComboBox<String> getCmbLevelSize() {
+        return cmbLevelSize;
+    }
+
+    public JSpinner getSpinMapSeed() {
+        return spinMapSeed;
+    }
+    
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnErase;
     private javax.swing.JButton btnExport;
