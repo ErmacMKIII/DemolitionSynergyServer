@@ -20,6 +20,11 @@ import com.google.gson.Gson;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.service.IoHandlerAdapter;
+import org.apache.mina.core.session.IoSession;
+import org.apache.mina.example.udp.perf.UdpServer;
+import org.apache.mina.transport.socket.nio.NioSession;
 import org.joml.Vector3f;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
@@ -50,7 +55,12 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
-public class GameServerProcessor {
+public class GameServerProcessor extends IoHandlerAdapter {
+
+    /**
+     * Game (DSynergy) server. Server is UDP (connectionless).
+     */
+    public final GameServer gameServer;
 
     public static final int BUFF_SIZE = 8192; // append bytes (chunk) buffer size
 
@@ -80,18 +90,56 @@ public class GameServerProcessor {
     protected static long lastTime = System.nanoTime();
 
     /**
+     * Create new Game Server processor which process receives request(s) and
+     * sends (optional) response(s).
+     *
+     * @param gameServer game server (on top of this processor)
+     */
+    public GameServerProcessor(GameServer gameServer) {
+        this.gameServer = gameServer;
+    }
+
+    /**
+     * Event on message received.
+     *
+     * @param session session with (client) endpoint
+     * @param message object message received
+     *
+     * @throws Exception
+     */
+    @Override
+    public void messageReceived(IoSession session, Object message) throws Exception {
+        // Process recived (as request)
+        GameServerProcessor.Result procResult = process(session, message);
+        // Post process that request was processed (and move on . . )
+        postProcess(procResult);
+    }
+
+    /**
+     * Event on message sent
+     *
+     * @param session session with (client) endpoint
+     * @param message object message sent
+     * @throws Exception
+     */
+    @Override
+    public void messageSent(IoSession session, Object message) throws Exception {
+
+    }
+
+    /**
      * Process request from clients and send response.
      *
-     * @param endpoint The endpoint socket to handle.
-     * @param gameServer game endpoint handling the clients.
+     * @param session session with (client) endpoint
+     * @param message message received. Usually IoBuffer.
      * @return result status of processing to the end point
      * @throws java.lang.Exception if errors on serialization
      */
-    public static GameServerProcessor.Result process(GameServer gameServer, DatagramSocket endpoint) throws Exception {
+    public GameServerProcessor.Result process(IoSession session, Object message) throws Exception {
         // Handle endpoint request and response
         final RequestIfc request;
 
-        request = RequestIfc.receive(gameServer);
+        request = RequestIfc.receive(gameServer, session, message);
 
         if (request == null || request.getClientAddress() == null) {
             // avoid processing invalid requests requests
@@ -100,7 +148,6 @@ public class GameServerProcessor {
 
         String clientGuid = request.getGuid();
         final InetAddress clientAddress = request.getClientAddress();
-        final int clientPort = request.getClientPort();
         String clientHostName = clientAddress.getHostName();
 
         // defence against duping packets (possibility bridged connections)
@@ -116,11 +163,11 @@ public class GameServerProcessor {
         // pending kick
         if (gameServer.kicklist.contains(clientGuid)) {
             ResponseIfc response = new Response(0L, ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, clientGuid);
-            response.send(gameServer, clientAddress, clientPort);
-            
+            response.send(gameServer, session);
+
             gameServer.kicklist.remove(clientGuid);
             gameServer.clients.removeIf(c -> c.uniqueId.equals(clientGuid));
-            
+
             return new Result(Status.OK, clientHostName, clientGuid, "OK => kick issued to the client!");
         }
 
@@ -132,7 +179,7 @@ public class GameServerProcessor {
         // Handle null data type (Possible & always erroneous)
         if (request.getDataType() == null) {
             Response response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
-            response.send(gameServer, clientAddress, clientPort);
+            response.send(gameServer, session);
 
             return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Bad Request - Bad data type!");
         }
@@ -167,7 +214,7 @@ public class GameServerProcessor {
                     gameServer.clients.add(new ClientInfo(clientHostName, clientGuid, GameServer.TIME_TO_LIVE));
                     gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
                 }
-                response.send(gameServer, clientAddress, clientPort);
+                response.send(gameServer, session);
                 break;
             case REGISTER:
                 switch (request.getDataType()) {
@@ -214,28 +261,29 @@ public class GameServerProcessor {
                         response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
                         break;
                 }
-                response.send(gameServer, clientAddress, clientPort);
+                response.send(gameServer, session);
                 break;
             case GOODBYE:
                 msg = "Goodbye, hope we will see you again!";
                 response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
-                response.send(gameServer, clientAddress, clientPort);
+                response.send(gameServer, session);
                 gameServer.clients.removeIf(c -> c.uniqueId.equals(clientGuid));
                 gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
                 if (clientGuid != null) {
                     gameServer.kicklist.remove(clientGuid);
                     GameServer.performCleanUp(gameServer.gameObject, clientGuid, false);
                 }
+                session.closeNow();
                 break;
             case GET_TIME:
                 gameTime = Game.gameTicks;
                 response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.DOUBLE, gameTime);
-                response.send(gameServer, clientAddress, clientPort);
+                response.send(gameServer, session);
                 break;
             case PING:
                 msg = String.format("You pinged %s", gameServer);
                 response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
-                response.send(gameServer, clientAddress, clientPort);
+                response.send(gameServer, session);
                 break;
             case GET_POS:
                 switch (request.getDataType()) {
@@ -294,7 +342,7 @@ public class GameServerProcessor {
                         response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
                         break;
                 }
-                response.send(gameServer, clientAddress, clientPort);
+                response.send(gameServer, session);
                 break;
             case SET_POS:
                 String jsonStr = request.getData().toString();
@@ -324,7 +372,7 @@ public class GameServerProcessor {
                 int totalFragments = fullFragments + (remainingBytes > 0 ? 1 : 0);
                 final ResponseIfc downloadResponse = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.INT, totalFragments);
                 try {
-                    downloadResponse.send(gameServer, clientAddress, clientPort);
+                    downloadResponse.send(gameServer, session);
                 } catch (Exception ex) {
                     DSLogger.reportError(ex.getMessage(), ex);
                     throw new RuntimeException("Failed to send download response!", ex);
@@ -337,7 +385,7 @@ public class GameServerProcessor {
 
                 if (n < 0 || n * BUFF_SIZE >= totalBytes) {
                     response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Invalid fragment number");
-                    response.send(gameServer, clientAddress, clientPort);
+                    response.send(gameServer, session);
                     return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Invalid fragment number!");
                 }
 
@@ -347,8 +395,8 @@ public class GameServerProcessor {
                 byte[] fragment = new byte[fragmentSize];
                 System.arraycopy(buffer, fragmentStart, fragment, 0, fragmentSize);
 
-                DatagramPacket packet = new DatagramPacket(fragment, fragmentSize, clientAddress, clientPort);
-                endpoint.send(packet);
+                IoBuffer buffer1 = IoBuffer.wrap(buffer);
+                session.write(buffer1);
 
                 DSLogger.reportInfo(String.format("Sent %d fragment, %d total bytes written", n, fragmentSize), null);
                 break;
@@ -361,7 +409,7 @@ public class GameServerProcessor {
                 });
                 String obj = gson.toJson(playerInfos, IList.class);
                 response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
-                response.send(gameServer, clientAddress, clientPort);
+                response.send(gameServer, session);
                 break;
             case SAY:
                 levelActors = gameServer.gameObject.levelContainer.levelActors;
@@ -372,12 +420,48 @@ public class GameServerProcessor {
                 }
                 response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, senderName + ":" + request.getData());
                 for (ClientInfo recipients : gameServer.clients) {
-                    response.send(gameServer, InetAddress.getByName(recipients.hostName), clientPort);
+//                    response.send(gameServer, InetAddress.getByName(recipients.hostName), clientPort);
                 }
                 break;
         }
 
         return new Result(Status.OK, clientHostName, clientGuid, String.format("%s data= %s", request.getRequestType().name(), String.valueOf(request.getData())));
+    }
+
+    /**
+     * Post processing result. After received request.
+     *
+     * Results could be written to console or to log.
+     *
+     * @param procResult process result
+     */
+    public void postProcess(GameServerProcessor.Result procResult) {
+        final String msg;
+        switch (procResult.status) {
+            case INTERNAL_ERROR:
+                msg = String.format("Server %s %s %s error!", procResult.hostname, procResult.guid, procResult.message);
+                DSLogger.reportError(msg, null);
+                gameServer.gameObject.WINDOW.writeOnConsole(msg);
+                break;
+            case CLIENT_ERROR:
+                gameServer.assertTstFailure(procResult.hostname, procResult.guid);
+                msg = String.format("Client %s %s %s error!", procResult.hostname, procResult.guid, procResult.message);
+                DSLogger.reportError(msg, null);
+                gameServer.gameObject.WINDOW.writeOnConsole(msg);
+                if (gameServer.blacklist.contains(procResult.hostname)) {
+                    DSLogger.reportWarning(msg, null);
+                    gameServer.gameObject.WINDOW.writeOnConsole(msg);
+                }
+                break;
+            default:
+            case OK:
+                gameServer.clients.filter(client -> client.hostName.equals(procResult.hostname) && client.getUniqueId().equals(procResult.guid))
+                        .forEach(client2 -> client2.timeToLive = GameServer.TIME_TO_LIVE);
+                msg = String.format("Client %s %s %s OK", procResult.hostname, procResult.guid, procResult.message);
+                DSLogger.reportInfo(msg, null);
+                gameServer.gameObject.WINDOW.writeOnConsole(msg);
+                break;
+        }
     }
 
     /**

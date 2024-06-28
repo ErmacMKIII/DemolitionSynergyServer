@@ -36,7 +36,7 @@ public class Main {
      */
     public static void main(String args[]) {
         List<String> argList = Arrays.asList(args);
-        
+
         // Init Config and Logging
         Configuration inCfg = Configuration.getInstance();
         inCfg.readConfigFile(); // this line reads if input file exists otherwise uses defaults
@@ -76,8 +76,8 @@ public class Main {
             final GameObject gameObject = new GameObject(); // throws ex
             // parse arguments
             if (argList.contains("-runonstart")) {
-                gameObject.WINDOW.startServerAndUpdate();          
-            
+                gameObject.WINDOW.startServerAndUpdate();
+
                 if (argList.contains("-genworld")) {
                     if (argList.contains("-seed")) {
                         String someString = argList.get(argsList.indexOf("-seed"));
@@ -87,9 +87,9 @@ public class Main {
                         }
                     }
                     gameObject.WINDOW.generateWorld();
-                }                     
+                }
             }
-            
+
             // start the game loop
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override

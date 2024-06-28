@@ -870,7 +870,7 @@ public class Window extends javax.swing.JFrame {
         setEnabledComponents(this.panelWorld, false);
         setEnabledComponents(this.panelInfo, false);
         gameObject.gameServer.stopServer();
-        
+
         btnStart.setEnabled(true);
         btnStop.setEnabled(false);
         btnRestart.setEnabled(false);
@@ -887,7 +887,7 @@ public class Window extends javax.swing.JFrame {
         stopServerAndUpdate();
     }//GEN-LAST:event_btnStopActionPerformed
 
-    public void restartServerAndUpdate() {        
+    public void restartServerAndUpdate() {
         gameObject.gameServer.stopServer();
         Game.setGameTicks(config.getGameTicks());
 
@@ -930,7 +930,7 @@ public class Window extends javax.swing.JFrame {
         };
         swingWorker.execute();
     }
-    
+
     private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
         generateWorld();
     }//GEN-LAST:event_btnGenerateActionPerformed
@@ -990,7 +990,8 @@ public class Window extends javax.swing.JFrame {
     }
 
     /**
-     * Import world into Dedicated server. Player(s) which are connecting are gonna download that world. File Dialog is used.
+     * Import world into Dedicated server. Player(s) which are connecting are
+     * gonna download that world. File Dialog is used.
      */
     public void worldImport() {
         int option = fileImport.showOpenDialog(this);
@@ -1022,9 +1023,11 @@ public class Window extends javax.swing.JFrame {
             swingWorker.execute();
         }
     }
-    
+
     /**
-     * Import world into Dedicated server. Player(s) which are connecting are gonna download that world.
+     * Import world into Dedicated server. Player(s) which are connecting are
+     * gonna download that world.
+     *
      * @param fileImport file to import
      * @throws java.lang.Exception if file not found
      */
