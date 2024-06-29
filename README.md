@@ -79,11 +79,11 @@ There are four arguments:
 3) In conjuction with '-genworld' seed could be provided as numeric value.
 4) In conjuction with '-genworld' size could be provided as string value. One of the following {SMALL, MEDIUM, LARGE, HUGE}
 	
-All in one example:
-`-runonstart -genworld -seed 305419896 -size medium -seed 305419896`
+All in one example (default):
+`-runonstart -genworld -size small -seed 305419896`
 
-So program (server binary) would be run with:
-`java -jar DSS.jar -runonstart -genworld -size medium -seed 305419896`
+So program (server binary) would be run with (default):
+`java -jar DSS.jar -runonstart -genworld -size small -seed 305419896`
 
 Which would run the server on designated local IP and port and
 generate world with supplied seed.
