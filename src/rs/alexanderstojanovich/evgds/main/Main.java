@@ -81,20 +81,20 @@ public class Main {
                 if (argList.contains("-genworld")) {
                     if (argList.contains("-size")) {
                         String someString = argList.get(argsList.indexOf("-size") + 1);
-                        if (!someString.isEmpty()) {                            
+                        if (!someString.isEmpty()) {
                             gameObject.WINDOW.setWorldLevelSize(someString.toUpperCase());
                         }
                     }
-                    
+
                     if (argList.contains("-seed")) {
                         String someString2 = argList.get(argsList.indexOf("-seed") + 1);
                         if (someString2.matches("^-?\\d{1,19}$")) {
-                            long seed = Long.parseLong(someString2);                            
+                            long seed = Long.parseLong(someString2);
                             gameObject.randomLevelGenerator.setSeed(seed);
                             gameObject.WINDOW.getSpinMapSeed().setValue(seed);
                         }
                     }
-                    
+
                     gameObject.WINDOW.generateWorld();
                 }
             }

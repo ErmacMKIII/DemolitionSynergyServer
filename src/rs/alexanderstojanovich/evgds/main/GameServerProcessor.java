@@ -418,8 +418,8 @@ public class GameServerProcessor extends IoHandlerAdapter {
                     senderName = otherPlayerOrNull.getName();
                 }
                 response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, senderName + ":" + request.getData());
-                for (ClientInfo recipients : gameServer.clients) {
-//                    response.send(gameServer, InetAddress.getByName(recipients.hostName), clientPort);
+                for (IoSession session1 : gameServer.acceptor.getManagedSessions().values()) {
+                    response.send(gameServer, session1);
                 }
                 break;
         }

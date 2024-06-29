@@ -863,6 +863,10 @@ public class Window extends javax.swing.JFrame {
         btnStop.setEnabled(true);
         btnRestart.setEnabled(true);
 
+        fileMenuStart.setEnabled(false);
+        fileMenuStop.setEnabled(true);
+        fileMenuRestart.setEnabled(true);
+
         tboxLocalIP.setEnabled(false);
         spinServerPort.setEnabled(false);
     }
@@ -876,6 +880,10 @@ public class Window extends javax.swing.JFrame {
         btnStart.setEnabled(true);
         btnStop.setEnabled(false);
         btnRestart.setEnabled(false);
+
+        fileMenuStart.setEnabled(true);
+        fileMenuStop.setEnabled(false);
+        fileMenuRestart.setEnabled(false);
 
         removeAllRows(posInfoModel);
         removeAllRows(clientInfoModel);
@@ -907,7 +915,11 @@ public class Window extends javax.swing.JFrame {
     }//GEN-LAST:event_fileMenuStartActionPerformed
 
     public void generateWorld() {
-        // TODO add your handling code here:       
+        // TODO add your handling code here:    
+        btnGenerate.setEnabled(false);
+        btnImport.setEnabled(false);
+        btnExport.setEnabled(false);
+        btnErase.setEnabled(false);
         final GameObject.MapLevelSize levelSize = (GameObject.MapLevelSize) cmbLevelSize.getSelectedItem();
         SwingWorker<Boolean, Void> swingWorker = new SwingWorker<Boolean, Void>() {
             @Override
@@ -928,6 +940,9 @@ public class Window extends javax.swing.JFrame {
                 } catch (InterruptedException | ExecutionException ex) {
                     DSLogger.reportError(ex.getMessage(), ex);
                 }
+                btnGenerate.setEnabled(true);
+                btnImport.setEnabled(true);
+                btnExport.setEnabled(true);
             }
         };
         swingWorker.execute();
@@ -1386,7 +1401,7 @@ public class Window extends javax.swing.JFrame {
     public JSpinner getSpinMapSeed() {
         return spinMapSeed;
     }
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnErase;
     private javax.swing.JButton btnExport;
