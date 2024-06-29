@@ -23,8 +23,6 @@ package rs.alexanderstojanovich.evgds.net;
  */
 public interface DSObject {
 
-    public static final int BUFF_SIZE = 512;
-
     /**
      * Object type to be send over net.
      */

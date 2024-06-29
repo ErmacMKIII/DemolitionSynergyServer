@@ -36,7 +36,7 @@ public class Main {
      */
     public static void main(String args[]) {
         List<String> argList = Arrays.asList(args);
-        
+
         // Init Config and Logging
         Configuration inCfg = Configuration.getInstance();
         inCfg.readConfigFile(); // this line reads if input file exists otherwise uses defaults
@@ -76,20 +76,29 @@ public class Main {
             final GameObject gameObject = new GameObject(); // throws ex
             // parse arguments
             if (argList.contains("-runonstart")) {
-                gameObject.WINDOW.startServerAndUpdate();          
-            
+                gameObject.WINDOW.startServerAndUpdate();
+
                 if (argList.contains("-genworld")) {
-                    if (argList.contains("-seed")) {
-                        String someString = argList.get(argsList.indexOf("-seed"));
-                        if (someString.matches("^-?\\d{1,19}$")) {
-                            long seed = Long.parseLong(someString);
-                            gameObject.randomLevelGenerator.setSeed(seed);
+                    if (argList.contains("-size")) {
+                        String someString = argList.get(argsList.indexOf("-size") + 1);
+                        if (!someString.isEmpty()) {
+                            gameObject.WINDOW.setWorldLevelSize(someString.toUpperCase());
                         }
                     }
+
+                    if (argList.contains("-seed")) {
+                        String someString2 = argList.get(argsList.indexOf("-seed") + 1);
+                        if (someString2.matches("^-?\\d{1,19}$")) {
+                            long seed = Long.parseLong(someString2);
+                            gameObject.randomLevelGenerator.setSeed(seed);
+                            gameObject.WINDOW.getSpinMapSeed().setValue(seed);
+                        }
+                    }
+
                     gameObject.WINDOW.generateWorld();
-                }                     
+                }
             }
-            
+
             // start the game loop
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 @Override
@@ -110,6 +119,7 @@ public class Main {
             timer0.scheduleAtFixedRate(task1, 1000L, 1000L);
         } catch (Exception ex) {
             DSLogger.reportFatalError("Unable to create game object - Application will exit!", null);
+            System.exit(1);
         }
     }
 

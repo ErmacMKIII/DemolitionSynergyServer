@@ -25,7 +25,8 @@ In order to build the project you are gonna need NetBeans IDE 16 (or later) and 
 3. Apache logger (Log4J) with dependecies (installed),
 4. Google Gson (installed),
 5. Darcula library, for dark theme (installed),
-6. OSHI library, for monitoring (installed)
+6. OSHI library, for monitoring (installed),
+7. Apache MINA, for networking (installed).
 
 Project could be compiled and run immediately.
 (No additional steps are needed.)
@@ -72,16 +73,17 @@ Make sure is configured first.
 Double check that local IP (ipconfig on Windows) and server port (default 13667)
 are okey.
 
-There are three arguments:
+There are four arguments:
 1) Run server on start '-runonstart'
 2) If above is used '-genworld' could be used to generate world after the server has started.
 3) In conjuction with '-genworld' seed could be provided as numeric value.
+4) In conjuction with '-genworld' size could be provided as string value. One of the following {SMALL, MEDIUM, LARGE, HUGE}
+	
+All in one example (default):
+`-runonstart -genworld -size small -seed 305419896`
 
-All in one example:
-`-runonstart -genworld -seed 305419896`
-
-So program (server binary) would be run with:
-`java -jar DSS.jar -runonstart -genworld -seed 305419896`
+So program (server binary) would be run with (default):
+`java -jar DSS.jar -runonstart -genworld -size small -seed 305419896`
 
 Which would run the server on designated local IP and port and
 generate world with supplied seed.

@@ -69,7 +69,7 @@ public class HardwareUtils {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-1");
             Configuration cfg = Configuration.getInstance();
-            byte[] hwBytes = getHardwareInfo().getBytes();            
+            byte[] hwBytes = getHardwareInfo().getBytes();
             md.update(hwBytes);
             byte[] hash = md.digest();
             long mostSignificantBits = 0;
@@ -80,7 +80,7 @@ public class HardwareUtils {
             for (int i = 8; i < 16; i++) {
                 leastSignificantBits = (leastSignificantBits << 8) | (hash[i] & 0xff);
             }
-            return new UUID(cfg.isUseBakGuid()? Long.reverseBytes(mostSignificantBits) : mostSignificantBits, cfg.isUseBakGuid() ? Long.reverseBytes(leastSignificantBits) : leastSignificantBits).toString().substring(20, 36);
+            return new UUID(cfg.isUseBakGuid() ? Long.reverseBytes(mostSignificantBits) : mostSignificantBits, cfg.isUseBakGuid() ? Long.reverseBytes(leastSignificantBits) : leastSignificantBits).toString().substring(20, 36);
         } catch (NoSuchAlgorithmException | SocketException ex) {
             DSLogger.reportFatalError("Could not generate hardware Unique ID!", ex);
             DSLogger.reportFatalError(ex.getMessage(), ex);

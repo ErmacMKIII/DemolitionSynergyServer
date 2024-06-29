@@ -52,12 +52,11 @@ public class Configuration {
     private int clientPort = 13667; // used in conjunction with server IP
 
     private boolean useBakGuid = false;
-    
+
     private static final String CONFIG_PATH = "dsynergy.ini";
 
     private static Configuration instance;
-    
-    
+
     public static Configuration getInstance() {
         if (instance == null) {
             instance = new Configuration();
@@ -267,7 +266,6 @@ public class Configuration {
 //    public int getMonitor() {
 //        return monitor;
 //    }
-
 //    public int getFpsCap() {
 //        return fpsCap;
 //    }
@@ -275,7 +273,6 @@ public class Configuration {
 //    public void setFpsCap(int fpsCap) {
 //        this.fpsCap = fpsCap;
 //    }
-
     public int getWidth() {
         return width;
     }
@@ -299,7 +296,6 @@ public class Configuration {
 //    public void setFullscreen(boolean fullscreen) {
 //        this.fullscreen = fullscreen;
 //    }
-
     public DSLogger.DSLogLevel getLogLevel() {
         return logLevel;
     }
@@ -383,5 +379,5 @@ public class Configuration {
     public boolean isUseBakGuid() {
         return useBakGuid;
     }
-    
+
 }

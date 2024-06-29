@@ -35,11 +35,13 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -861,6 +863,10 @@ public class Window extends javax.swing.JFrame {
         btnStop.setEnabled(true);
         btnRestart.setEnabled(true);
 
+        fileMenuStart.setEnabled(false);
+        fileMenuStop.setEnabled(true);
+        fileMenuRestart.setEnabled(true);
+
         tboxLocalIP.setEnabled(false);
         spinServerPort.setEnabled(false);
     }
@@ -870,10 +876,14 @@ public class Window extends javax.swing.JFrame {
         setEnabledComponents(this.panelWorld, false);
         setEnabledComponents(this.panelInfo, false);
         gameObject.gameServer.stopServer();
-        
+
         btnStart.setEnabled(true);
         btnStop.setEnabled(false);
         btnRestart.setEnabled(false);
+
+        fileMenuStart.setEnabled(true);
+        fileMenuStop.setEnabled(false);
+        fileMenuRestart.setEnabled(false);
 
         removeAllRows(posInfoModel);
         removeAllRows(clientInfoModel);
@@ -887,7 +897,7 @@ public class Window extends javax.swing.JFrame {
         stopServerAndUpdate();
     }//GEN-LAST:event_btnStopActionPerformed
 
-    public void restartServerAndUpdate() {        
+    public void restartServerAndUpdate() {
         gameObject.gameServer.stopServer();
         Game.setGameTicks(config.getGameTicks());
 
@@ -905,7 +915,11 @@ public class Window extends javax.swing.JFrame {
     }//GEN-LAST:event_fileMenuStartActionPerformed
 
     public void generateWorld() {
-        // TODO add your handling code here:       
+        // TODO add your handling code here:    
+        btnGenerate.setEnabled(false);
+        btnImport.setEnabled(false);
+        btnExport.setEnabled(false);
+        btnErase.setEnabled(false);
         final GameObject.MapLevelSize levelSize = (GameObject.MapLevelSize) cmbLevelSize.getSelectedItem();
         SwingWorker<Boolean, Void> swingWorker = new SwingWorker<Boolean, Void>() {
             @Override
@@ -926,17 +940,23 @@ public class Window extends javax.swing.JFrame {
                 } catch (InterruptedException | ExecutionException ex) {
                     DSLogger.reportError(ex.getMessage(), ex);
                 }
+                btnGenerate.setEnabled(true);
+                btnImport.setEnabled(true);
+                btnExport.setEnabled(true);
             }
         };
         swingWorker.execute();
     }
-    
+
     private void btnGenerateActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGenerateActionPerformed
         generateWorld();
     }//GEN-LAST:event_btnGenerateActionPerformed
 
-    private void cmbLevelSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLevelSizeActionPerformed
-        // TODO add your handling code here:
+    /**
+     * Set world size (closed form) {SMALL=25k, MEDIUM=50k, LARGE=100k,
+     * HUGE=131070 }
+     */
+    public void setWorldLevelSize() {
         final int numberOfBlocks;
         final GameObject.MapLevelSize levelSize = (GameObject.MapLevelSize) cmbLevelSize.getSelectedItem();
         switch (levelSize) {
@@ -955,6 +975,39 @@ public class Window extends javax.swing.JFrame {
                 break;
         }
         gameObject.randomLevelGenerator.setNumberOfBlocks(numberOfBlocks);
+    }
+
+    /**
+     * Set world size (closed form) {SMALL=25k, MEDIUM=50k, LARGE=100k,
+     * HUGE=131070 }
+     *
+     * @param newLevelSize world size to set
+     */
+    public void setWorldLevelSize(String newLevelSize) {
+        final int numberOfBlocks;
+        final GameObject.MapLevelSize levelSize = GameObject.MapLevelSize.valueOf(newLevelSize.toUpperCase());
+        switch (levelSize) {
+            default:
+            case SMALL:
+                numberOfBlocks = 25000;
+                break;
+            case MEDIUM:
+                numberOfBlocks = 50000;
+                break;
+            case LARGE:
+                numberOfBlocks = 100000;
+                break;
+            case HUGE:
+                numberOfBlocks = 131070;
+                break;
+        }
+        this.getCmbLevelSize().setSelectedItem(levelSize);
+        gameObject.randomLevelGenerator.setNumberOfBlocks(numberOfBlocks);
+    }
+
+    private void cmbLevelSizeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLevelSizeActionPerformed
+        // TODO add your handling code here:
+        setWorldLevelSize();
     }//GEN-LAST:event_cmbLevelSizeActionPerformed
 
     private void spinMapSeedStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinMapSeedStateChanged
@@ -990,7 +1043,8 @@ public class Window extends javax.swing.JFrame {
     }
 
     /**
-     * Import world into Dedicated server. Player(s) which are connecting are gonna download that world. File Dialog is used.
+     * Import world into Dedicated server. Player(s) which are connecting are
+     * gonna download that world. File Dialog is used.
      */
     public void worldImport() {
         int option = fileImport.showOpenDialog(this);
@@ -1022,9 +1076,11 @@ public class Window extends javax.swing.JFrame {
             swingWorker.execute();
         }
     }
-    
+
     /**
-     * Import world into Dedicated server. Player(s) which are connecting are gonna download that world.
+     * Import world into Dedicated server. Player(s) which are connecting are
+     * gonna download that world.
+     *
      * @param fileImport file to import
      * @throws java.lang.Exception if file not found
      */
@@ -1244,7 +1300,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.1 (PUBLIC BUILD reviewed on 2024-06-27 at 10:45).\n");
+            sb.append("VERSION v1.1 (PUBLIC BUILD reviewed on 2024-06-28 at 23:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1336,6 +1392,14 @@ public class Window extends javax.swing.JFrame {
         Icon icon = dayNightIcons.get(index);
 
         gameTimeText.setIcon(icon);
+    }
+
+    public JComboBox<String> getCmbLevelSize() {
+        return cmbLevelSize;
+    }
+
+    public JSpinner getSpinMapSeed() {
+        return spinMapSeed;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

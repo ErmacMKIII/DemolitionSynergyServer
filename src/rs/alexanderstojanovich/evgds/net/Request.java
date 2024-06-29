@@ -21,12 +21,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.zip.CRC32C;
+import org.apache.mina.core.buffer.IoBuffer;
+import org.apache.mina.core.session.IoSession;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.evgds.main.Game;
@@ -269,7 +269,7 @@ public class Request implements RequestIfc {
     }
 
     @Override
-    public void send(Game client) throws Exception {
+    public void send(Game client, IoSession session) throws Exception {
         serialize(client);
         // computing checksum
         CRC32C csObj = new CRC32C();
@@ -277,16 +277,12 @@ public class Request implements RequestIfc {
         this.checksum = csObj.getValue();
         // storing content with checksum
         final int capacity = content.length + Long.BYTES;
-        ByteBuffer byteBuff = ByteBuffer.allocateDirect(capacity);
-        byteBuff.put(content);
-        byteBuff.putLong(checksum);
-        byteBuff.flip();
+        IoBuffer buffer = IoBuffer.allocate(capacity, true);
+        buffer.put(content);
+        buffer.putLong(checksum);
+        buffer.flip();
 
-        byte[] packetData = new byte[byteBuff.remaining()];
-        byteBuff.get(packetData);
-
-        DatagramPacket packet = new DatagramPacket(packetData, packetData.length, client.getServerInetAddr(), client.getPort());
-        client.getServerEndpoint().send(packet);
+        session.write(buffer);
     }
 
     @Override
