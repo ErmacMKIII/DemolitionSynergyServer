@@ -26,6 +26,7 @@
                   <Image iconType="3" name="/rs/alexanderstojanovich/evgds/resources/stop.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Stop"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fileMenuStopActionPerformed"/>
@@ -37,6 +38,7 @@
                   <Image iconType="3" name="/rs/alexanderstojanovich/evgds/resources/restart.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Restart"/>
+                <Property name="enabled" type="boolean" value="false"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="fileMenuRestartActionPerformed"/>

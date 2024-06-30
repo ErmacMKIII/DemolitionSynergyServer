@@ -198,7 +198,13 @@ public class GameServer implements DSMachine, Runnable {
             @Override
             public void run() {
                 // Decrease time-to-live for each client and remove expired clients
-                clients.forEach((ClientInfo client) -> client.timeToLive--);
+                clients.forEach((ClientInfo client) -> {
+                    client.timeToLive--;
+                    if (client.timeToLive <= 0) {
+                        kicklist.remove(client.uniqueId);
+                        performCleanUp(gameObject, client.uniqueId, client.timeToLive <= 0);
+                    }
+                });
                 clients.removeIf(cli -> cli.timeToLive <= 0);
 
                 // Update server window title with current player count
