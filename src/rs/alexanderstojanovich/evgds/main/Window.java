@@ -780,6 +780,7 @@ public class Window extends javax.swing.JFrame {
 
         fileMenuStop.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/stop.png"))); // NOI18N
         fileMenuStop.setText("Stop");
+        fileMenuStop.setEnabled(false);
         fileMenuStop.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fileMenuStopActionPerformed(evt);
@@ -789,6 +790,7 @@ public class Window extends javax.swing.JFrame {
 
         fileMenuRestart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/restart.png"))); // NOI18N
         fileMenuRestart.setText("Restart");
+        fileMenuRestart.setEnabled(false);
         fileMenuRestart.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 fileMenuRestartActionPerformed(evt);
