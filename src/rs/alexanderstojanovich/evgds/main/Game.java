@@ -54,7 +54,7 @@ public class Game implements DSMachine {
     private static int ups; // current handleInput per second    
 
     // if this is reach game will close without exception!
-    public static final double CRITICAL_TIME = 10.0;
+    public static final double CRITICAL_TIME = 30.0;
     public static final int AWAIT_TIME = 10; // 10 Seconds
 
     public static final String ROOT = "/";
