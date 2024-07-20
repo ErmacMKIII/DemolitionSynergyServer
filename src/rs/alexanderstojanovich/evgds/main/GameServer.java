@@ -23,8 +23,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.mina.core.session.IoSession;
 
 import org.apache.mina.transport.socket.DatagramAcceptor;
@@ -197,6 +195,9 @@ public class GameServer implements DSMachine, Runnable {
         TimerTask task1 = new TimerTask() {
             @Override
             public void run() {
+                // Set ups to 0
+                Game.setUps(0);
+
                 // Decrease time-to-live for each client and remove expired clients
                 clients.forEach((ClientInfo client) -> {
                     client.timeToLive--;

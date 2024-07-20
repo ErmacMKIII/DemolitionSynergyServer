@@ -878,6 +878,7 @@ public class Window extends javax.swing.JFrame {
         setEnabledComponents(this.panelWorld, false);
         setEnabledComponents(this.panelInfo, false);
         gameObject.gameServer.stopServer();
+        gameObject.game.stop();
 
         btnStart.setEnabled(true);
         btnStop.setEnabled(false);
@@ -1282,7 +1283,7 @@ public class Window extends javax.swing.JFrame {
         appendMemoryUsage(sb, false);
         appendNetworkUsage(sb, gameObject.gameServer.localIP, false);
 
-        JTextArea textArea = new JTextArea(sb.toString(), 10, 50);
+        JTextArea textArea = new JTextArea(sb.toString(), 10, 35);
         JScrollPane jsp = new JScrollPane(textArea);
         textArea.setEditable(false);
         JOptionPane.showMessageDialog(null, jsp, "Server Health", JOptionPane.INFORMATION_MESSAGE);
@@ -1302,19 +1303,19 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.1 (PUBLIC BUILD reviewed on 2024-06-28 at 23:00).\n");
+            sb.append("VERSION v1.2 (PUBLIC BUILD reviewed on 2024-07-21 at 01:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
             sb.append("For latest release changelog please check GitHub page. \n");
             sb.append("\n");
-            sb.append("Demolition Synergy Version: 45\n");
+            sb.append(String.format("Demolition Synergy Version: %d\n", GameObject.VERSION));
             sb.append("\n");
             sb.append("Copyright © 2024\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
-            JTextArea textArea = new JTextArea(sb.toString(), 15, 50);
+            JTextArea textArea = new JTextArea(sb.toString(), 15, 35);
             JScrollPane jsp = new JScrollPane(textArea);
             textArea.setEditable(false);
             JOptionPane.showMessageDialog(this, jsp, "About", JOptionPane.INFORMATION_MESSAGE, icon);
@@ -1379,7 +1380,7 @@ public class Window extends javax.swing.JFrame {
             sb.append("\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
-            JTextArea textArea = new JTextArea(sb.toString(), 15, 50);
+            JTextArea textArea = new JTextArea(sb.toString(), 15, 35);
             JScrollPane jsp = new JScrollPane(textArea);
             textArea.setEditable(false);
             JOptionPane.showMessageDialog(this, jsp, "How to use", JOptionPane.INFORMATION_MESSAGE, icon);

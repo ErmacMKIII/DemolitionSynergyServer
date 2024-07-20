@@ -187,7 +187,6 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         }
 
         // working check avoids locking the monitor
-        levelContainer.update();
         WINDOW.upsertPosInfo(levelContainer.levelActors.getPosInfo());
         WINDOW.upsertPlayerInfo(levelContainer.levelActors.getPlayerInfo());
         WINDOW.upsertClientInfo(gameServer.getClientInfo());
