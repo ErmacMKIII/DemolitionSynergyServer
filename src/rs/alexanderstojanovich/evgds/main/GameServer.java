@@ -195,9 +195,6 @@ public class GameServer implements DSMachine, Runnable {
         TimerTask task1 = new TimerTask() {
             @Override
             public void run() {
-                // Set ups to 0
-                Game.setUps(0);
-
                 // Decrease time-to-live for each client and remove expired clients
                 clients.forEach((ClientInfo client) -> {
                     client.timeToLive--;

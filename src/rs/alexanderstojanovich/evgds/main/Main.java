@@ -108,12 +108,24 @@ public class Main {
                 }
             });
 
-            // Schedule timer task to monitor CPU and RAM
+            // Schedule timer task to monitor CPU, RAM and Network
+            long[] time = {System.nanoTime(), 0L}; // lastTime, currTime in Array
             Timer timer0 = new Timer("Timer Utils");
             TimerTask task1 = new TimerTask() {
                 @Override
                 public void run() {
-                    gameObject.WINDOW.checkHealthMini();
+                    // Set ups to 0
+                    Game.setUps(0);
+
+                    // assign current time
+                    time[1] = System.nanoTime();
+                    // retrieve delta time
+                    double deltaTime = (time[1] - time[0]) / 1E9d;
+                    // reassign so it is calc again in next interval
+                    time[0] = time[1];
+
+//                    DSLogger.reportInfo("deltaTime" + deltaTime, null);
+                    gameObject.WINDOW.checkHealthMini(deltaTime);
                 }
             };
             timer0.scheduleAtFixedRate(task1, 1000L, 1000L);
