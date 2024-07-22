@@ -58,7 +58,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
      */
     public final GameServer gameServer;
 
-    public static final int BUFF_SIZE = 8192; // append bytes (chunk) buffer size
+    public static final int BUFF_SIZE = 4096; // append bytes (chunk) buffer size
 
     public static final int FAIL_ATTEMPT_MAX = 10;
     public static final int TOTAL_FAIL_ATTEMPT_MAX = 3000;
