@@ -55,7 +55,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
 
     private final Configuration cfg = Configuration.getInstance();
 
-    public static final int VERSION = 45;
+    public static final int VERSION = 46;
     public static final String WINDOW_TITLE = String.format("Demolition Synergy - v%s", VERSION);
     // makes default window -> Renderer sets resolution from config
 
@@ -187,7 +187,6 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         }
 
         // working check avoids locking the monitor
-        levelContainer.update();
         WINDOW.upsertPosInfo(levelContainer.levelActors.getPosInfo());
         WINDOW.upsertPlayerInfo(levelContainer.levelActors.getPlayerInfo());
         WINDOW.upsertClientInfo(gameServer.getClientInfo());

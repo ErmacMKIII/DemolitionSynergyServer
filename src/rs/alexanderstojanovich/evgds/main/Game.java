@@ -18,6 +18,8 @@ package rs.alexanderstojanovich.evgds.main;
 
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.joml.Vector3f;
 import rs.alexanderstojanovich.evgds.net.DSMachine;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
@@ -54,7 +56,7 @@ public class Game implements DSMachine {
     private static int ups; // current handleInput per second    
 
     // if this is reach game will close without exception!
-    public static final double CRITICAL_TIME = 10.0;
+    public static final double CRITICAL_TIME = 30.0;
     public static final int AWAIT_TIME = 10; // 10 Seconds
 
     public static final String ROOT = "/";
@@ -113,6 +115,11 @@ public class Game implements DSMachine {
     public final Vector3f playerServerPos = new Vector3f();
 
     /**
+     * Game Loop Timer. Only updates time and small stuff.
+     */
+    public Timer gameLoopTimer = new Timer("Game-Loop");
+
+    /**
      * Access to Game Engine.
      */
     public final GameObject gameObject;
@@ -147,38 +154,39 @@ public class Game implements DSMachine {
         this.running = true;
         Game.setCurrentMode(Mode.FREE);
         ups = 0;
+        accumulator = 0.0;
 
         // gameTicks is progressive only ingame time
         gameTicks = config.getGameTicks();
-        double lastTime = System.nanoTime();
-        double currTime;
-        double deltaTime;
+        //----------------------------------------------------------------------
+        // Schedule timer task to clear ups & fps values
+        gameLoopTimer = new Timer("Game-Loop");
+        TimerTask task0 = new TimerTask() {
+            @Override
+            public void run() {
+                double currTime = System.currentTimeMillis();
+                double deltaTime = (currTime - this.scheduledExecutionTime()) / 1E3d;
+                accumulator += deltaTime;
+                gameTicks += deltaTime * Game.TPS;
+                if (gameTicks >= Double.MAX_VALUE) {
+                    gameTicks = 0.0;
+                }
 
-        while (!gameObject.gameServer.shutDownSignal) {
-            currTime = System.nanoTime();
-            deltaTime = (currTime - lastTime) / 1E9d;
-            gameTicks += deltaTime * Game.TPS;
-            if (gameTicks >= Double.MAX_VALUE) {
-                gameTicks = 0.0;
+                // Detecting critical status
+                if (ups == 0 && deltaTime > CRITICAL_TIME) {
+                    DSLogger.reportFatalError("Game status critical!", null);
+                    gameObject.WINDOW.stopServerAndUpdate();
+                }
+
+                while (accumulator >= TICK_TIME) {
+                    // Update with fixed timestep (environment)
+                    update(TICK_TIME);
+                    ups++;
+                    accumulator -= TICK_TIME;
+                }
             }
-
-            accumulator += deltaTime;
-            lastTime = currTime;
-
-            // Detecting critical status
-            if (ups == 0 && deltaTime > CRITICAL_TIME) {
-                DSLogger.reportFatalError("Game status critical!", null);
-                gameObject.WINDOW.stopServerAndUpdate();
-                throw new Exception("Game status critical!");
-            }
-
-            while (accumulator >= TICK_TIME) {
-                // Update with fixed timestep (environment)
-                update(TICK_TIME);
-                ups++;
-                accumulator -= TICK_TIME;
-            }
-        }
+        };
+        gameLoopTimer.scheduleAtFixedRate(task0, (long) (TICK_TIME / 2.0 * 1000L), (long) (TICK_TIME / 2.0 * 1000L));
 
         this.running = false;
         DSLogger.reportDebug("Main loop ended.", null);
@@ -199,6 +207,15 @@ public class Game implements DSMachine {
         cfg.setServerPort(gameObject.gameServer.port);
 
         return cfg;
+    }
+
+    /**
+     * Cancel the running game loop for dedicated server
+     */
+    public void stop() {
+        if (gameLoopTimer != null) {
+            gameLoopTimer.cancel();
+        }
     }
 
     public static void setGameTicks(double gameTicks) {

@@ -21,9 +21,15 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.URL;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -50,9 +56,11 @@ import javax.swing.table.TableColumn;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
 import oshi.SystemInfo;
-import oshi.hardware.GlobalMemory;
+import oshi.hardware.CentralProcessor;
 import oshi.hardware.HardwareAbstractionLayer;
 import oshi.hardware.NetworkIF;
+import oshi.software.os.OSProcess;
+import oshi.software.os.OperatingSystem;
 import rs.alexanderstojanovich.evgds.helper.ButtonEditor;
 import rs.alexanderstojanovich.evgds.helper.ButtonRenderer;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
@@ -72,11 +80,14 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
  */
 public class Window extends javax.swing.JFrame {
 
+    protected double lastTime = 0.0;
+    protected double currTime = 0.0;
     protected long bytesReceived = 0L;
     protected long bytesSent = 0L;
 
     public final SystemInfo si = new SystemInfo();
     public final HardwareAbstractionLayer hal = si.getHardware();
+    public final OperatingSystem os = si.getOperatingSystem();
 
     public final Configuration config = Configuration.getInstance();
 
@@ -125,8 +136,20 @@ public class Window extends javax.swing.JFrame {
         }
     };
 
+    /**
+     * World file import (*.dat, *.ndat)
+     */
     public final JFileChooser fileImport = new JFileChooser();
+
+    /**
+     * World file export (*.dat, *.ndat)
+     */
     public final JFileChooser fileExport = new JFileChooser();
+
+    /**
+     * Save as log
+     */
+    public final JFileChooser logSaveAs = new JFileChooser();
 
     /**
      * Creates new form ServerInterface
@@ -144,6 +167,7 @@ public class Window extends javax.swing.JFrame {
         this.initDialogs();
         this.tboxLocalIP.setText(config.getLocalIP());
         this.spinServerPort.setValue(config.getServerPort());
+        initPopUpMenu();
     }
 
     public void initCenterWindow() {
@@ -152,6 +176,33 @@ public class Window extends javax.swing.JFrame {
 
     public void writeOnConsole(String msg) {
         this.console.append(msg + "\r\n");
+    }
+
+    /**
+     * Init popup menu for terminal (JTextArea)
+     */
+    private void initPopUpMenu() {
+        // Add the popup menu to the text area
+        this.console.setComponentPopupMenu(this.logPopupMenu);
+
+        // Add mouse listener to show the popup menu
+        this.console.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                showPopupMenu(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                showPopupMenu(e);
+            }
+
+            private void showPopupMenu(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    logPopupMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+        });
     }
 
     /**
@@ -393,6 +444,9 @@ public class Window extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        logPopupMenu = new javax.swing.JPopupMenu();
+        logMenuCopy = new javax.swing.JMenuItem();
+        logMenuSaveAs = new javax.swing.JMenuItem();
         panelNetwork = new javax.swing.JPanel();
         lblLocalIP = new javax.swing.JLabel();
         tboxLocalIP = new javax.swing.JTextField();
@@ -440,6 +494,26 @@ public class Window extends javax.swing.JFrame {
         fileHelp = new javax.swing.JMenu();
         helpMenuAbout = new javax.swing.JMenuItem();
         helpMenuHowToUse = new javax.swing.JMenuItem();
+
+        logMenuCopy.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/copy-clipboard.png"))); // NOI18N
+        logMenuCopy.setText("Copy");
+        logMenuCopy.setEnabled(false);
+        logMenuCopy.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logMenuCopyActionPerformed(evt);
+            }
+        });
+        logPopupMenu.add(logMenuCopy);
+
+        logMenuSaveAs.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/save-log.png"))); // NOI18N
+        logMenuSaveAs.setText("Save As ...");
+        logMenuSaveAs.setEnabled(false);
+        logMenuSaveAs.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logMenuSaveAsActionPerformed(evt);
+            }
+        });
+        logPopupMenu.add(logMenuSaveAs);
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Demolition Synergy Server");
@@ -871,6 +945,9 @@ public class Window extends javax.swing.JFrame {
 
         tboxLocalIP.setEnabled(false);
         spinServerPort.setEnabled(false);
+
+        logMenuCopy.setEnabled(true);
+        logMenuSaveAs.setEnabled(true);
     }
 
     public void stopServerAndUpdate() {
@@ -878,6 +955,7 @@ public class Window extends javax.swing.JFrame {
         setEnabledComponents(this.panelWorld, false);
         setEnabledComponents(this.panelInfo, false);
         gameObject.gameServer.stopServer();
+        gameObject.game.stop();
 
         btnStart.setEnabled(true);
         btnStop.setEnabled(false);
@@ -893,6 +971,9 @@ public class Window extends javax.swing.JFrame {
 
         tboxLocalIP.setEnabled(true);
         spinServerPort.setEnabled(true);
+
+        logMenuCopy.setEnabled(false);
+        logMenuSaveAs.setEnabled(false);
     }
 
     private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
@@ -1168,12 +1249,14 @@ public class Window extends javax.swing.JFrame {
     /**
      * Display 'Health' of the Server as CPU usage, Memory usage and Network
      * usage (Local IP interface). In short notation.
+     *
+     * @param deltaTime deltaTime between periods
      */
-    public void checkHealthMini() {
+    public void checkHealthMini(double deltaTime) {
         StringBuilder sb = new StringBuilder();
 
         // Append CPU load
-        appendCpuLoad(sb, true);
+        appendCpuLoad(deltaTime, sb, true);
         sb.append(" ");
 
         // Append memory usage
@@ -1203,31 +1286,44 @@ public class Window extends javax.swing.JFrame {
     }
 
     /**
-     * Appends the CPU load to the provided StringBuilder.
+     * Appends the CPU load for the current process to the provided
+     * StringBuilder.
      *
+     * @param deltaTime delta time between polls (updates)
      * @param sb the StringBuilder to append the CPU load to
      * @param shortNotation short notation
      */
-    private void appendCpuLoad(StringBuilder sb, boolean shortNotation) {
-        double cpuLoad = hal.getProcessor().getSystemCpuLoad(1000L) * 100;
+    private void appendCpuLoad(double deltaTime, StringBuilder sb, boolean shortNotation) {
+        CentralProcessor processor = si.getHardware().getProcessor();
+        int cpuNumber = processor.getLogicalProcessorCount();
+
+        OSProcess process = os.getProcess(os.getProcessId());
+        if (lastTime == 0L) { // first time, avoid abnormal values
+            lastTime = (process.getKernelTime() + process.getUserTime()) / 1000.0; // convert millis to sec
+        }
+
+        currTime = (process.getKernelTime() + process.getUserTime()) / 1000.0; // convert millis to sec
+        // "on windows i need to divide by the # of cpus, but not on the other two systems" - val235
+        double cpuLoad = (100d * (currTime - lastTime) / (deltaTime)) / (os.getFamily().equalsIgnoreCase("windows") ? cpuNumber : 1);
+        lastTime = currTime;
+
         sb.append((shortNotation) ? String.format("CPU: %.1f%%\n", cpuLoad) : String.format("CPU Load: %.2f%%\n", cpuLoad));
     }
 
     /**
-     * Appends the memory usage (heap and non-heap) to the provided
+     * Appends the memory usage for the current process to the provided
      * StringBuilder.
      *
      * @param sb the StringBuilder to append the memory usage to
      * @param shortNotation short notation
      */
     private void appendMemoryUsage(StringBuilder sb, boolean shortNotation) {
-        GlobalMemory memory = hal.getMemory();
-        long usedMemory = memory.getTotal() - memory.getAvailable();
-        long totalMemory = memory.getTotal();
+        OSProcess currentProcess = os.getProcess(os.getProcessId());
+        long usedMemory = currentProcess.getResidentSetSize();
         if (shortNotation) {
             sb.append(String.format("RAM: %d MB\n", usedMemory / (1024 * 1024)));
         } else {
-            sb.append(String.format("Memory: Used = %d MB, Total = %d MB\n", usedMemory / (1024 * 1024), totalMemory / (1024 * 1024)));
+            sb.append(String.format("Memory: Used = %d MB\n", usedMemory / (1024 * 1024)));
         }
     }
 
@@ -1278,11 +1374,11 @@ public class Window extends javax.swing.JFrame {
     private void checkHealth() {
         StringBuilder sb = new StringBuilder();
         appendServerStatus(sb);
-        appendCpuLoad(sb, false);
+        appendCpuLoad(1.5, sb, false);
         appendMemoryUsage(sb, false);
         appendNetworkUsage(sb, gameObject.gameServer.localIP, false);
 
-        JTextArea textArea = new JTextArea(sb.toString(), 10, 50);
+        JTextArea textArea = new JTextArea(sb.toString(), 10, 35);
         JScrollPane jsp = new JScrollPane(textArea);
         textArea.setEditable(false);
         JOptionPane.showMessageDialog(null, jsp, "Server Health", JOptionPane.INFORMATION_MESSAGE);
@@ -1302,22 +1398,58 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.1 (PUBLIC BUILD reviewed on 2024-06-28 at 23:00).\n");
+            sb.append("VERSION v1.2 (PUBLIC BUILD reviewed on 2024-07-22 at 00:00).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
             sb.append("For latest release changelog please check GitHub page. \n");
             sb.append("\n");
-            sb.append("Demolition Synergy Version: 45\n");
+            sb.append(String.format("Demolition Synergy Version: %d\n", GameObject.VERSION));
             sb.append("\n");
             sb.append("Copyright © 2024\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
-            JTextArea textArea = new JTextArea(sb.toString(), 15, 50);
+            JTextArea textArea = new JTextArea(sb.toString(), 15, 35);
             JScrollPane jsp = new JScrollPane(textArea);
             textArea.setEditable(false);
             JOptionPane.showMessageDialog(this, jsp, "About", JOptionPane.INFORMATION_MESSAGE, icon);
+        }
+    }
+
+    /**
+     * Copy Log to ClipBoard
+     */
+    private void copyLog() {
+        String text = console.getText();
+        StringSelection stringSelection = new StringSelection(text);
+        Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
+    }
+
+    /**
+     * Save as Log
+     */
+    private void saveAsLog() {
+        int option = logSaveAs.showSaveDialog(this);
+        if (option == JFileChooser.APPROVE_OPTION) {
+            final File file = logSaveAs.getSelectedFile();
+
+            SwingWorker<Void, Void> swingWorker = new SwingWorker<Void, Void>() {
+                @Override
+                protected Void doInBackground() throws Exception {
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
+                        // Write the content of the JTextArea to the file
+                        writer.write(console.getText());
+                        JOptionPane.showMessageDialog(Window.this, "Log saved successfully!");
+                    } catch (IOException ex) {
+                        JOptionPane.showMessageDialog(Window.this, "Error saving log: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                    return null;
+                }
+            };
+
+            swingWorker.execute();
         }
     }
 
@@ -1356,6 +1488,16 @@ public class Window extends javax.swing.JFrame {
         gameObject.gameServer.setPort((int) spinServerPort.getValue());
     }//GEN-LAST:event_spinServerPortStateChanged
 
+    private void logMenuCopyActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logMenuCopyActionPerformed
+        // TODO add your handling code here:
+        copyLog();
+    }//GEN-LAST:event_logMenuCopyActionPerformed
+
+    private void logMenuSaveAsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logMenuSaveAsActionPerformed
+        // TODO add your handling code here:
+        saveAsLog();
+    }//GEN-LAST:event_logMenuSaveAsActionPerformed
+
     private void infoHelp() {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
         if (icon_url != null) {
@@ -1379,7 +1521,7 @@ public class Window extends javax.swing.JFrame {
             sb.append("\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
-            JTextArea textArea = new JTextArea(sb.toString(), 15, 50);
+            JTextArea textArea = new JTextArea(sb.toString(), 15, 35);
             JScrollPane jsp = new JScrollPane(textArea);
             textArea.setEditable(false);
             JOptionPane.showMessageDialog(this, jsp, "How to use", JOptionPane.INFORMATION_MESSAGE, icon);
@@ -1433,6 +1575,9 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JLabel lblMapSeed;
     private javax.swing.JLabel lblServerPort;
     private javax.swing.JLabel lblWorldName;
+    private javax.swing.JMenuItem logMenuCopy;
+    private javax.swing.JMenuItem logMenuSaveAs;
+    private javax.swing.JPopupMenu logPopupMenu;
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JPanel panelConsole;
     private javax.swing.JPanel panelInfo;

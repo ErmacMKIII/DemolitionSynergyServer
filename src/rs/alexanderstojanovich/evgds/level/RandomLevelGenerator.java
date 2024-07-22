@@ -322,7 +322,7 @@ public class RandomLevelGenerator {
                 int yBottom = Math.round(MathUtils.noise2(numOctaves, x, z, 0.5f, hMin, yMid, frequencies, amplitudes)) & 0xFFFFFFFE;
                 int yHalf = (yTop - yBottom) >> 1;
 
-                // solid generating
+                // solid & fluid generating
                 noiseInner:
                 for (int y = yBottom; y <= yTop; y += 2) {
                     Vector3f pos = new Vector3f(x, y, z);
@@ -330,14 +330,14 @@ public class RandomLevelGenerator {
                         continue;
                     }
 
-                    // color chance
-                    Vector3f color = new Vector3f(1.0f, 1.0f, 1.0f);
-                    if (random.nextFloat() >= 0.95f) {
-                        Vector3f tempc = new Vector3f();
-                        color = color.mul(random.nextFloat(), random.nextFloat(), random.nextFloat(), tempc);
-                    }
-
                     if (solidBlocks > 0 && y >= yHalf && boundary) {
+                        // color chance
+                        Vector3f color = new Vector3f(1.0f, 1.0f, 1.0f);
+                        if (random.nextFloat() >= 0.95f) {
+                            Vector3f tempc = new Vector3f();
+                            color = color.mul(random.nextFloat(), random.nextFloat(), random.nextFloat(), tempc);
+                        }
+
                         String tex = "stone"; // make "stone" terrain
 
                         if (random.nextFloat() >= 0.95f) {
@@ -350,6 +350,13 @@ public class RandomLevelGenerator {
                         solidBlocks--;
                         genBlks++;
                     } else if (fluidBlocks > 0 && y < yHalf && !boundary) {
+                        // color chance
+                        Vector3f color = new Vector3f(1.0f, 1.0f, 1.0f);
+                        if (random.nextFloat() >= 0.95f) {
+                            Vector3f tempc = new Vector3f();
+                            color = color.mul(random.nextFloat(), random.nextFloat(), random.nextFloat(), tempc);
+                        }
+
                         String tex = "water"; // make water terrain
 
                         Block fluidBlock = new Block(tex, pos, new Vector4f(color, 0.5f), false);
@@ -360,7 +367,7 @@ public class RandomLevelGenerator {
                     }
 
                     if (solidBlocks == 0 && fluidBlocks == 0) {
-                        break noiseInner;
+                        break;// noiseInner;
                     }
                 }
             }
