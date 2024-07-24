@@ -50,7 +50,7 @@ public class GameServer implements DSMachine, Runnable {
     /**
      * Time-to-live for clients in seconds
      */
-    public static final int TIME_TO_LIVE = 90;
+    public static final int TIME_TO_LIVE = 120;
 
     /**
      * Maximum failed attempts allowed per client

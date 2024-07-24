@@ -159,13 +159,20 @@ public class Game implements DSMachine {
         // gameTicks is progressive only ingame time
         gameTicks = config.getGameTicks();
         //----------------------------------------------------------------------
-        // Schedule timer task to clear ups & fps values
+        // Schedule timer task to emulate game loop
+        // Cuz primary task is time elapsing
+        long[] time = {System.nanoTime(), 0L}; // lastTime, currTime in Array
         gameLoopTimer = new Timer("Game-Loop");
         TimerTask task0 = new TimerTask() {
             @Override
             public void run() {
-                double currTime = System.currentTimeMillis();
-                double deltaTime = (currTime - this.scheduledExecutionTime()) / 1E3d;
+                // assign current time
+                time[1] = System.nanoTime();
+                // retrieve delta time
+                double deltaTime = (time[1] - time[0]) / 1E9d;
+                // reassign so it is calc again in next interval
+                time[0] = time[1];
+
                 accumulator += deltaTime;
                 gameTicks += deltaTime * Game.TPS;
                 if (gameTicks >= Double.MAX_VALUE) {
@@ -186,7 +193,7 @@ public class Game implements DSMachine {
                 }
             }
         };
-        gameLoopTimer.scheduleAtFixedRate(task0, (long) (TICK_TIME / 2.0 * 1000L), (long) (TICK_TIME / 2.0 * 1000L));
+        gameLoopTimer.scheduleAtFixedRate(task0, (long) (TICK_TIME * 1000L), (long) (TICK_TIME * 1000L));
 
         this.running = false;
         DSLogger.reportDebug("Main loop ended.", null);
