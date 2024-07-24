@@ -981,10 +981,10 @@ public class Window extends javax.swing.JFrame {
     }//GEN-LAST:event_btnStopActionPerformed
 
     public void restartServerAndUpdate() {
-        gameObject.gameServer.stopServer();
+        stopServerAndUpdate();
         Game.setGameTicks(config.getGameTicks());
 
-        gameObject.start();
+        startServerAndUpdate();
     }
 
     private void btnRestartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRestartActionPerformed
@@ -1398,7 +1398,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.2 (PUBLIC BUILD reviewed on 2024-07-22 at 00:00).\n");
+            sb.append("VERSION v1.2.1 (PUBLIC BUILD reviewed on 2024-07-24 at 01:52).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
