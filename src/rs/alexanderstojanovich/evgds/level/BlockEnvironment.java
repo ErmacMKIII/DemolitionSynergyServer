@@ -16,14 +16,12 @@
  */
 package rs.alexanderstojanovich.evgds.level;
 
-import org.joml.Vector3f;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
 import rs.alexanderstojanovich.evgds.chunk.Chunk;
 import rs.alexanderstojanovich.evgds.chunk.Chunks;
 import rs.alexanderstojanovich.evgds.chunk.Tuple;
 import rs.alexanderstojanovich.evgds.core.Camera;
-import rs.alexanderstojanovich.evgds.light.LightSources;
 import rs.alexanderstojanovich.evgds.main.Configuration;
 import rs.alexanderstojanovich.evgds.main.GameObject;
 import rs.alexanderstojanovich.evgds.models.Block;
@@ -206,7 +204,7 @@ public class BlockEnvironment {
         optimizing = true;
 
         // Determine lastFaceBits mask
-        final int mask0 = Block.getVisibleFaceBitsFast(camera.getFront(), LevelContainer.actorInFluid ? 0f : 45f);
+        final int mask0 = Block.getVisibleFaceBitsFast(camera.getFront(), LevelContainer.actorInFluid ? 2.5f : 45f);
         workingTuples.removeIf(ot -> (ot.faceBits() & mask0) == 0);
 
         final String tex = Assets.TEX_WORLD[texProcIndex];
@@ -239,7 +237,7 @@ public class BlockEnvironment {
                                 if (workTuple != null) {
                                     selectedTuples.forEach(st -> {
                                         boolean modified = workTuple.blockList.addAll(
-                                                st.blockList.filter(blk -> blk != null && camera.doesSeeEff(blk, 75f) && !workTuple.blockList.contains(blk))
+                                                st.blockList.filter(blk -> blk != null && camera.doesSeeEff(blk, 30f) && !workTuple.blockList.contains(blk))
                                         );
                                         if (modified) {
                                             modifiedWorkingTupleNames.addIfAbsent(workTuple.getName());

@@ -17,7 +17,18 @@
 package rs.alexanderstojanovich.evgds.main;
 
 import com.google.gson.Gson;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.zip.CRC32C;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
@@ -32,6 +43,7 @@ import rs.alexanderstojanovich.evgds.net.ClientInfo;
 import rs.alexanderstojanovich.evgds.net.DSObject;
 import static rs.alexanderstojanovich.evgds.net.DSObject.DataType.INT;
 import static rs.alexanderstojanovich.evgds.net.DSObject.DataType.STRING;
+import rs.alexanderstojanovich.evgds.net.LevelMapInfo;
 import rs.alexanderstojanovich.evgds.net.PlayerInfo;
 import rs.alexanderstojanovich.evgds.net.PosInfo;
 import rs.alexanderstojanovich.evgds.net.Request;
@@ -197,6 +209,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
         String msg;
         LevelActors levelActors;
         final int totalBytes;
+        boolean okey;
 
         double gameTime;
         switch (request.getRequestType()) {
@@ -358,7 +371,10 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 break;
             case DOWNLOAD:
                 // Server alraedy saved the level
-                gameServer.gameObject.levelContainer.storeLevelToBufferNewFormat();
+                okey = gameServer.gameObject.levelContainer.storeLevelToBufferNewFormat();
+                if (!okey) {
+                    return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Internal error - Unable to save map level file!");
+                }
                 System.arraycopy(gameServer.gameObject.levelContainer.buffer, 0, gameServer.gameObject.levelContainer.bak_buffer, 0, gameServer.gameObject.levelContainer.pos);
                 gameServer.gameObject.levelContainer.bak_pos = gameServer.gameObject.levelContainer.pos;
                 totalBytes = gameServer.gameObject.levelContainer.bak_pos;
@@ -423,6 +439,56 @@ public class GameServerProcessor extends IoHandlerAdapter {
                     response.send(gameServer, session1);
                 }
                 break;
+            case WORLD_INFO:
+                // Locate all level map files with dat or ndat extension
+                File currFile = new File("./");
+                final Pattern pattern = Pattern.compile("\\.(dat|ndat)$");
+                List<String> datFileList = Arrays.asList(currFile.list((dir, name) -> pattern.matcher(name.toLowerCase()).find()));
+                GapList<String> datFileListCopy = GapList.create(datFileList);
+                String mapFileOrNull = datFileListCopy.getFirstOrNull();
+                CRC32C checksum = new CRC32C();
+
+                if (mapFileOrNull == null) {
+                    mapFileOrNull = gameServer.worldName + ".ndat";
+                    okey = gameServer.gameObject.levelContainer.saveLevelToFile(mapFileOrNull);
+                    if (!okey) {
+                        return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Internal error - Level still does not exist!");
+                    }
+                    // Refresh the file list after storing the level
+                    datFileList = Arrays.asList(currFile.list((dir, name) -> pattern.matcher(name.toLowerCase()).find()));
+                    datFileListCopy = GapList.create(datFileList);
+                    mapFileOrNull = datFileListCopy.getFirstOrNull();
+                }
+
+                if (mapFileOrNull == null) {
+                    return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Internal error - Level still does not exist!");
+                }
+
+                File mapFileLevel = new File(mapFileOrNull);
+                if (!mapFileLevel.exists()) {
+                    return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Internal error - Level still does not exist!");
+                }
+
+                // calculating file size & checksum
+                // with attend to send to the client
+                try (FileChannel fileChannel = new FileInputStream(mapFileLevel).getChannel()) {
+                    int sizeBytes = (int) Files.size(Path.of(mapFileOrNull));
+                    ByteBuffer buffc = ByteBuffer.allocate((int) fileChannel.size());
+                    while ((fileChannel.read(buffc)) > 0) {
+                        // Do nothing, just read the file into the buffer
+                    }
+                    buffc.flip();
+                    checksum.update(buffc);
+
+                    LevelMapInfo mapInfo = new LevelMapInfo(gameServer.worldName, checksum.getValue(), sizeBytes);
+                    response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, mapInfo.toString());
+                    response.send(gameServer, session);
+                } catch (IOException ex) {
+                    DSLogger.reportError(ex.getMessage(), ex);
+                    return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Internal error - Unable to read the level file!");
+                }
+                break;
+
         }
 
         return new Result(Status.OK, clientHostName, clientGuid, String.format("%s data= %s", request.getRequestType().name(), String.valueOf(request.getData())));
