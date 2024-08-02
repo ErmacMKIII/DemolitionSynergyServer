@@ -43,16 +43,8 @@ public class Game implements DSMachine {
     public static final int TPS_TWO = 2; // Two ticks ~ 25 ms (Used for Chunk Optimization) ~ default
 
     public static final double TICK_TIME = 1.0 / (double) TPS;
-
-    public static final float AMOUNT = 4.45f;
-    public static final float JUMP_STR_AMOUNT = 110f;
-    public static final float ANGLE = (float) (Math.PI / 180);
-
-    public static final int FORWARD = 0;
-    public static final int BACKWARD = 1;
-    public static final int LEFT = 2;
-    public static final int RIGHT = 3;
-
+    
+    public static final float AMOUNT = 0.0093f;
     private static int ups; // current handleInput per second    
 
     // if this is reach game will close without exception!
