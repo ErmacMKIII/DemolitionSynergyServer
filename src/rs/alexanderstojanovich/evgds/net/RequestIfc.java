@@ -104,7 +104,11 @@ public interface RequestIfc extends DSObject {
         /**
          * Force disconnect to player
          */
-        KICK_PLAYER
+        KICK_PLAYER,
+        /**
+         * Get world info {world name, size in bytes & checksum)
+         */
+        WORLD_INFO
     }
 
     /**
