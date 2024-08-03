@@ -49,6 +49,17 @@ public interface GravityEnviroment {
     public boolean jump(Critter critter, float amountY, float deltaTime);
 
     /**
+     * Makes the player push downwards, pressuring the bottom surface (or air),
+     * towards Y-axis negative.
+     *
+     * @param critter The player.
+     * @param amountYNeg The amount of upward movement.
+     * @param deltaTime The time elapsed since the last handleInput.
+     * @return did player crouch
+     */
+    public boolean crouch(Critter critter, float amountYNeg, float deltaTime);
+
+    /**
      * Get falling velocity
      *
      * @return falling velocity

@@ -441,9 +441,10 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 break;
             case WORLD_INFO:
                 // Locate all level map files with dat or ndat extension
-                File currFile = new File("./");
-                final Pattern pattern = Pattern.compile("\\.(dat|ndat)$");
-                List<String> datFileList = Arrays.asList(currFile.list((dir, name) -> pattern.matcher(name.toLowerCase()).find()));
+                final File clientDir = new File("./");
+                final String worldNameEscaped = Pattern.quote(gameServer.worldName);
+                Pattern pattern = Pattern.compile(worldNameEscaped + "\\.(n)?dat$", Pattern.CASE_INSENSITIVE);
+                List<String> datFileList = Arrays.asList(clientDir.list((dir, name) -> pattern.matcher(name).find()));
                 GapList<String> datFileListCopy = GapList.create(datFileList);
                 String mapFileOrNull = datFileListCopy.getFirstOrNull();
                 CRC32C checksum = new CRC32C();
@@ -455,7 +456,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                         return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Internal error - Level still does not exist!");
                     }
                     // Refresh the file list after storing the level
-                    datFileList = Arrays.asList(currFile.list((dir, name) -> pattern.matcher(name.toLowerCase()).find()));
+                    datFileList = Arrays.asList(clientDir.list((dir, name) -> pattern.matcher(name.toLowerCase()).find()));
                     datFileListCopy = GapList.create(datFileList);
                     mapFileOrNull = datFileListCopy.getFirstOrNull();
                 }
