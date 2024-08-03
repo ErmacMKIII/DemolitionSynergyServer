@@ -43,8 +43,8 @@ public class Game implements DSMachine {
     public static final int TPS_TWO = 2; // Two ticks ~ 25 ms (Used for Chunk Optimization) ~ default
 
     public static final double TICK_TIME = 1.0 / (double) TPS;
-    
-    public static final float AMOUNT = 0.0093f;
+
+    public static final float AMOUNT = 0.0075f;
     private static int ups; // current handleInput per second    
 
     // if this is reach game will close without exception!

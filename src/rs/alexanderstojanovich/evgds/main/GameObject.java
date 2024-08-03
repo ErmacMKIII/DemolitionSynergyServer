@@ -235,15 +235,6 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     }
 
     // -------------------------------------------------------------------------
-    /**
-     * Calls chunk functions to determine visible chunks
-     *
-     * @return is changed
-     */
-    public boolean determineVisibleChunks() {
-        return levelContainer.determineVisible();
-    }
-
     // -------------------------------------------------------------------------
     /**
      * Clear Everything. Game will be 'Free'.
@@ -400,39 +391,6 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
 //    public void destroy() {
 //        SINGLE_THR_EXEC.shutdown();
 //    }
-    /**
-     * Test collision with Environment. Must not leave the SKYBOX and not
-     * collide with solid objects or critters.
-     *
-     * @param preditable Predictable to have collision with environment
-     * @return test true/false
-     */
-    public boolean hasCollisionWith(Predictable preditable) { // collision detection - critter against solid obstacles
-        return LevelContainer.hasCollisionWithEnvironment(preditable);
-    }
-
-    /**
-     * Test collision with Environment. Must not leave the SKYBOX and not
-     * collide with solid objects or critters. (virtually) => 0.07f dimension
-     *
-     * @param observer Predictable to have collision with environment
-     * @return test true/false
-     */
-    public boolean hasCollisionWith(Observer observer) { // collision detection - critter against solid obstacles
-        return LevelContainer.hasCollisionWithEnvironment(observer);
-    }
-
-    /**
-     * Test collision with Environment. Must not leave the SKYBOX and not
-     * collide with solid objects or critters.
-     *
-     * @param critter critter (implements predictable). Has (model) body.
-     * @return test true/false
-     */
-    public boolean hasCollisionWith(Critter critter) { // collision detection - critter against solid obstacles
-        return LevelContainer.hasCollisionWithEnvironment(critter);
-    }
-
     // prints general and detailed information about solid and fluid chunks
     public void printInfo() {
 //        levelContainer.chunks.printInfo();
