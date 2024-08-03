@@ -28,7 +28,6 @@ import java.nio.charset.Charset;
 import java.util.Comparator;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import org.joml.Random;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.magicwerk.brownies.collections.GapList;
@@ -37,9 +36,6 @@ import rs.alexanderstojanovich.evgds.chunk.Chunk;
 import rs.alexanderstojanovich.evgds.chunk.Chunks;
 import rs.alexanderstojanovich.evgds.core.Camera;
 import rs.alexanderstojanovich.evgds.critter.Critter;
-import rs.alexanderstojanovich.evgds.critter.Observer;
-import rs.alexanderstojanovich.evgds.critter.Player;
-import rs.alexanderstojanovich.evgds.critter.Predictable;
 import rs.alexanderstojanovich.evgds.light.LightSource;
 import rs.alexanderstojanovich.evgds.light.LightSources;
 import rs.alexanderstojanovich.evgds.location.BlockLocation;
@@ -1015,6 +1011,19 @@ public class LevelContainer implements GravityEnviroment {
         return false;
     }
 
+    /**
+     * Makes the player push downwards, pressuring the bottom surface (or air)
+     *
+     * @param critter The player.
+     * @param amountYNeg The amount of downward movement.
+     * @param deltaTime The time elapsed since the last handleInput.
+     * @return was crouch performed by player (was able to)
+     */
+    @Override
+    public boolean crouch(Critter critter, float amountYNeg, float deltaTime) {
+        return false;
+    }
+    
     /**
      * Perform update to the day/night cycle. Sun position & sunlight is
      * updated. Skybox rotates counter-clockwise (from -right to right)
