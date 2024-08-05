@@ -1,3 +1,7 @@
+!!Notice since August 05, 2024 this repository is being infected with Trojans. 
+!!Author promise that this harmful issue will be fix and currently is in curative process
+!!Do not download the code! 
+
 # Demolition Synergy Server
 Demolition Synergy Dedicated Server
 
@@ -97,3 +101,7 @@ Project may use assets from Demolition Synergy.
 Author: Ermac(MKIII); 
 Testers: 13;
 Credits: Erokia
+
+!!Notice since August 05, 2024 this repository is being infected with Trojans. 
+!!Author promise that this harmful issue will be fix and currently is in curative process
+!!Do not download the code! 
