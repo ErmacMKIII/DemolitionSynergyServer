@@ -1,6 +1,8 @@
-!!Notice since August 05, 2024 this repository is being infected with Trojans. 
-!!Author promise that this harmful issue will be fix and currently is in curative process
-!!Do not download the code! 
+# Notice About Demolition Synergy (Very Important!)
+
+This repository ErmacMKIII/DemolitionSynergy is renewed.
+Old one is taken down. Because of severe malware infection.
+Please see ***Very Important Notice*** located at the bottom for more info.
 
 # Demolition Synergy Server
 Demolition Synergy Dedicated Server
@@ -102,6 +104,8 @@ Author: Ermac(MKIII);
 Testers: 13;
 Credits: Erokia
 
-!!Notice since August 05, 2024 this repository is being infected with Trojans. 
-!!Author promise that this harmful issue will be fix and currently is in curative process
-!!Do not download the code! 
+# Very Important Notice
+Old repository of ErmacMKIII/DemolitionSynergy suffered severe malware Trojan infection and was unsalvagable.
+Author is certain that malware was not prior date July 12, 2024.
+ErmacMKIII/DemolitionSynergy as renewed repository stands since August 6, 2024.
+Author apologizes for concerns and any damage.

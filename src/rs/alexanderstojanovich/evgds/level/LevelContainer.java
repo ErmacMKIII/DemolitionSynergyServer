@@ -1023,7 +1023,7 @@ public class LevelContainer implements GravityEnviroment {
     public boolean crouch(Critter critter, float amountYNeg, float deltaTime) {
         return false;
     }
-    
+
     /**
      * Perform update to the day/night cycle. Sun position & sunlight is
      * updated. Skybox rotates counter-clockwise (from -right to right)
