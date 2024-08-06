@@ -16,11 +16,15 @@
  */
 package rs.alexanderstojanovich.evgds.main;
 
+import com.bulenkov.darcula.DarculaLaf;
+import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
@@ -56,20 +60,21 @@ public class Main {
             DSLogger.reportDebug("Logging to file set.", null);
         }
         // Set Look and feel for Swing GUI App
-        try {
-            javax.swing.UIManager.setLookAndFeel("com.bulenkov.darcula.DarculaLaf");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    try {
-                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                        break;
-                    } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex1) {
-                        DSLogger.reportError("Unable to set Nimbus look & feel!", ex);
-                    }
-                }
-            }
-            DSLogger.reportError("Unable to set Darcula look & feel!", ex);
+        String guiTheme = inCfg.getTheme();
+        switch (guiTheme) {
+            case "light":
+                FlatLightLaf.setup();
+                break;
+            case "dark":
+                FlatDarkLaf.setup();
+                break;
+            case "default":
+            case "metal":
+                FlatDarkLaf.setup(new MetalLookAndFeel());
+                break;
+            case "darcula":
+                FlatLaf.setup(new DarculaLaf());
+                break;
         }
         // initialize game creation (only creates window)
         try {
