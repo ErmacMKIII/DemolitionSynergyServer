@@ -23,9 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.joml.Vector3f;
-import rs.alexanderstojanovich.evgds.critter.Critter;
-import rs.alexanderstojanovich.evgds.critter.Observer;
-import rs.alexanderstojanovich.evgds.critter.Predictable;
 import rs.alexanderstojanovich.evgds.level.Editor;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import rs.alexanderstojanovich.evgds.level.RandomLevelGenerator;
@@ -55,7 +52,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
 
     private final Configuration cfg = Configuration.getInstance();
 
-    public static final int VERSION = 48;
+    public static final int VERSION = 49;
     public static final String WINDOW_TITLE = String.format("Demolition Synergy - v%s", VERSION);
     // makes default window -> Renderer sets resolution from config
 

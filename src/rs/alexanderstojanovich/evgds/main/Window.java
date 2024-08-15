@@ -729,24 +729,26 @@ public class Window extends javax.swing.JFrame {
         panelInfo.add(progBar, java.awt.BorderLayout.PAGE_END);
 
         clientInfoTbl.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][]{},
-                new String[]{
-                    "Host Name", "Unique Id", "Time to Live", "Date Assigned"
-                }
+            new Object [][] {
+
+            },
+            new String [] {
+                "Host Name", "Unique Id", "Time to Live", "Date Assigned"
+            }
         ) {
-            Class[] types = new Class[]{
+            Class[] types = new Class [] {
                 java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Object.class
             };
-            boolean[] canEdit = new boolean[]{
+            boolean[] canEdit = new boolean [] {
                 false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types[columnIndex];
+                return types [columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit[columnIndex];
+                return canEdit [columnIndex];
             }
         });
         clientInfoTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -757,24 +759,26 @@ public class Window extends javax.swing.JFrame {
         tabPaneInfo.addTab("Client", new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/monitor_icon.png")), spClientInfo, ""); // NOI18N
 
         playerInfoTbl.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][]{},
-                new String[]{
-                    "Name", "Texture Model", "Unique Id", "Color"
-                }
+            new Object [][] {
+
+            },
+            new String [] {
+                "Name", "Texture Model", "Unique Id", "Color"
+            }
         ) {
-            Class[] types = new Class[]{
+            Class[] types = new Class [] {
                 java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean[]{
+            boolean[] canEdit = new boolean [] {
                 false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types[columnIndex];
+                return types [columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit[columnIndex];
+                return canEdit [columnIndex];
             }
         });
         playerInfoTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -785,24 +789,26 @@ public class Window extends javax.swing.JFrame {
         tabPaneInfo.addTab("Player", new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/player.png")), spPlayerInfo); // NOI18N
 
         posInfoTbl.setModel(new javax.swing.table.DefaultTableModel(
-                new Object[][]{},
-                new String[]{
-                    "Unique Id", "Position", "Front"
-                }
+            new Object [][] {
+
+            },
+            new String [] {
+                "Unique Id", "Position", "Front"
+            }
         ) {
-            Class[] types = new Class[]{
+            Class[] types = new Class [] {
                 java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
-            boolean[] canEdit = new boolean[]{
+            boolean[] canEdit = new boolean [] {
                 false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
-                return types[columnIndex];
+                return types [columnIndex];
             }
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
-                return canEdit[columnIndex];
+                return canEdit [columnIndex];
             }
         });
         posInfoTbl.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -1392,7 +1398,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.5 (PUBLIC BUILD reviewed on 2024-08-06 at 14:15).\n");
+            sb.append("VERSION v1.6 (PUBLIC BUILD reviewed on 2024-08-15 at 02:45).\n");
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
