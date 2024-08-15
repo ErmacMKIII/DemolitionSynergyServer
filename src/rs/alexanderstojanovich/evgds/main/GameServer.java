@@ -204,12 +204,12 @@ public class GameServer implements DSMachine, Runnable {
                 // Decrease time-to-live for each client and remove expired clients
                 clients.forEach((ClientInfo client) -> {
                     client.timeToLive--;
-                    if (client.timeToLive <= 0) {
+                    if (client.timeToLive <= 0 || kicklist.contains(client.uniqueId)) {
                         kicklist.remove(client.uniqueId);
                         performCleanUp(gameObject, client.uniqueId, client.timeToLive <= 0);
                     }
                 });
-                clients.removeIf(cli -> cli.timeToLive <= 0);
+                clients.removeIf(cli -> cli.timeToLive <= 0 || kicklist.contains(cli.uniqueId));
 
                 // Update server window title with current player count
                 GameServer.this.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + GameServer.this.worldName + " - Player Count: " + (GameServer.this.clients.size()));
