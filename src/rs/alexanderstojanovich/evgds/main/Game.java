@@ -185,7 +185,7 @@ public class Game implements DSMachine {
                 }
             }
         };
-        gameLoopTimer.scheduleAtFixedRate(task0, (long) (TICK_TIME * 1000L), (long) (TICK_TIME * 1000L));
+        gameLoopTimer.scheduleAtFixedRate(task0, (long) (0.5 * TICK_TIME * 1000L), (long) (0.5 * TICK_TIME * 1000L));
 
         this.running = false;
         DSLogger.reportDebug("Main loop ended.", null);
