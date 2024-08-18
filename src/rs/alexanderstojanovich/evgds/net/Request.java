@@ -58,6 +58,7 @@ public class Request implements RequestIfc {
     public final int clientPort;
 
     protected long checksum = 0L;
+    protected long timestamp = 0L;
 
     /**
      * Invalid request. If receiving fails!
@@ -174,6 +175,9 @@ public class Request implements RequestIfc {
                         throw new IOException("Unsupported data type during serialization!");
                 }
             }
+
+            // Write timestamp
+            out.writeLong(timestamp); // Include the timestamp in serialization
         }
         this.content = byteStream.toByteArray();
     }
@@ -254,6 +258,9 @@ public class Request implements RequestIfc {
                 default:
                     throw new IOException("Unsupported data type during deserialization!");
             }
+
+            // Read timestamp
+            this.timestamp = in.readLong(); // Read the timestamp during deserialization
         }
         this.content = content;
         this.requestType = RequestType.values()[reqTypeOrdinal];
@@ -309,4 +316,8 @@ public class Request implements RequestIfc {
         return guid;
     }
 
+    @Override
+    public long getTimestamp() {
+        return timestamp;
+    }
 }

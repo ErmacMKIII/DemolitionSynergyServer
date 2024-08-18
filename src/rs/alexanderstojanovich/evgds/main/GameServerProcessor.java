@@ -27,6 +27,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32C;
 import org.apache.mina.core.buffer.IoBuffer;
@@ -76,16 +79,6 @@ public class GameServerProcessor extends IoHandlerAdapter {
     public static final int TOTAL_FAIL_ATTEMPT_MAX = 3000;
 
     public static int TotalFailedAttempts = 0;
-
-    /**
-     * Number of successive packets to receive before confirmation (Server)
-     */
-    public static final int PACKETS_MAX = 8;
-
-    /**
-     * Maximum number of level attempts (retransmission)
-     */
-    public static final int RETRANSMISSION_MAX_ATTEMPTS = 3;
 
     /**
      * Last checksum to avoid (duping)

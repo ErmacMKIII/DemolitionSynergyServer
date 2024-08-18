@@ -70,7 +70,7 @@ public class GameServer implements DSMachine, Runnable {
     /**
      * Configuration instance
      */
-    public final Configuration config = Configuration.getInstance();
+    public static final Configuration config = Configuration.getInstance();
 
     /**
      * Default world name
@@ -95,7 +95,7 @@ public class GameServer implements DSMachine, Runnable {
     /**
      * Maximum number of clients allowed
      */
-    protected static final int MAX_CLIENTS = 16;
+    protected static final int MAX_CLIENTS = config.getMaxClients();
 
     /**
      * Endpoint address
@@ -139,14 +139,9 @@ public class GameServer implements DSMachine, Runnable {
     public static final long GOODBYE_TIMEOUT = 15000L;
 
     /**
-     * Magic bytes of End-of-Stream
+     * Server util helper (time to live etc.)
      */
-    public static final byte[] EOS = {(byte) 0xAB, (byte) 0xCD, (byte) 0x0F, (byte) 0x15}; // 4 Bytes
-
-    /**
-     * Executor service for server tasks
-     */
-    public final ExecutorService serverExecutor = Executors.newSingleThreadExecutor();
+    public final ExecutorService serverHelperExecutor = Executors.newSingleThreadExecutor();
 
     /**
      * List of blacklisted hosts
@@ -220,7 +215,7 @@ public class GameServer implements DSMachine, Runnable {
         timerClientChk.scheduleAtFixedRate(task1, 1000L, 1000L);
 
         // Start the server main loop in a separate thread
-        serverExecutor.execute(this);
+        serverHelperExecutor.execute(this);
 
         // Log server start information
         DSLogger.reportInfo(String.format("Commencing start of Game Server. Game Server will start on %s:%d", localIP, port), null);
@@ -270,7 +265,7 @@ public class GameServer implements DSMachine, Runnable {
      * timer.
      */
     public void shutDown() {
-        this.serverExecutor.shutdown();
+        this.serverHelperExecutor.shutdown();
         this.timerClientChk.cancel();
     }
 
@@ -471,8 +466,8 @@ public class GameServer implements DSMachine, Runnable {
         return timeout;
     }
 
-    public ExecutorService getServerExecutor() {
-        return serverExecutor;
+    public ExecutorService getServerHelperExecutor() {
+        return serverHelperExecutor;
     }
 
     public IList<String> getBlacklist() {
