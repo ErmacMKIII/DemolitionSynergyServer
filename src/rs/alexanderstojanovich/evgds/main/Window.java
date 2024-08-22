@@ -80,6 +80,12 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
  */
 public class Window extends javax.swing.JFrame {
 
+    public static enum BuildType {
+        PUBLIC, DEVELOPMENT
+    }
+
+    public static final BuildType BUILD = BuildType.DEVELOPMENT;
+
     protected double lastTime = 0.0;
     protected double currTime = 0.0;
     protected long bytesReceived = 0L;
@@ -1399,7 +1405,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.7 (PUBLIC BUILD reviewed on 2024-08-20 at 06:20).\n");
+            sb.append(String.format("VERSION v1.7 (%s BUILD reviewed on 2024-08-22 at 07:15).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
