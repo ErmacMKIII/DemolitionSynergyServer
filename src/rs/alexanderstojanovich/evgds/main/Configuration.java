@@ -49,6 +49,7 @@ public class Configuration {
     private String serverIP = ""; // server ip used to connect client to server
     private int serverPort = 13667; // used in conjunction with local IP
     private int clientPort = 13667; // used in conjunction with server IP
+    private int maxClients = 16; // max number of clients connected (server logic)
 
     private boolean useBakGuid = false;
 
@@ -184,6 +185,13 @@ public class Configuration {
                                     clientPort = number;
                                 }
                                 break;
+                            case "maxclients":
+                                number = Integer.parseInt(words[1]);
+                                // max authorised clients on the server
+                                if (number > 0 && number <= 16) {
+                                    maxClients = number;
+                                }
+                                break;
                             case "usebakguid":
                                 useBakGuid = Boolean.parseBoolean(words[1].toLowerCase());
                                 break;
@@ -247,6 +255,8 @@ public class Configuration {
             pw.println("ServerPort = " + serverPort);
             pw.println("# Client port set to connect to game server. Varying");
             pw.println("ClientPort = " + clientPort);
+            pw.println("# Max server clients");
+            pw.println("MaxClients = " + maxClients);
             pw.println("# Use backup guid. Testing purposes.");
             pw.println("UseBakGuid = " + useBakGuid);
         } catch (FileNotFoundException ex) {
@@ -381,6 +391,10 @@ public class Configuration {
 
     public void setTheme(String theme) {
         this.theme = theme;
+    }
+
+    public int getMaxClients() {
+        return maxClients;
     }
 
 }

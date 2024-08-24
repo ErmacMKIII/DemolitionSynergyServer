@@ -80,6 +80,12 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
  */
 public class Window extends javax.swing.JFrame {
 
+    public static enum BuildType {
+        PUBLIC, DEVELOPMENT
+    }
+
+    public static final BuildType BUILD = BuildType.PUBLIC;
+
     protected double lastTime = 0.0;
     protected double currTime = 0.0;
     protected long bytesReceived = 0L;
@@ -245,7 +251,7 @@ public class Window extends javax.swing.JFrame {
         // Initialize columns for the tables
         playerInfoModel.setColumnIdentifiers(new String[]{"Name", "Texture Model", "Unique ID", "Color"});
         posInfoModel.setColumnIdentifiers(new String[]{"Unique ID", "Position", "Front"});
-        clientInfoModel.setColumnIdentifiers(new String[]{"Host Name", "Unique ID", "Time to Live", "Date Assigned", "Kick Client"});
+        clientInfoModel.setColumnIdentifiers(new String[]{"Host Name", "Unique ID", "Time to Live", "Date Assigned", "Request per second", "Kick Client"});
     }
 
     public static void setEnabledComponents(Component component, boolean enabled) {
@@ -373,12 +379,13 @@ public class Window extends javax.swing.JFrame {
                     clientInfoModel.setValueAt(info.uniqueId, i, 1);
                     clientInfoModel.setValueAt(info.timeToLive, i, 2);
                     clientInfoModel.setValueAt(info.dateAssigned, i, 3);
+                    clientInfoModel.setValueAt(info.requestPerSecond, i, 4);
                     found = true;
                     break;
                 }
             }
             if (!found) {
-                clientInfoModel.addRow(new Object[]{info.getHostName(), info.getUniqueId(), info.getTimeToLive(), info.dateAssigned.toString()});
+                clientInfoModel.addRow(new Object[]{info.getHostName(), info.getUniqueId(), info.getTimeToLive(), info.dateAssigned.toString(), info.requestPerSecond});
             }
         }
     }
@@ -733,14 +740,14 @@ public class Window extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Host Name", "Unique Id", "Time to Live", "Date Assigned"
+                "Host Name", "Unique Id", "Time to Live", "Date Assigned", "Request per second"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Object.class
+                java.lang.String.class, java.lang.String.class, java.lang.Integer.class, java.lang.Object.class, java.lang.Integer.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -1398,7 +1405,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append("VERSION v1.6 (PUBLIC BUILD reviewed on 2024-08-15 at 06:15).\n");
+            sb.append(String.format("VERSION v1.7 (%s BUILD reviewed on 2024-08-24 at 09:00).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");

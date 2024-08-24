@@ -52,7 +52,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
 
     private final Configuration cfg = Configuration.getInstance();
 
-    public static final int VERSION = 49;
+    public static final int VERSION = 50;
     public static final String WINDOW_TITLE = String.format("Demolition Synergy - v%s", VERSION);
     // makes default window -> Renderer sets resolution from config
 
@@ -324,6 +324,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         updateRenderLCLock.lock();
         try {
             ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
+            ok |= levelContainer.saveLevelToFile(gameServer.worldName + ".ndat");
         } finally {
             updateRenderLCLock.unlock();
         }
@@ -364,7 +365,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
                     break;
             }
             ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
-            ok |= levelContainer.storeLevelToBufferNewFormat();
+            ok |= levelContainer.saveLevelToFile(gameServer.worldName + ".ndat");
         } finally {
             updateRenderLCLock.unlock();
         }

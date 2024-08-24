@@ -42,7 +42,7 @@ Project structure:
 # Source Code Structure
 └───rs
     └───alexanderstojanovich
-        └───evg
+        └───evgds
             ├───chunk
             ├───core
             ├───critter
