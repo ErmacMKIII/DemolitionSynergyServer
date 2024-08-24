@@ -324,6 +324,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         updateRenderLCLock.lock();
         try {
             ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
+            ok |= levelContainer.saveLevelToFile(gameServer.worldName + ".ndat");
         } finally {
             updateRenderLCLock.unlock();
         }
@@ -364,7 +365,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
                     break;
             }
             ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
-            ok |= levelContainer.storeLevelToBufferNewFormat();
+            ok |= levelContainer.saveLevelToFile(gameServer.worldName + ".ndat");
         } finally {
             updateRenderLCLock.unlock();
         }
