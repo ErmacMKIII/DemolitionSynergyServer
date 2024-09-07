@@ -56,7 +56,6 @@ public class BlockEnvironment {
      */
 //    public final IList<Tuple> modifiedTuples = new GapList<>();
     protected volatile boolean optimizing = false;
-    protected volatile boolean fullyOptimized = false;
     protected final Chunks chunks;
     protected int texProcIndex = 0;
 
@@ -180,8 +179,6 @@ public class BlockEnvironment {
         IList<Tuple> temp = optimizedTuples;
         optimizedTuples = workingTuples;
         workingTuples = temp;
-
-        fullyOptimized = false;
     }
 
     /**
@@ -231,10 +228,6 @@ public class BlockEnvironment {
 
     public IList<Tuple> getWorkingTuples() {
         return workingTuples;
-    }
-
-    public boolean isFullyOptimized() {
-        return fullyOptimized;
     }
 
     public IList<String> getModifiedWorkingTupleNames() {
