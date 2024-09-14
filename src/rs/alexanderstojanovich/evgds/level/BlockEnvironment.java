@@ -57,7 +57,6 @@ public class BlockEnvironment {
 //    public final IList<Tuple> modifiedTuples = new GapList<>();
     protected volatile boolean optimizing = false;
     protected final Chunks chunks;
-    protected int texProcIndex = 0;
 
     protected int lastFaceBits = 0; // starting from one, cuz zero is not rendered
     public static final int NUM_OF_PASSES_MAX = Configuration.getInstance().getOptimizationPasses();
@@ -104,59 +103,75 @@ public class BlockEnvironment {
     }
 
     /**
-     * Basic version of optimization for tuples from all the chunks.
+     * Improved version of optimization for tuples from all the chunks. The
+     * world is built incrementally and consists of two passes. Also includes
+     * modifications to work with Tuple Buffer Object (TBO). Modified tuples are
+     * pushed to the optimized stream. (Chat GPT)
      *
-     * @param queue visible chunkId queue
+     * @param vqueue visible chunkId queue
      * @param camera in-game camera
      */
-    public void optimizeByControl(IList<Integer> queue, Camera camera) {
+    public void optimizeByControl(IList<Integer> vqueue, Camera camera) {
         optimizing = true;
 
-        if (lastFaceBits == 0) {
-            workingTuples.clear();
-        }
+        // Determine lastFaceBits mask
+        final int mask0 = Block.getVisibleFaceBitsFast(camera.getFront(), LevelContainer.actorInFluid ? 2.5f : 45f);
+        workingTuples.removeIf(ot -> (ot.faceBits() & mask0) == 0);
 
-        // "filter mask" 
-        final int mask0 = Block.getVisibleFaceBitsFast(camera.getFront(), LevelContainer.actorInFluid ? 0f : 45f);
+        int lastFaceBitsCopy = lastFaceBits;
 
-        int passes = 0;
-        // iterate through face bits from 0 to 63
-        for (int faceBits = lastFaceBits; passes < NUM_OF_PASSES_MAX; faceBits++, passes++) {
-            // apply mask
-            if ((mask0 & faceBits) != 0) {
-                for (String tex : Assets.TEX_WORLD) {
-                    Tuple workTuple = null;
-                    // iterate through visible queue
-                    for (int chunkId : queue) {
-                        Chunk chunk = chunks.getChunk(chunkId);
-                        if (chunk != null) {
-                            Tuple selectedTuple = chunk.getTuple(tex, faceBits);
-                            if (selectedTuple != null) {
-                                if (workTuple == null) {
-                                    workTuple = new Tuple(tex, faceBits);
-                                }
-                                // choose only visible on camera blocks
-                                for (Block blk : selectedTuple.blockList) {
-                                    if (camera.doesSeeEff(blk, 30f)) {
-                                        workTuple.blockList.add(blk);
-                                    }
-                                }
-                            }
-                        }
+        for (String tex : Assets.TEX_WORLD) {
+            for (int j = 0; j < NUM_OF_PASSES_MAX; j++) {
+                final int faceBits = (++lastFaceBitsCopy) & 63;
+                if ((faceBits & (mask0 & 63)) != 0) {
+                    // PASS 1: Create Tuples
+                    Tuple optmTuple = workingTuples
+                            .filter(ot -> ot != null && ot.texName().equals(tex) && ot.faceBits() == faceBits)
+                            .getFirstOrNull();
+                    if (optmTuple == null) {
+                        optmTuple = new Tuple(tex, faceBits);
+                        workingTuples.add(optmTuple);
                     }
+                    optmTuple.blockList.clear(); // cleaning!
 
-                    if (workTuple != null) {
-                        workingTuples.add(workTuple);
-                        workingTuples.sort(Tuple.TUPLE_COMP);
-                    }
+                    // PASS 2: Fill Tuples
+                    chunks.chunkList
+                            .filter(chnk -> vqueue.contains(chnk.id) && Chunk.doesSeeChunk(chnk.id, camera, 5f))
+                            .forEach(chnk -> {
+                                final Tuple workTuple = workingTuples
+                                        .filter(ot -> ot != null && ot.texName().equals(tex) && ot.faceBits() == faceBits)
+                                        .getFirstOrNull();
+                                final IList<Tuple> selectedTuples = chnk.tupleList
+                                        .filter(t -> t != null && t.texName().equals(tex) && t.faceBits() == faceBits);
+
+                                if (workTuple != null) {
+                                    selectedTuples.forEach(st -> {
+                                        boolean modified = workTuple.blockList.addAll(
+                                                st.blockList.filter(blk -> blk != null && camera.doesSeeEff(blk, 30f) && !workTuple.blockList.contains(blk))
+                                        );
+                                        if (modified) {
+                                            modifiedWorkingTupleNames.addIfAbsent(workTuple.getName());
+                                        }
+                                    });
+                                }
+                            });
                 }
             }
         }
-
         lastFaceBits += NUM_OF_PASSES_MAX;
-        lastFaceBits &= 63; // Ensure faceBits remain within a valid range (mod 64)
+        lastFaceBits &= 63;
 
         if (lastFaceBits == 0) {
+            workingTuples.sort(Tuple.TUPLE_COMP);
+            workingTuples
+                    .filter(wt -> modifiedWorkingTupleNames.contains(wt.getName()))
+                    .forEach(wt -> {
+                        wt.blockList.sort(Block.UNIQUE_BLOCK_CMP);
+                        wt.setBuffered(false);
+                    });
+            workingTuples.removeIf(wt -> wt.blockList.isEmpty());
+            modifiedWorkingTupleNames.clear();
+
             swap();
         }
 
@@ -212,10 +227,6 @@ public class BlockEnvironment {
 
     public Chunks getChunks() {
         return chunks;
-    }
-
-    public int getTexProcIndex() {
-        return texProcIndex;
     }
 
     public int getBitPos() {

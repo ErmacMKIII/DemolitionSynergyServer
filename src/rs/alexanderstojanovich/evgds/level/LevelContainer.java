@@ -43,7 +43,6 @@ import rs.alexanderstojanovich.evgds.location.TexByte;
 import rs.alexanderstojanovich.evgds.main.Configuration;
 import rs.alexanderstojanovich.evgds.main.Game;
 import rs.alexanderstojanovich.evgds.main.GameObject;
-import rs.alexanderstojanovich.evgds.main.GameTime;
 import rs.alexanderstojanovich.evgds.models.Block;
 import rs.alexanderstojanovich.evgds.models.Model;
 import rs.alexanderstojanovich.evgds.resources.Assets;
@@ -841,37 +840,6 @@ public class LevelContainer implements GravityEnviroment {
         return success;
     }
 
-//    public CompletableFuture<Void> saveLevelToFileAsync(String filename) {
-//        return CompletableFuture.runAsync(() -> {
-//            BufferedOutputStream bos = null;
-//            File file = new File(filename);
-//            if (file.exists()) {
-//                file.delete();
-//            }
-//
-//            if (filename.endsWith(".dat")) {
-//                storeLevelToBufferOldFormat(); // saves level to buffer first
-//            } else if (filename.endsWith(".ndat")) {
-//                storeLevelToBufferNewFormat(); // saves level to buffer first
-//            }
-//
-//            try {
-//                bos = new BufferedOutputStream(new FileOutputStream(file));
-//                bos.write(buffer, 0, pos); // save buffer to file at pos mark
-//            } catch (FileNotFoundException ex) {
-//                DSLogger.reportFatalError(ex.getMessage(), ex);
-//            } catch (IOException ex) {
-//                DSLogger.reportFatalError(ex.getMessage(), ex);
-//            }
-//            if (bos != null) {
-//                try {
-//                    bos.close();
-//                } catch (IOException ex) {
-//                    DSLogger.reportFatalError(ex.getMessage(), ex);
-//                }
-//            }
-//        });
-//    }
     public boolean loadLevelFromFile(String filename) {
         if (working) {
             return false;
