@@ -47,7 +47,7 @@ public class Player extends Critter implements Observer {
      * Weapon model on character first-person-shooter 'in hands'.
      */
     protected Model inHandsWeaponModel = Model.MODEL_NONE;
-    
+
     /**
      * Create new player for Single Player
      *
