@@ -43,10 +43,11 @@ public class Player extends Critter implements Observer {
     protected final RPGCamera camera;
     public final LightSource light;
 
-//    /**
-//     * Weapon model on character first-person-shooter 'in hands'.
-//     */
-//    protected Model inHandsWeaponModel = Model.MODEL_NONE;
+    /**
+     * Weapon model on character first-person-shooter 'in hands'.
+     */
+    protected Model inHandsWeaponModel = Model.MODEL_NONE;
+    
     /**
      * Create new player for Single Player
      *
