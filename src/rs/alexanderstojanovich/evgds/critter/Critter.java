@@ -16,11 +16,17 @@
  */
 package rs.alexanderstojanovich.evgds.critter;
 
-import java.util.UUID;
 import org.joml.Vector3f;
 import rs.alexanderstojanovich.evgds.core.Camera;
 import rs.alexanderstojanovich.evgds.models.Model;
+import rs.alexanderstojanovich.evgds.resources.Assets;
 import rs.alexanderstojanovich.evgds.util.HardwareUtils;
+import rs.alexanderstojanovich.evgds.weapons.WeaponIfc;
+import static rs.alexanderstojanovich.evgds.weapons.WeaponIfc.Clazz.None;
+import static rs.alexanderstojanovich.evgds.weapons.WeaponIfc.Clazz.OneHandedSmallGun;
+import static rs.alexanderstojanovich.evgds.weapons.WeaponIfc.Clazz.TwoHandedBigGuns;
+import static rs.alexanderstojanovich.evgds.weapons.WeaponIfc.Clazz.TwoHandedSmallGun;
+import rs.alexanderstojanovich.evgds.weapons.Weapons;
 
 /**
  * Critter is class of living things. Has capabilities moving. Is collision
@@ -32,7 +38,7 @@ public class Critter implements Predictable, Moveable {
 
     protected String name;
     public final String uniqueId;
-    public final Model body;
+    public Model body;
     protected Vector3f predictor;
     protected Vector3f front = Camera.Z_AXIS;
     protected Vector3f up = Camera.Y_AXIS;
@@ -46,12 +52,24 @@ public class Critter implements Predictable, Moveable {
     protected Model charBodyWeaponModel = Model.MODEL_NONE;
 
     /**
+     * Critter (could be Player) has nothing in hands (no-weapon)
+     */
+    protected WeaponIfc weapon = Weapons.NONE;
+
+    /**
+     * Game assets resources
+     */
+    protected final Assets assets;
+    
+    /**
      * Create new instance of the critter. If instanced in anonymous class
      * specify the camera
      *
+     * @param assets game assets
      * @param body body model
      */
-    public Critter(Model body) {
+    public Critter(Assets assets, Model body) {
+        this.assets = assets;
         this.body = body;
         this.predictor = new Vector3f(body.pos); // separate predictor from the body
         this.uniqueId = HardwareUtils.generateHardwareUUID();
@@ -61,10 +79,12 @@ public class Critter implements Predictable, Moveable {
      * Create new instance of the critter. If instanced in anonymous class
      * specify the camera
      *
+     * @param assets game assets
      * @param pos initial position of the critter
      * @param body body model
      */
-    public Critter(Vector3f pos, Model body) {
+    public Critter(Assets assets, Vector3f pos, Model body) {
+        this.assets = assets;
         this.body = body;
         this.predictor = new Vector3f(body.pos); // separate predictor from the body
         this.uniqueId = HardwareUtils.generateHardwareUUID();
@@ -74,10 +94,12 @@ public class Critter implements Predictable, Moveable {
      * Create new instance of the critter. If instanced in anonymous class
      * specify the camera
      *
+     * @param assets game assets
      * @param uniqueId to be assigned to the critter
      * @param body model body for the critter
      */
-    public Critter(String uniqueId, Model body) {
+    public Critter(Assets assets, String uniqueId, Model body) {
+        this.assets = assets;
         this.uniqueId = uniqueId;
         this.body = body;
     }
@@ -210,6 +232,56 @@ public class Critter implements Predictable, Moveable {
         Vector3f temp = new Vector3f();
         front = front.rotateY(angle, temp);
         updateCameraVectors();
+    }
+    
+    /**
+     * Switch body model rendered in 3rd person
+     */
+    protected void switchBodyModel() {
+        Vector3f posCopy = this.body.pos;
+        float rYCopy = this.body.getrY();
+        
+        // switch to body model having that weapon class
+        switch (this.weapon.getClazz()) {
+            case OneHandedSmallGun:
+                this.body = assets.PLAYER_BODY_1H_SG;
+                break;
+            case TwoHandedSmallGun:
+                this.body = assets.PLAYER_BODY_2H_SG;
+                break;
+            case TwoHandedBigGuns:
+                this.body = assets.PLAYER_BODY_1H_SG;
+                break;
+            default:
+            case None:
+                this.body = assets.PLAYER_BODY_DEFAULT;
+                break;
+        }
+        // set the copied position VEC3
+        this.body.pos.set(posCopy);
+        // rotation Y-axis angle copy
+        this.body.setrY(rYCopy);
+    }
+    
+    /**
+     * Switch to weapon in hands
+     *
+     * @param weapons all weapons instance (wraps array)
+     * @param index index of (weapon) enumeration
+     */
+    public void switchWeapon(Weapons weapons, int index) {
+        this.weapon = weapons.AllWeapons[index];
+        this.charBodyWeaponModel = this.weapon.deriveBodyModel(this);
+    }
+
+    /**
+     * Switch to weapon in hands
+     *
+     * @param weapon weapon to switch to
+     */
+    public void switchWeapon(WeaponIfc weapon) {
+        this.weapon = weapon;
+        this.charBodyWeaponModel = this.weapon.deriveBodyModel(this);
     }
 
     @Override
@@ -405,5 +477,10 @@ public class Critter implements Predictable, Moveable {
     public Model getCharBodyWeaponModel() {
         return charBodyWeaponModel;
     }
+
+    public WeaponIfc getWeapon() {
+        return weapon;
+    }
+
 
 }

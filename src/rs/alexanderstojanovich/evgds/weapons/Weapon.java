@@ -85,20 +85,20 @@ public class Weapon implements WeaponIfc {
             case None:
             default:
                 break;
-            case OneHandedSmallGun:
-                result.pos.set(critter.body.pos.x - critter.body.getWidth() / 2.0f, critter.body.pos.y, critter.body.pos.z + critter.body.getDepth() / 2.0f);
-                break;
-            case TwoHandedSmallGun:
-                result.pos.set(critter.body.pos.x - critter.body.getWidth() / 2.0f, critter.body.pos.y, critter.body.pos.z + critter.body.getDepth() / 2.0f);
-                result.setrY((float) Math.PI / 4.0f);
-                break;
-            case TwoHandedBigGuns:
-                result.pos.set(critter.body.pos.x - critter.body.getWidth() / 2.0f, 1.5f * critter.body.pos.y, critter.body.pos.z + critter.body.getDepth() / 2.0f);
-                break;
+//            case OneHandedSmallGun:
+//                result.pos.set(critter.body.pos.x - critter.body.getWidth() / 2.0f, critter.body.pos.y, critter.body.pos.z + critter.body.getDepth() / 2.0f);
+//                break;
+//            case TwoHandedSmallGun:
+//                result.pos.set(critter.body.pos.x - critter.body.getWidth() / 2.0f, critter.body.pos.y, critter.body.pos.z + critter.body.getDepth() / 2.0f);
+////                result.setrY((float) Math.PI / 4.0f);
+//                break;
+//            case TwoHandedBigGuns:
+//                result.pos.set(critter.body.pos.x - critter.body.getWidth() / 2.0f, 1.5f * critter.body.pos.y, critter.body.pos.z + critter.body.getDepth() / 2.0f);
+//                break;
         }
 
         result.setScale(0.38f);
-
+        
         return result;
     }
 

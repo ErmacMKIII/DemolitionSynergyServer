@@ -25,7 +25,7 @@ import rs.alexanderstojanovich.evgds.models.Model;
  */
 public class RPGCamera extends Camera {
 
-    private final Model target;
+    protected Model target = Model.MODEL_NONE;
     protected float distanceFromTarget = 2.1f;
     private static final float ANGLE_AROUND_TARGET = (float) (-org.joml.Math.PI) / 2.0f; // sideways look angle
 
@@ -130,6 +130,10 @@ public class RPGCamera extends Camera {
 
     public float getAngleAroundTarget() {
         return ANGLE_AROUND_TARGET;
+    }
+
+    public void setTarget(Model target) {
+        this.target = target;
     }
 
 }
