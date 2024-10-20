@@ -201,7 +201,7 @@ public class Player extends Critter implements Observer {
         // set the camera target model assuming it was changed
         this.camera.setTarget(body);
     }
-    
+
     @Override
     public void turnRight(float angle) {
         super.turnRight(angle);
@@ -287,5 +287,4 @@ public class Player extends Critter implements Observer {
         return registered;
     }
 
-    
 }

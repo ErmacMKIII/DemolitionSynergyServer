@@ -60,7 +60,7 @@ public class Critter implements Predictable, Moveable {
      * Game assets resources
      */
     protected final Assets assets;
-    
+
     /**
      * Create new instance of the critter. If instanced in anonymous class
      * specify the camera
@@ -156,7 +156,6 @@ public class Critter implements Predictable, Moveable {
         Vector3f temp = new Vector3f();
         Vector3f frontAmpl = front.mul(amount, temp);
         body.pos = body.pos.add(frontAmpl, temp);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.add(frontAmpl, temp);
     }
 
     @Override
@@ -164,7 +163,6 @@ public class Critter implements Predictable, Moveable {
         Vector3f temp = new Vector3f();
         Vector3f frontAmpl = front.mul(amount, temp);
         body.pos = body.pos.sub(frontAmpl, temp);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.sub(frontAmpl, temp);
     }
 
     @Override
@@ -172,7 +170,6 @@ public class Critter implements Predictable, Moveable {
         Vector3f temp = new Vector3f();
         Vector3f rightAmpl = right.mul(amount, temp);
         body.pos = body.pos.sub(rightAmpl, temp);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.sub(rightAmpl, temp);
     }
 
     @Override
@@ -180,7 +177,6 @@ public class Critter implements Predictable, Moveable {
         Vector3f temp = new Vector3f();
         Vector3f rightAmpl = right.mul(amount, temp);
         body.pos = body.pos.add(rightAmpl, temp);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.add(rightAmpl, temp);
     }
 
     @Override
@@ -188,7 +184,6 @@ public class Critter implements Predictable, Moveable {
         Vector3f temp = new Vector3f();
         Vector3f upAmpl = up.mul(amount, temp);
         body.pos = body.pos.add(upAmpl, temp);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.add(upAmpl, temp);
     }
 
     @Override
@@ -196,7 +191,6 @@ public class Critter implements Predictable, Moveable {
         Vector3f temp = new Vector3f();
         Vector3f upAmpl = up.mul(amount, temp);
         body.pos = body.pos.sub(upAmpl, temp);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.sub(upAmpl, temp);
     }
 
     protected void updateCameraVectors() {
@@ -233,36 +227,76 @@ public class Critter implements Predictable, Moveable {
         front = front.rotateY(angle, temp);
         updateCameraVectors();
     }
-    
+
     /**
      * Switch body model rendered in 3rd person
      */
     protected void switchBodyModel() {
         Vector3f posCopy = this.body.pos;
         float rYCopy = this.body.getrY();
-        
+
         // switch to body model having that weapon class
-        switch (this.weapon.getClazz()) {
-            case OneHandedSmallGun:
-                this.body = assets.PLAYER_BODY_1H_SG;
-                break;
-            case TwoHandedSmallGun:
-                this.body = assets.PLAYER_BODY_2H_SG;
-                break;
-            case TwoHandedBigGuns:
-                this.body = assets.PLAYER_BODY_1H_SG;
-                break;
-            default:
-            case None:
-                this.body = assets.PLAYER_BODY_DEFAULT;
-                break;
+        if (weapon == Weapons.NONE) {
+            this.body = assets.PLAYER_BODY_DEFAULT;
+        } else {
+            switch (weapon.getTexName()) {
+                case Assets.W01M9:
+                    this.body = assets.PLAYER_BODY_1H_SG_W01M9;
+                    break;
+                case Assets.W02M1:
+                    this.body = assets.PLAYER_BODY_1H_SG_W02M1;
+                    break;
+                case Assets.W03DE:
+                    this.body = assets.PLAYER_BODY_1H_SG_W03DE;
+                    break;
+                case Assets.W04UZ:
+                    this.body = assets.PLAYER_BODY_1H_SG_W04UZ;
+                    break;
+                case Assets.W05M5:
+                    this.body = assets.PLAYER_BODY_2H_SG_W05M5;
+                    break;
+                case Assets.W06P9:
+                    this.body = assets.PLAYER_BODY_2H_SG_W06P9;
+                    break;
+                case Assets.W07AK:
+                    this.body = assets.PLAYER_BODY_2H_SG_W07AK;
+                    break;
+                case Assets.W08M4:
+                    this.body = assets.PLAYER_BODY_2H_SG_W08M4;
+                    break;
+                case Assets.W09G3:
+                    this.body = assets.PLAYER_BODY_2H_SG_W09G3;
+                    break;
+                case Assets.W10M6:
+                    this.body = assets.PLAYER_BODY_2H_BG_W10M6;
+                    break;
+                case Assets.W11MS:
+                    this.body = assets.PLAYER_BODY_2H_BG_W11MS;
+                    break;
+                case Assets.W12W2:
+                    this.body = assets.PLAYER_BODY_2H_SG_W12W2;
+                    break;
+                case Assets.W13B9:
+                    this.body = assets.PLAYER_BODY_2H_SG_W13B9;
+                    break;
+                case Assets.W14R7:
+                    this.body = assets.PLAYER_BODY_2H_SG_W14R7;
+                    break;
+                case Assets.W15DR:
+                    this.body = assets.PLAYER_BODY_2H_SG_W15DR;
+                    break;
+                case Assets.W16M8:
+                    this.body = assets.PLAYER_BODY_2H_BG_W16M8;
+                    break;
+            }
         }
+
         // set the copied position VEC3
         this.body.pos.set(posCopy);
         // rotation Y-axis angle copy
         this.body.setrY(rYCopy);
     }
-    
+
     /**
      * Switch to weapon in hands
      *
@@ -312,7 +346,6 @@ public class Critter implements Predictable, Moveable {
         float scale = front.length() / frontXZ.length();
         frontXZ = frontXZ.mul(amount * scale, temp1);
         body.pos = body.pos.add(frontXZ, temp2);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.add(frontXZ, temp);
     }
 
     @Override
@@ -323,7 +356,6 @@ public class Critter implements Predictable, Moveable {
         float scale = front.length() / frontXZ.length();
         frontXZ = frontXZ.mul(amount * scale, temp1);
         body.pos = body.pos.sub(frontXZ, temp2);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.sub(frontXZ, temp);
     }
 
     @Override
@@ -334,7 +366,6 @@ public class Critter implements Predictable, Moveable {
         float scale = right.length() / rightXZ.length();
         rightXZ = rightXZ.mul(amount * scale, temp1);
         body.pos = body.pos.sub(rightXZ, temp2);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.sub(rightXZ, temp);
     }
 
     @Override
@@ -345,7 +376,6 @@ public class Critter implements Predictable, Moveable {
         float scale = right.length() / rightXZ.length();
         rightXZ = rightXZ.mul(amount * scale, temp1);
         body.pos = body.pos.add(rightXZ, temp2);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.add(rightXZ, temp);
     }
 
     @Override
@@ -354,7 +384,6 @@ public class Critter implements Predictable, Moveable {
         Vector3f temp2 = new Vector3f();
         Vector3f upAmount = Camera.Y_AXIS.mul(amount, temp1);
         body.pos = body.pos.add(upAmount, temp2);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.add(upAmount, temp);
     }
 
     @Override
@@ -363,7 +392,6 @@ public class Critter implements Predictable, Moveable {
         Vector3f temp2 = new Vector3f();
         Vector3f upAmount = Camera.Y_AXIS.mul(amount, temp1);
         body.pos = body.pos.sub(upAmount, temp2);
-//        charBodyWeaponModel.pos = charBodyWeaponModel.pos.sub(upAmount, temp);
     }
 
     @Override
@@ -481,6 +509,5 @@ public class Critter implements Predictable, Moveable {
     public WeaponIfc getWeapon() {
         return weapon;
     }
-
 
 }
