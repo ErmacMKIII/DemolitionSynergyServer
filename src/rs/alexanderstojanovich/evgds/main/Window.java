@@ -249,7 +249,7 @@ public class Window extends javax.swing.JFrame {
         this.clientInfoTbl.setModel(clientInfoModel);
 
         // Initialize columns for the tables
-        playerInfoModel.setColumnIdentifiers(new String[]{"Name", "Texture Model", "Unique ID", "Color"});
+        playerInfoModel.setColumnIdentifiers(new String[]{"Name", "Texture Model", "Unique ID", "Color", "Weapon"});
         posInfoModel.setColumnIdentifiers(new String[]{"Unique ID", "Position", "Front"});
         clientInfoModel.setColumnIdentifiers(new String[]{"Host Name", "Unique ID", "Time to Live", "Date Assigned", "Request per second", "Kick Client"});
     }
@@ -288,6 +288,7 @@ public class Window extends javax.swing.JFrame {
                     playerInfoModel.setValueAt(info.name, i, 1);
                     playerInfoModel.setValueAt(info.texModel, i, 2);
                     playerInfoModel.setValueAt(info.color.toString(NumberFormat.getInstance(Locale.US)), i, 3);
+                    playerInfoModel.setValueAt(info.weapon, i, 4);
                     found = true;
                     break;
                 }
@@ -297,7 +298,8 @@ public class Window extends javax.swing.JFrame {
                     info.name,
                     info.texModel,
                     info.uniqueId,
-                    info.color.toString(NumberFormat.getInstance(Locale.US))
+                    info.color.toString(NumberFormat.getInstance(Locale.US)),
+                    info.weapon
                 });
             }
         }
@@ -770,14 +772,14 @@ public class Window extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Name", "Texture Model", "Unique Id", "Color"
+                "Name", "Texture Model", "Unique Id", "Color", "Weapon"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false, false, false
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -1381,7 +1383,7 @@ public class Window extends javax.swing.JFrame {
     private void checkHealth() {
         StringBuilder sb = new StringBuilder();
         appendServerStatus(sb);
-        appendCpuLoad(1.5, sb, false);
+        appendCpuLoad(1.0, sb, false);
         appendMemoryUsage(sb, false);
         appendNetworkUsage(sb, gameObject.gameServer.localIP, false);
 
@@ -1405,7 +1407,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v1.8 (%s BUILD reviewed on 2024-09-14 at 21:00).\n", BUILD.toString()));
+            sb.append(String.format("VERSION v1.8 (%s BUILD reviewed on 2024-10-21 at 05:00).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");

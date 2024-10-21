@@ -108,7 +108,11 @@ public interface RequestIfc extends DSObject {
         /**
          * Get world info {world name, size in bytes & checksum)
          */
-        WORLD_INFO
+        WORLD_INFO,
+        /**
+         * Update player info from client (Key: Guid). Similar to register.
+         */
+        PLAYER_INFO_UPDATE
     }
 
     /**

@@ -33,6 +33,8 @@ import rs.alexanderstojanovich.evgds.models.Model;
 import rs.alexanderstojanovich.evgds.net.PlayerInfo;
 import rs.alexanderstojanovich.evgds.net.PosInfo;
 import rs.alexanderstojanovich.evgds.util.GlobalColors;
+import rs.alexanderstojanovich.evgds.weapons.WeaponIfc;
+import rs.alexanderstojanovich.evgds.weapons.Weapons;
 
 /**
  * Define all the level observers & critters. Present in the level container.
@@ -162,11 +164,23 @@ public class LevelActors {
     public void configOtherPlayers(PlayerInfo[] playerInfo) {
         Arrays.asList(playerInfo).forEach(pi -> {
             if (!pi.uniqueId.equals(player.uniqueId)) {
-                Critter op = new Critter(this.levelContainer.gameObject.GameAssets, pi.uniqueId, new Model(levelContainer.gameObject.GameAssets.PLAYER_BODY_DEFAULT));
-                op.setName(pi.name);
-                op.body.setPrimaryRGBAColor(pi.color);
-                op.body.setTexName(pi.texModel);
-                otherPlayers.add(op);
+                Critter opOrNull = otherPlayers.getIf(oplyr -> oplyr.uniqueId.equals(pi.uniqueId));
+                if (opOrNull == null) {
+                    opOrNull = new Critter(levelContainer.gameObject.GameAssets,
+                            pi.uniqueId,
+                            new Model(levelContainer.gameObject.GameAssets.PLAYER_BODY_DEFAULT)
+                    );
+                    IList<WeaponIfc> weaponsAsList = GapList.create(Arrays.asList(levelContainer.weapons.AllWeapons));
+                    WeaponIfc weapon = weaponsAsList.getIf(w -> w.getTexName().equals(pi.weapon));
+                    if (weapon == null) { // if there is no weapon, switch to 'NONE' - unarmed, avoid nulls!
+                        weapon = Weapons.NONE;
+                    }
+                    opOrNull.switchWeapon(weapon);
+                    otherPlayers.add(opOrNull);
+                }
+                opOrNull.setName(pi.name);
+                opOrNull.body.setPrimaryRGBAColor(pi.color);
+                opOrNull.body.setTexName(pi.texModel);
             }
         });
     }
@@ -198,7 +212,7 @@ public class LevelActors {
 
         int index = 0;
         for (Critter crit : otherPlayers) {
-            PlayerInfo pi = new PlayerInfo(crit.getName(), crit.getBody().texName, crit.uniqueId, crit.body.getPrimaryRGBAColor());
+            PlayerInfo pi = new PlayerInfo(crit.getName(), crit.getBody().texName, crit.uniqueId, crit.body.getPrimaryRGBAColor(), crit.getWeapon().getTexName());
             result[index++] = pi;
         }
 

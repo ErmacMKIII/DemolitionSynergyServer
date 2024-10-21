@@ -57,6 +57,8 @@ import static rs.alexanderstojanovich.evgds.net.RequestIfc.RequestType.PING;
 import rs.alexanderstojanovich.evgds.net.Response;
 import rs.alexanderstojanovich.evgds.net.ResponseIfc;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
+import rs.alexanderstojanovich.evgds.weapons.WeaponIfc;
+import rs.alexanderstojanovich.evgds.weapons.Weapons;
 
 /**
  * Task to handle each endpoint asynchronously.
@@ -410,7 +412,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 Gson gson = new Gson();
                 IList<PlayerInfo> playerInfos = new GapList<>();
                 levelActors.otherPlayers.forEach(op -> {
-                    playerInfos.add(new PlayerInfo(op.getName(), op.body.texName, op.uniqueId, op.body.getPrimaryRGBAColor()));
+                    playerInfos.add(new PlayerInfo(op.getName(), op.body.texName, op.uniqueId, op.body.getPrimaryRGBAColor(), op.getWeapon().getTexName()));
                 });
                 String obj = gson.toJson(playerInfos, IList.class);
                 response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
@@ -477,6 +479,37 @@ public class GameServerProcessor extends IoHandlerAdapter {
                     DSLogger.reportError(ex.getMessage(), ex);
                     return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Internal error - Unable to read the level file!");
                 }
+                break;
+            case PLAYER_INFO_UPDATE:
+                switch (request.getDataType()) {
+                    case OBJECT: {
+                        String jsonStro = request.getData().toString();
+                        PlayerInfo info = PlayerInfo.fromJson(jsonStro);
+                        levelActors = gameServer.gameObject.game.gameObject.levelContainer.levelActors;
+                        Critter targCrit = levelActors.otherPlayers.getIf(ot -> ot.uniqueId.equals(info.uniqueId));
+                        if (targCrit == null) {
+                            msg = String.format("Players ID is not registered. Registration required!", gameServer.worldName, gameServer.version);
+                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
+                        } else {
+                            targCrit.setName(info.name);
+                            targCrit.body.setPrimaryRGBAColor(info.color);
+                            targCrit.body.texName = info.texModel;
+
+                            IList<WeaponIfc> weaponsAsList = GapList.create(Arrays.asList(gameServer.gameObject.levelContainer.weapons.AllWeapons));
+                            WeaponIfc weapon = weaponsAsList.getIf(w -> w.getTexName().equals(info.weapon));
+                            if (weapon == null) { // if there is no weapon, switch to 'NONE' - unarmed, avoid nulls!
+                                weapon = Weapons.NONE;
+                            }
+                            targCrit.switchWeapon(weapon);
+                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, "OK - Player info updated.");
+                        }
+                        break;
+                    }
+                    default:
+                        response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
+                        break;
+                }
+                response.send(gameServer, session);
                 break;
 
         }
