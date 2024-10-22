@@ -183,7 +183,15 @@ public class LevelActors {
                 }
                 opOrNull.setName(pi.name);
                 opOrNull.body.setPrimaryRGBAColor(pi.color);
-                opOrNull.body.setTexName(pi.texModel);
+//                opOrNull.body.setTexName(pi.texModel);
+
+                IList<WeaponIfc> weaponsAsList = GapList.create(Arrays.asList(levelContainer.weapons.AllWeapons));
+                WeaponIfc weapon = weaponsAsList.getIf(w -> w.getTexName().equals(pi.weapon));
+                if (weapon == null) { // if there is no weapon, switch to 'NONE' - unarmed, avoid nulls!
+                    weapon = Weapons.NONE;
+                }
+                opOrNull.switchWeapon(weapon);
+                opOrNull.switchBodyModel();
             }
         });
     }
