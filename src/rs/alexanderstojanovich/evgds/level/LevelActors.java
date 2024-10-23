@@ -191,7 +191,7 @@ public class LevelActors {
                     weapon = Weapons.NONE;
                 }
                 opOrNull.switchWeapon(weapon);
-                opOrNull.switchBodyModel();
+                opOrNull.setModelClazz(pi.texModel);
             }
         });
     }
