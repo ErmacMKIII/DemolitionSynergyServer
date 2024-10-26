@@ -425,10 +425,14 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 if (otherPlayerOrNull != null) {
                     senderName = otherPlayerOrNull.getName();
                 }
-                response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, senderName + ":" + request.getData());
-                for (IoSession session1 : gameServer.acceptor.getManagedSessions().values()) {
-                    response.send(gameServer, session1);
-                }
+                response = new Response(0L, ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, senderName + ":" + request.getData());
+                gameServer.clients.forEach(ci -> {
+                    try {
+                        response.send(gameServer, ci.session);
+                    } catch (Exception ex) {
+                        DSLogger.reportError("Unable to deliver chat message, ex:", ex);
+                    }
+                });
                 break;
             case WORLD_INFO:
                 // Locate all level map files with dat or ndat extension
