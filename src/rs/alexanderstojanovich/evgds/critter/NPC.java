@@ -16,7 +16,9 @@
  */
 package rs.alexanderstojanovich.evgds.critter;
 
+import org.joml.Vector3f;
 import rs.alexanderstojanovich.evgds.models.Model;
+import rs.alexanderstojanovich.evgds.resources.Assets;
 
 /**
  * Is non-player capabilities. Doesn't have camera.
@@ -25,8 +27,16 @@ import rs.alexanderstojanovich.evgds.models.Model;
  */
 public class NPC extends Critter {
 
-    public NPC(Model body) {
-        super(body);
+    public NPC(Assets assets, Model body) {
+        super(assets, body);
+    }
+
+    public NPC(Assets assets, Vector3f pos, Model body) {
+        super(assets, pos, body);
+    }
+
+    public NPC(Assets assets, String uniqueId, Model body) {
+        super(assets, uniqueId, body);
     }
 
 }

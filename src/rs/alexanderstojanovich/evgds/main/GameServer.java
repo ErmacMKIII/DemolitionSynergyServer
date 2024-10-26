@@ -100,7 +100,7 @@ public class GameServer implements DSMachine, Runnable {
     /**
      * Max total request per second
      */
-    public static final int MAX_RPS = 128; // Max Total Request Per Second
+    public static final int MAX_RPS = 2000; // Max Total Request Per Second
 
     /**
      * Endpoint address

@@ -461,7 +461,7 @@ public class RandomLevelGenerator {
     }
 
     private void generateFluidSeries(int solidBlocks) {
-//        DSLogger.reportDebug("By Noise: solidBlks = " + solidBlocks, null);
+        // Clouds arent generated only fluid
         levelContainer.setProgress(0.0f);
         IList<Vector3f> allFluidPos = LevelContainer.AllBlockMap.getPopulatedLocations(tb -> !tb.solid);
         for (Vector3f fldPos : allFluidPos) {
@@ -542,11 +542,11 @@ public class RandomLevelGenerator {
                 int blocksRandom = generateByRandom(solidRandom, fluidRandom, totalRandom, posR_Min, posR_Max, hRMin, hRMax);
                 DSLogger.reportDebug("Done.", null);
                 // --------------------------------------------------------------
-
                 DSLogger.reportDebug("Generating Part III - Fluid Series", null);
                 // 3. Fluid Series
                 generateFluidSeries(numberOfBlocks - blocksNoise - blocksRandom);
                 DSLogger.reportDebug("Done.", null);
+                // --------------------------------------------------------------
             }
         }
 

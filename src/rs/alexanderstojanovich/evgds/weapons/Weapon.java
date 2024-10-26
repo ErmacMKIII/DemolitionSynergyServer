@@ -18,7 +18,6 @@ package rs.alexanderstojanovich.evgds.weapons;
 
 import rs.alexanderstojanovich.evgds.critter.Critter;
 import rs.alexanderstojanovich.evgds.models.Model;
-import static rs.alexanderstojanovich.evgds.weapons.WeaponIfc.Clazz.TwoHandedSmallGun;
 
 /**
  * Demolition Synergy weapon interface. Contains all texture, models and sounds
@@ -86,11 +85,10 @@ public class Weapon implements WeaponIfc {
             default:
                 break;
             case OneHandedSmallGun:
-                result.pos.set(critter.body.pos.x - critter.body.getWidth() / 2.0f, critter.body.pos.y, critter.body.pos.z + critter.body.getDepth() / 2.0f);
+                result.pos.set(critter.body.pos.x + critter.body.getWidth() / 2.0f, critter.body.pos.y, 1.5f * (critter.body.pos.z + critter.body.getDepth() / 2.0f));
                 break;
             case TwoHandedSmallGun:
                 result.pos.set(critter.body.pos.x - critter.body.getWidth() / 2.0f, critter.body.pos.y, critter.body.pos.z + critter.body.getDepth() / 2.0f);
-                result.setrY((float) Math.PI / 4.0f);
                 break;
             case TwoHandedBigGuns:
                 result.pos.set(critter.body.pos.x - critter.body.getWidth() / 2.0f, 1.5f * critter.body.pos.y, critter.body.pos.z + critter.body.getDepth() / 2.0f);
@@ -98,6 +96,7 @@ public class Weapon implements WeaponIfc {
         }
 
         result.setScale(0.38f);
+        result.setrY(critter.body.getrY());
 
         return result;
     }

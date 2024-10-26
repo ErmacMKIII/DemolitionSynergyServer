@@ -43,7 +43,6 @@ import rs.alexanderstojanovich.evgds.location.TexByte;
 import rs.alexanderstojanovich.evgds.main.Configuration;
 import rs.alexanderstojanovich.evgds.main.Game;
 import rs.alexanderstojanovich.evgds.main.GameObject;
-import rs.alexanderstojanovich.evgds.main.GameTime;
 import rs.alexanderstojanovich.evgds.models.Block;
 import rs.alexanderstojanovich.evgds.models.Model;
 import rs.alexanderstojanovich.evgds.resources.Assets;
@@ -117,7 +116,7 @@ public class LevelContainer implements GravityEnviroment {
     public final byte[] bak_buffer = new byte[0x1000000]; // 16 MB BAK Buffer
     public int bak_pos = 0;
 
-    public static final float BASE = 22.5f;
+    public static final float BASE = 24f;
     public static final float SKYBOX_SCALE = BASE * BASE * BASE;
     public static final float SKYBOX_WIDTH = 2.0f * SKYBOX_SCALE;
 
@@ -841,37 +840,6 @@ public class LevelContainer implements GravityEnviroment {
         return success;
     }
 
-//    public CompletableFuture<Void> saveLevelToFileAsync(String filename) {
-//        return CompletableFuture.runAsync(() -> {
-//            BufferedOutputStream bos = null;
-//            File file = new File(filename);
-//            if (file.exists()) {
-//                file.delete();
-//            }
-//
-//            if (filename.endsWith(".dat")) {
-//                storeLevelToBufferOldFormat(); // saves level to buffer first
-//            } else if (filename.endsWith(".ndat")) {
-//                storeLevelToBufferNewFormat(); // saves level to buffer first
-//            }
-//
-//            try {
-//                bos = new BufferedOutputStream(new FileOutputStream(file));
-//                bos.write(buffer, 0, pos); // save buffer to file at pos mark
-//            } catch (FileNotFoundException ex) {
-//                DSLogger.reportFatalError(ex.getMessage(), ex);
-//            } catch (IOException ex) {
-//                DSLogger.reportFatalError(ex.getMessage(), ex);
-//            }
-//            if (bos != null) {
-//                try {
-//                    bos.close();
-//                } catch (IOException ex) {
-//                    DSLogger.reportFatalError(ex.getMessage(), ex);
-//                }
-//            }
-//        });
-//    }
     public boolean loadLevelFromFile(String filename) {
         if (working) {
             return false;
@@ -1022,76 +990,6 @@ public class LevelContainer implements GravityEnviroment {
     @Override
     public boolean crouch(Critter critter, float amountYNeg, float deltaTime) {
         return false;
-    }
-
-    /**
-     * Perform update to the day/night cycle. Sun position & sunlight is
-     * updated. Skybox rotates counter-clockwise (from -right to right)
-     */
-    public void update() { // call it externally from the main thread 
-        if (!working) { // don't subBufferVertices if working, it may screw up!   
-            final float now = (float) GameTime.Now().getTime();
-            float dtime = now - lastCycledDayTime;
-            lastCycledDayTime = now;
-
-            final float dangle = org.joml.Math.toRadians(dtime * 360.0f / 24.0f);
-
-            SKYBOX.setrY(SKYBOX.getrY() + dangle);
-            SUN.pos.rotateZ(dangle);
-
-            final float sunAngle = org.joml.Math.atan2(SUN.pos.y, SUN.pos.x);
-            float inten = org.joml.Math.sin(sunAngle);
-
-            if (inten < 0.0f) { // night
-                SKYBOX.setTexName("night");
-                SKYBOX.setPrimaryRGBAColor(new Vector4f((new Vector3f(SKYBOX_COLOR_RGB)).mul(0.15f), 0.15f));
-            } else if (inten >= 0.0f) { // day
-                SKYBOX.setTexName("day");
-                SKYBOX.setPrimaryRGBAColor(new Vector4f((new Vector3f(SKYBOX_COLOR_RGB)).mul(Math.max(inten, 0.15f)), 0.15f));
-            }
-
-            final float sunInten = Math.max(inten, 0.0f);
-            SUN.setPrimaryRGBAColor(new Vector4f((new Vector3f(SUN_COLOR_RGB)).mul(sunInten), 1.0f));
-            SUNLIGHT.setIntensity(sunInten * SUN_INTENSITY);
-            SUNLIGHT.pos.set(SUN.pos);
-
-            // always handleInput sunlight (sun/pos)
-            lightSources.updateLight(1, SUNLIGHT);
-            lightSources.setModified(1, true); // SUNLIGHT index is always 1
-
-            // handleInput - player light - only in correct mode
-            if (Game.getCurrentMode() == Game.Mode.FREE || Game.getCurrentMode() == Game.Mode.EDITOR) {
-                levelActors.player.light.setIntensity(0.0f);
-            } else {
-                levelActors.player.light.setIntensity(LightSource.PLAYER_LIGHT_INTENSITY);
-                lightSources.updateLight(0, levelActors.player.light);
-            }
-            lightSources.setModified(0, true); // Player index is always 0
-
-            // handleInput - set light modified for visible lights
-            lightSources.sourceList.forEach(ls -> {
-                int chnkId = Chunk.chunkFunc(ls.pos);
-                if (vChnkIdList.contains(chnkId)) {
-                    lightSources.setModified(ls.pos, true);
-                }
-            });
-        }
-    }
-
-    /**
-     * Optimize block environment. Block environment is ensuring that there is
-     * no created overhead in rendering.
-     *
-     * Blocks from all the chunks are being taken into consideration.
-     *
-     */
-    public void optimize() {
-        if (!working) {
-            Camera mainCamera = levelActors.mainCamera();
-            // provide visible chunk id(entifier) list, camera view eye and camera position
-            // where all the blocks are pulled into optimized tuples
-            blockEnvironment.optimizeByControl(vChnkIdList, mainCamera);
-        }
     }
 
     // -------------------------------------------------------------------------

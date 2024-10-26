@@ -20,8 +20,12 @@ import org.joml.Vector3f;
 import rs.alexanderstojanovich.evgds.light.LightSource;
 import rs.alexanderstojanovich.evgds.core.Camera;
 import rs.alexanderstojanovich.evgds.core.RPGCamera;
+import rs.alexanderstojanovich.evgds.main.Configuration;
 import rs.alexanderstojanovich.evgds.models.Model;
+import rs.alexanderstojanovich.evgds.resources.Assets;
 import rs.alexanderstojanovich.evgds.util.GlobalColors;
+import rs.alexanderstojanovich.evgds.weapons.WeaponIfc;
+import rs.alexanderstojanovich.evgds.weapons.Weapons;
 
 /**
  * Player class.
@@ -43,47 +47,48 @@ public class Player extends Critter implements Observer {
     protected final RPGCamera camera;
     public final LightSource light;
 
-//    /**
-//     * Weapon model on character first-person-shooter 'in hands'.
-//     */
-//    protected Model inHandsWeaponModel = Model.MODEL_NONE;
+    public final Configuration cfg = Configuration.getInstance();
+
     /**
      * Create new player for Single Player
      *
+     * @param assets game assets
      * @param body player body
      */
-    public Player(Model body) {
-        super(body);
+    public Player(Assets assets, Model body) {
+        super(assets, body);
         this.camera = new RPGCamera(this.body, new Vector3f(this.body.pos));
         this.light = new LightSource(this.body.pos, new Vector3f(GlobalColors.WHITE), LightSource.PLAYER_LIGHT_INTENSITY);
-        this.name = "Player";
+        this.name = "";
     }
 
     /**
      * Create new player for Single Player
      *
+     * @param assets game assets
      * @param camera camera to view
      * @param light light from player
      * @param body player body
      */
-    public Player(RPGCamera camera, LightSource light, Model body) {
-        super(body);
+    public Player(Assets assets, RPGCamera camera, LightSource light, Model body) {
+        super(assets, body);
         this.camera = camera;
         this.light = light;
-        this.name = "Player";
+        this.name = "";
     }
 
     /**
      * Create new player for Multiplayer. Using client registration to server.
      * Client has submit registration to this server.
      *
+     * @param assets game assets
      * @param camera camera to view
      * @param light light from player
      * @param uniqueId unique id to be assigned to player
      * @param body player body
      */
-    public Player(RPGCamera camera, LightSource light, String uniqueId, Model body) {
-        super(uniqueId, body);
+    public Player(Assets assets, RPGCamera camera, LightSource light, String uniqueId, Model body) {
+        super(assets, uniqueId, body);
         this.camera = camera;
         this.light = light;
     }
@@ -166,6 +171,35 @@ public class Player extends Critter implements Observer {
     public void setPos(Vector3f pos) {
         super.setPos(pos);
         camera.pos = pos;
+    }
+
+    public LightSource getLight() {
+        return light;
+    }
+
+    /**
+     * Switch to weapon in hands
+     *
+     * @param weapons all weapons instance (wraps array)
+     * @param index index of (weapon) enumeration
+     */
+    @Override
+    public void switchWeapon(Weapons weapons, int index) {
+        super.switchWeapon(weapons, index);
+        // set the camera target model assuming it was changed
+        this.camera.setTarget(body);
+    }
+
+    /**
+     * Switch to weapon in hands
+     *
+     * @param weapon weapon to switch to
+     */
+    @Override
+    public void switchWeapon(WeaponIfc weapon) {
+        super.switchWeapon(weapon);
+        // set the camera target model assuming it was changed
+        this.camera.setTarget(body);
     }
 
     @Override
