@@ -72,6 +72,16 @@ sudo apt install openjdk-11-jdk
 ```
 ![Alt text](/misc/Screenshot2.png?raw=true "DSS Ubuntu 14.04 LTS")
 
+To Debug in Linux please install Apache Netbeans 19 Debian package
+using Software Center. Debian package could be obtained from following Url:
+https://netbeans.apache.org/front/main/download/nb19/
+
+Then download project source code from release.
+
+Project could be compiled and run immediately.
+
+Done.
+
 # Game Server Arguments 
 
 Configure Server in dsynergy.ini.
