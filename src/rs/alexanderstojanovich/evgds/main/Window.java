@@ -16,6 +16,7 @@
  */
 package rs.alexanderstojanovich.evgds.main;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -49,10 +50,16 @@ import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import org.magicwerk.brownies.collections.BigList;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
 import oshi.SystemInfo;
@@ -84,7 +91,53 @@ public class Window extends javax.swing.JFrame {
         PUBLIC, DEVELOPMENT
     }
 
-    public static final BuildType BUILD = BuildType.PUBLIC;
+    /**
+     * Status of the console message (with bitmask values).
+     */
+    public enum Status {
+        INFO(1), WARN(2), ERR(4);
+
+        private final int mask;
+
+        private Status(int mask) {
+            this.mask = mask;
+        }
+
+        public int getMask() {
+            return mask;
+        }
+    }
+
+    protected int filter = 0;
+
+    /**
+     * Message log (contains string text plus status)
+     */
+    private final IList<Message> messageLog = new BigList<>(); // Store all messages with their status
+
+    /**
+     * Message class to store each log entry with its status
+     */
+    private static class Message {
+
+        public final String text;
+        public final Status status;
+
+        public Message(String text, Status status) {
+            this.text = text;
+            this.status = status;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public Status getStatus() {
+            return status;
+        }
+    }
+
+    public static final BuildType BUILD = BuildType.DEVELOPMENT;
 
     protected double lastTime = 0.0;
     protected double currTime = 0.0;
@@ -180,8 +233,68 @@ public class Window extends javax.swing.JFrame {
         this.setLocation(DIM.width / 2 - this.getSize().width / 2, DIM.height / 2 - this.getSize().height / 2);
     }
 
-    public void writeOnConsole(String msg) {
-        this.console.append(msg + "\r\n");
+    /**
+     * Write new message on the console.
+     *
+     * @param msg message text
+     * @param status message status {INFO, ERR, WARN}
+     */
+    public void writeOnConsole(String msg, Status status) {
+        try {
+            Message message = new Message(msg, status);
+            messageLog.add(message);
+
+            // Create a StyleContext and Style
+            SimpleAttributeSet attributes = new SimpleAttributeSet();
+            switch (status) {
+                case ERR:
+                    StyleConstants.setForeground(attributes, Color.RED);
+                    break;
+                case WARN:
+                    StyleConstants.setForeground(attributes, Color.ORANGE);
+                    break;
+                case INFO:
+                default:
+                    break;
+            }
+
+            Document document = this.console.getDocument();
+
+            if ((status.mask & filter) != 0) {
+                this.console.getDocument().insertString(document.getLength(), message.text + "\r\n", attributes);
+            }
+        } catch (BadLocationException ex) {
+            DSLogger.reportError(ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * Write existing message on the console
+     *
+     * @param msg message from the log
+     */
+    public void writeOnConsole(Message msg) {
+        try {
+            // Create a StyleContext and Style
+            SimpleAttributeSet attributes = new SimpleAttributeSet();
+            switch (msg.status) {
+                case ERR:
+                    StyleConstants.setForeground(attributes, Color.RED);
+                    break;
+                case WARN:
+                    StyleConstants.setForeground(attributes, Color.ORANGE);
+                    break;
+                case INFO:
+                default:
+                    break;
+            }
+
+            Document document = this.console.getDocument();
+
+            this.console.getDocument().insertString(document.getLength(), msg.text + "\r\n", attributes);
+        } catch (BadLocationException ex) {
+            DSLogger.reportError(ex.getMessage(), ex);
+        }
     }
 
     /**
@@ -348,7 +461,7 @@ public class Window extends javax.swing.JFrame {
             final int srow = this.clientInfoTbl.getSelectedRow();
             String client = this.clientInfoModel.getValueAt(srow, clientInfoModel.findColumn("Unique ID")).toString();
             DSLogger.reportInfo("Kick player: " + client, null);
-            writeOnConsole("Kick player: " + client);
+            writeOnConsole("Kick player: " + client, Status.INFO);
             GameServer.kickPlayer(gameObject.gameServer, client);
         });
         final ButtonRenderer btnKickRend = new ButtonRenderer(kickBtnEdit.getButton());
@@ -404,7 +517,7 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
-    public JTextArea getConsole() {
+    public JTextPane getConsole() {
         return console;
     }
 
@@ -489,9 +602,13 @@ public class Window extends javax.swing.JFrame {
         spPosInfo = new javax.swing.JScrollPane();
         posInfoTbl = new javax.swing.JTable();
         panelConsole = new javax.swing.JPanel();
-        spConsole = new javax.swing.JScrollPane();
-        console = new javax.swing.JTextArea();
         lblHealthMini = new javax.swing.JLabel();
+        togBtnBar = new javax.swing.JPanel();
+        togBtnError = new javax.swing.JToggleButton();
+        togBtnWarn = new javax.swing.JToggleButton();
+        togBtnInfo = new javax.swing.JToggleButton();
+        spConsole = new javax.swing.JScrollPane();
+        console = new javax.swing.JTextPane();
         mainMenu = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         fileMenuStart = new javax.swing.JMenuItem();
@@ -834,19 +951,55 @@ public class Window extends javax.swing.JFrame {
         panelConsole.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Console", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
         panelConsole.setLayout(new java.awt.BorderLayout());
 
-        console.setEditable(false);
-        console.setColumns(20);
-        console.setFont(new java.awt.Font("Segoe UI Symbol", 0, 14)); // NOI18N
-        console.setRows(5);
-        spConsole.setViewportView(console);
-
-        panelConsole.add(spConsole, java.awt.BorderLayout.CENTER);
-
         lblHealthMini.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         lblHealthMini.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/health-mini.png"))); // NOI18N
         lblHealthMini.setText("CPU: 0% RAM: 0 MB In/Out: 0 bytes/0 bytes");
         lblHealthMini.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Health", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
         panelConsole.add(lblHealthMini, java.awt.BorderLayout.PAGE_END);
+
+        togBtnBar.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Filter", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
+        togBtnBar.setLayout(new java.awt.GridLayout(1, 3));
+
+        togBtnError.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
+        togBtnError.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/err.png"))); // NOI18N
+        togBtnError.setSelected(true);
+        togBtnError.setText("Error");
+        togBtnError.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                togBtnErrorActionPerformed(evt);
+            }
+        });
+        togBtnBar.add(togBtnError);
+
+        togBtnWarn.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
+        togBtnWarn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/warn.png"))); // NOI18N
+        togBtnWarn.setSelected(true);
+        togBtnWarn.setText("Warning");
+        togBtnWarn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                togBtnWarnActionPerformed(evt);
+            }
+        });
+        togBtnBar.add(togBtnWarn);
+
+        togBtnInfo.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
+        togBtnInfo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/info.png"))); // NOI18N
+        togBtnInfo.setSelected(true);
+        togBtnInfo.setText("Info");
+        togBtnInfo.setToolTipText("");
+        togBtnInfo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                togBtnInfoActionPerformed(evt);
+            }
+        });
+        togBtnBar.add(togBtnInfo);
+
+        panelConsole.add(togBtnBar, java.awt.BorderLayout.PAGE_START);
+
+        console.setEditable(false);
+        spConsole.setViewportView(console);
+
+        panelConsole.add(spConsole, java.awt.BorderLayout.CENTER);
 
         getContentPane().add(panelConsole);
 
@@ -957,6 +1110,9 @@ public class Window extends javax.swing.JFrame {
 
         logMenuCopy.setEnabled(true);
         logMenuSaveAs.setEnabled(true);
+
+        messageLog.clear();
+        refreshConsole();
     }
 
     public void stopServerAndUpdate() {
@@ -1407,7 +1563,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v1.8 (%s BUILD reviewed on 2024-10-26 at 02:50).\n", BUILD.toString()));
+            sb.append(String.format("VERSION v1.9 (%s BUILD reviewed on 2024-11-16 at 19:25).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1507,6 +1663,49 @@ public class Window extends javax.swing.JFrame {
         saveAsLog();
     }//GEN-LAST:event_logMenuSaveAsActionPerformed
 
+    private void togBtnErrorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togBtnErrorActionPerformed
+        // TODO add your handling code here:
+        if (togBtnError.isSelected()) {
+            filter |= Status.ERR.mask;
+        } else {
+            filter &= ~Status.ERR.mask;
+        }
+
+        refreshConsole();
+    }//GEN-LAST:event_togBtnErrorActionPerformed
+
+    private void togBtnWarnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togBtnWarnActionPerformed
+        // TODO add your handling code here:
+        if (togBtnWarn.isSelected()) {
+            filter |= Status.WARN.mask;
+        } else {
+            filter &= ~Status.WARN.mask;
+        }
+
+        refreshConsole();
+    }//GEN-LAST:event_togBtnWarnActionPerformed
+
+    private void togBtnInfoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_togBtnInfoActionPerformed
+        if (togBtnInfo.isSelected()) {
+            filter |= Status.INFO.mask;
+        } else {
+            filter &= ~Status.INFO.mask;
+        }
+
+        refreshConsole();
+    }//GEN-LAST:event_togBtnInfoActionPerformed
+
+    /**
+     * Refresh console log. Works with filters. {INFO, WARN, ERR}
+     */
+    private void refreshConsole() {
+        console.setText(""); // Clear the current console content
+        messageLog.filter(m -> (m.status.mask & filter) != 0).forEach(msg -> {
+            // Add messages matching the current filter
+            writeOnConsole(msg);
+        });
+    }
+
     private void infoHelp() {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
         if (icon_url != null) {
@@ -1566,7 +1765,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JButton btnStop;
     private javax.swing.JTable clientInfoTbl;
     private javax.swing.JComboBox<String> cmbLevelSize;
-    private javax.swing.JTextArea console;
+    private javax.swing.JTextPane console;
     private javax.swing.JMenu fileHelp;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenuItem fileMenuExit;
@@ -1606,6 +1805,10 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JTextField tboxBlockNum;
     private javax.swing.JTextField tboxLocalIP;
     private javax.swing.JTextField tboxWorldName;
+    private javax.swing.JPanel togBtnBar;
+    private javax.swing.JToggleButton togBtnError;
+    private javax.swing.JToggleButton togBtnInfo;
+    private javax.swing.JToggleButton togBtnWarn;
     // End of variables declaration//GEN-END:variables
 
 }

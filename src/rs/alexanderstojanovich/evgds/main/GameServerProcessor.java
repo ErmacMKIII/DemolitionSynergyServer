@@ -228,7 +228,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             msg = String.format("Player ID is registered!", gameServer.worldName, gameServer.version);
                             response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
 
-                            gameServer.gameObject.WINDOW.writeOnConsole((String.format("Player %s has connected.", newPlayerUniqueId)));
+                            gameServer.gameObject.WINDOW.writeOnConsole((String.format("Player %s has connected.", newPlayerUniqueId)), Window.Status.INFO);
                             DSLogger.reportInfo(String.format("Player %s has connected.", newPlayerUniqueId), null);
 
                         } else {
@@ -248,7 +248,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             critter.body.texName = info.texModel;
                             levelActors.otherPlayers.add(critter);
 
-                            gameServer.gameObject.WINDOW.writeOnConsole((String.format("Player %s (%s) has connected.", info.name, info.uniqueId)));
+                            gameServer.gameObject.WINDOW.writeOnConsole((String.format("Player %s (%s) has connected.", info.name, info.uniqueId)), Window.Status.INFO);
                             DSLogger.reportInfo(String.format("Player %s (%s) has connected.", info.name, info.uniqueId), null);
 
                             msg = String.format("Player ID is registered!", gameServer.worldName, gameServer.version);
@@ -534,16 +534,16 @@ public class GameServerProcessor extends IoHandlerAdapter {
             case INTERNAL_ERROR:
                 msg = String.format("Server %s %s %s error!", procResult.hostname, procResult.guid, procResult.message);
                 DSLogger.reportError(msg, null);
-                gameServer.gameObject.WINDOW.writeOnConsole(msg);
+                gameServer.gameObject.WINDOW.writeOnConsole(msg, Window.Status.ERR);
                 break;
             case CLIENT_ERROR:
                 gameServer.assertTstFailure(procResult.hostname, procResult.guid);
                 msg = String.format("Client %s %s %s error!", procResult.hostname, procResult.guid, procResult.message);
                 DSLogger.reportError(msg, null);
-                gameServer.gameObject.WINDOW.writeOnConsole(msg);
+                gameServer.gameObject.WINDOW.writeOnConsole(msg, Window.Status.ERR);
                 if (gameServer.blacklist.contains(procResult.hostname)) {
                     DSLogger.reportWarning(msg, null);
-                    gameServer.gameObject.WINDOW.writeOnConsole(msg);
+                    gameServer.gameObject.WINDOW.writeOnConsole(msg, Window.Status.WARN);
                 }
                 break;
             default:
@@ -555,7 +555,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                         });
                 msg = String.format("Client %s %s %s OK", procResult.hostname, procResult.guid, procResult.message);
                 DSLogger.reportInfo(msg, null);
-                gameServer.gameObject.WINDOW.writeOnConsole(msg);
+                gameServer.gameObject.WINDOW.writeOnConsole(msg, Window.Status.INFO);
                 break;
         }
     }
