@@ -66,11 +66,21 @@ Tested to work with Ubuntu 14.04.6 LTS.
 
 Install Open JDK 11 with following commands (in Terminal)
 ```
-sudo add-apt-repository ppa:openjdk-r/ppa`
-sudo apt-get update`
-sudo apt install openjdk-11-jdk`
+sudo add-apt-repository ppa:openjdk-r/ppa
+sudo apt-get update
+sudo apt install openjdk-11-jdk
 ```
 ![Alt text](/misc/Screenshot2.png?raw=true "DSS Ubuntu 14.04 LTS")
+
+To debug in Linux please install Apache NetBeans 19 Debian package
+using Software Center. Debian package could be obtained from following Url:
+https://netbeans.apache.org/front/main/download/nb19/
+
+Then download project source code from release.
+
+Project could be compiled and run immediately.
+
+Done.
 
 # Game Server Arguments 
 
