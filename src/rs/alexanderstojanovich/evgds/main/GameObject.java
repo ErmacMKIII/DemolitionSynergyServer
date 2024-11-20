@@ -23,7 +23,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import org.joml.Vector3f;
-import rs.alexanderstojanovich.evgds.level.Editor;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import rs.alexanderstojanovich.evgds.level.RandomLevelGenerator;
 import rs.alexanderstojanovich.evgds.resources.Assets;
@@ -227,7 +226,6 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      * Clear Everything. Game will be 'Free'.
      */
     public void clearEverything() {
-        Editor.deselect();
         LevelContainer.AllBlockMap.init();
         levelContainer.chunks.clear();
         levelContainer.blockEnvironment.clear();
