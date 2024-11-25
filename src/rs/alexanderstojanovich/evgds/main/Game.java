@@ -98,7 +98,6 @@ public class Game implements DSMachine {
     protected DatagramSocket serverEndpoint;
     protected InetAddress serverInetAddr = null;
 
-    protected int port = config.getClientPort();
     protected int timeout = DEFAULT_TIMEOUT;
 
     /**
@@ -312,10 +311,9 @@ public class Game implements DSMachine {
         return config;
     }
 
-    public int getPort() {
-        return port;
-    }
-
+//    public int getPort() {
+//        return port;
+//    }
     public int getWeaponIndex() {
         return weaponIndex;
     }

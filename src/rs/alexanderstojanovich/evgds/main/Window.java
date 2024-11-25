@@ -108,7 +108,7 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
-    protected int filter = 0;
+    protected int filter = 7;
 
     /**
      * Message log (contains string text plus status)
@@ -137,7 +137,7 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
-    public static final BuildType BUILD = BuildType.DEVELOPMENT;
+    public static final BuildType BUILD = BuildType.PUBLIC;
 
     protected double lastTime = 0.0;
     protected double currTime = 0.0;
@@ -1563,7 +1563,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v1.9 (%s BUILD reviewed on 2024-11-20 at 23:26).\n", BUILD.toString()));
+            sb.append(String.format("VERSION v1.9 (%s BUILD reviewed on 2024-11-25 at 04:28).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");

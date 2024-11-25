@@ -18,11 +18,8 @@ package rs.alexanderstojanovich.evgds.level;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
-import rs.alexanderstojanovich.evgds.chunk.Chunk;
 import rs.alexanderstojanovich.evgds.chunk.Chunks;
 import rs.alexanderstojanovich.evgds.chunk.Tuple;
 import rs.alexanderstojanovich.evgds.core.Camera;
