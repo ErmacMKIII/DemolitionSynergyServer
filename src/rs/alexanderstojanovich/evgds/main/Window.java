@@ -1601,7 +1601,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v1.9 (%s BUILD reviewed on 2024-11-30 at 03:07).\n", BUILD.toString()));
+            sb.append(String.format("VERSION v1.9 (%s BUILD reviewed on 2024-11-30 at 05:40).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");

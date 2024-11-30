@@ -320,10 +320,8 @@ public class GameServer implements DSMachine, Runnable {
         if (++TotalFailedAttempts >= TOTAL_FAIL_ATTEMPT_MAX) {
             gameObject.WINDOW.logMessage((String.format("Game Server (%s:%d) status critical! Trying to shut down!", this.localIP, this.port)), Window.Status.ERR);
             DSLogger.reportWarning(String.format("Game Server (%s:%d) status critical! Trying to shut down!", this.localIP, this.port), null);
-            shutDownSignal = true;
 
             gameObject.WINDOW.stopServerAndUpdate();
-            shutDown();
         }
     }
 
