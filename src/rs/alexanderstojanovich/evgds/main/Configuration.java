@@ -37,18 +37,17 @@ public class Configuration {
     private DSLogger.DSLogLevel logLevel = DSLogger.DSLogLevel.ERR;
     private boolean logToFile = false;
     private int blockDynamicSize = 50;
-    private int textDynamicSize = 10;
+//    private int textDynamicSize = 10;
     private int textureSize = 512;
     private float gameTimeMultiplier = 1.0f;
-    private int optimizationPasses = 2;
+    private int optimizationPasses = 8;
+    // console refresh timer in seconds
+    private double consoleRefreshTimer = 5.0;
     private double gameTicks = 0.0;
-    private int blocksPerRun = 1000;
-    private int ticksPerUpdate = Game.TPS_TWO;
+//    private int ticksPerUpdate = Game.TPS_TWO;
 
     private String localIP = "127.0.0.1"; // local IP address used to host the server on (local) machine
-    private String serverIP = ""; // server ip used to connect client to server
     private int serverPort = 13667; // used in conjunction with local IP
-    private int clientPort = 13667; // used in conjunction with server IP
     private int maxClients = 16; // max number of clients connected (server logic)
 
     private boolean useBakGuid = false;
@@ -119,16 +118,22 @@ public class Configuration {
                                     blockDynamicSize = number;
                                 }
                                 break;
-                            case "textdynamicsize":
-                                number = Integer.parseInt(words[1]);
-                                if (number >= 3 && number <= 1000) {
-                                    textDynamicSize = number;
-                                }
-                                break;
+//                            case "textdynamicsize":
+//                                number = Integer.parseInt(words[1]);
+//                                if (number >= 3 && number <= 1000) {
+//                                    textDynamicSize = number;
+//                                }
+//                                break;
                             case "optimizationpasses":
                                 number = Integer.parseInt(words[1]);
                                 if (number != 0 && (number & (number - 1)) == 0 && number <= 64) {
                                     optimizationPasses = number;
+                                }
+                                break;
+                            case "consolerefreshtimer":
+                                double decimNum = Double.parseDouble(words[1]);
+                                if (decimNum != 0.0 && decimNum <= 3600.0) {
+                                    consoleRefreshTimer = decimNum;
                                 }
                                 break;
                             case "texturesize":
@@ -150,26 +155,26 @@ public class Configuration {
                                     gameTimeMultiplier = val;
                                 }
                                 break;
-                            case "blocksperrun":
-                                number = Integer.parseInt(words[1]);
-                                // block per cache loading run
-                                if (number > 0 && number <= 25000) {
-                                    blocksPerRun = number;
-                                }
-                                break;
-                            case "ticksperupdate":
-                                number = Integer.parseInt(words[1]);
-                                // block per cache loading run
-                                if (number > 0 && number <= 2) {
-                                    ticksPerUpdate = number;
-                                }
-                                break;
+//                            case "blocksperrun":
+//                                number = Integer.parseInt(words[1]);
+//                                // block per cache loading run
+//                                if (number > 0 && number <= 25000) {
+//                                    blocksPerRun = number;
+//                                }
+//                                break;
+//                            case "ticksperupdate":
+//                                number = Integer.parseInt(words[1]);
+//                                // block per cache loading run
+//                                if (number > 0 && number <= 2) {
+//                                    ticksPerUpdate = number;
+//                                }
+//                                break;
                             case "localip":
                                 localIP = words[1];
                                 break;
-                            case "serverip":
-                                serverIP = words[1];
-                                break;
+//                            case "serverip":
+//                                serverIP = words[1];
+//                                break;
                             case "serverport":
                                 number = Integer.parseInt(words[1]);
                                 // server port is constrained on local machine
@@ -177,13 +182,13 @@ public class Configuration {
                                     serverPort = number;
                                 }
                                 break;
-                            case "clientport":
-                                number = Integer.parseInt(words[1]);
-                                // clent port is free
-                                if (number > 0) {
-                                    clientPort = number;
-                                }
-                                break;
+//                            case "clientport":
+//                                number = Integer.parseInt(words[1]);
+//                                // clent port is free
+//                                if (number > 0) {
+//                                    clientPort = number;
+//                                }
+//                                break;
                             case "maxclients":
                                 number = Integer.parseInt(words[1]);
                                 // max authorised clients on the server
@@ -234,27 +239,25 @@ public class Configuration {
             pw.println("# If true generate log file, otherwise print only to console. Used in conjuction with log level.");
             pw.println("LogToFile = " + logToFile);
             pw.println("BlockDynamicSize = " + blockDynamicSize);
-            pw.println("TextDynamicSize = " + textDynamicSize);
+//            pw.println("TextDynamicSize = " + textDynamicSize);
             pw.println("OptimizationPasses = " + optimizationPasses);
+            pw.println("# Timer value (decimal, in seconds) to refresh console (dedicated server).");
+            pw.println("ConsoleRefreshTimer = " + consoleRefreshTimer);
             pw.println("# Texture size. Must be power of two, non-zero and lesser or equal than 4096.");
             pw.println("TextureSize = " + textureSize);
-            pw.println("# Game Ticks (decimal). Must be greater or equal zero");
+            pw.println("# Game Ticks (decimal). Must be greater or equal zero.");
             pw.println("GameTicks = " + gameTicks);
             pw.println("# Game Time (decimal). Must be metween (0, 5]");
             pw.println("GameTimeMultiplier = " + gameTimeMultiplier);
-            pw.println("# Block number load per cache run. Must be between (0, 25000]");
-            pw.println("BlocksPerRun = " + blocksPerRun);
-            pw.println("# Ticks per update (1 - FLUID, 2 - EFFICIENT)");
-            pw.println("TicksPerUpdate = " + ticksPerUpdate);
-            pw.println("# Local IP address used to host the server on (local) machine. Used with server port");
+//            pw.println("# Block number load per cache run. Must be between (0, 25000]");
+//            pw.println("BlocksPerRun = " + blocksPerRun);
+//            pw.println("# Ticks per update (1 - FLUID, 2 - EFFICIENT)");
+//            pw.println("TicksPerUpdate = " + ticksPerUpdate);
+            pw.println("# Local IP address used to host the server on (local) machine. Used with server port.");
             pw.println("LocalIP = " + localIP);
-            pw.println("# Preferred game server (local or public IP address) for client to connect. Used in conjuction with client port");
-            pw.println("ServerIP = " + serverIP);
-            pw.println("# Preferred game server port (to run the server). Must be in range 13660-13669");
+            pw.println("# Preferred game server port (to run the server). Must be in range 13660-13669.");
             pw.println("ServerPort = " + serverPort);
-            pw.println("# Client port set to connect to game server. Varying");
-            pw.println("ClientPort = " + clientPort);
-            pw.println("# Max server clients");
+            pw.println("# Max server clients.");
             pw.println("MaxClients = " + maxClients);
             pw.println("# Use backup guid. Testing purposes.");
             pw.println("UseBakGuid = " + useBakGuid);
@@ -319,10 +322,10 @@ public class Configuration {
     public int getBlockDynamicSize() {
         return blockDynamicSize;
     }
-
-    public int getTextDynamicSize() {
-        return textDynamicSize;
-    }
+//
+//    public int getTextDynamicSize() {
+//        return textDynamicSize;
+//    }
 
     public int getTextureSize() {
         return textureSize;
@@ -336,34 +339,30 @@ public class Configuration {
         return gameTicks;
     }
 
-    public int getBlocksPerRun() {
-        return blocksPerRun;
-    }
-
+//    public int getBlocksPerRun() {
+//        return blocksPerRun;
+//    }
     public int getOptimizationPasses() {
         return optimizationPasses;
     }
 
-    public int getTicksPerUpdate() {
-        return ticksPerUpdate;
-    }
-
-    public String getServerIP() {
-        return serverIP;
-    }
-
-    public void setServerIP(String serverIP) {
-        this.serverIP = serverIP;
-    }
-
+//    public int getTicksPerUpdate() {
+//        return ticksPerUpdate;
+//    }
+//    public String getServerIP() {
+//        return serverIP;
+//    }
+//
+//    public void setServerIP(String serverIP) {
+//        this.serverIP = serverIP;
+//    }
     public int getServerPort() {
         return serverPort;
     }
 
-    public int getClientPort() {
-        return clientPort;
-    }
-
+//    public int getClientPort() {
+//        return clientPort;
+//    }
     public String getLocalIP() {
         return localIP;
     }
@@ -376,10 +375,9 @@ public class Configuration {
         this.serverPort = serverPort;
     }
 
-    public void setClientPort(int clientPort) {
-        this.clientPort = clientPort;
-    }
-
+//    public void setClientPort(int clientPort) {
+//        this.clientPort = clientPort;
+//    }
     public boolean isUseBakGuid() {
         return useBakGuid;
     }
@@ -394,6 +392,10 @@ public class Configuration {
 
     public int getMaxClients() {
         return maxClients;
+    }
+
+    public double getConsoleRefreshTimer() {
+        return consoleRefreshTimer;
     }
 
 }

@@ -22,8 +22,8 @@ import org.joml.Vector4f;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
 import org.magicwerk.brownies.collections.Key1List;
-import rs.alexanderstojanovich.evgds.models.Block;
 import rs.alexanderstojanovich.evgds.chunk.Chunk;
+import rs.alexanderstojanovich.evgds.models.Block;
 
 /**
  *
@@ -181,13 +181,12 @@ public class BlockLocation {
     }
 
     /**
-     * List of populated locations for given y-coordinate. Warning: this is
-     * performance costly - So don't call it in a loop!
+     * List of populated locations for given blkId.
      *
      * @param blkId blk primary (key) id
      * @return List of Vector3f of populated locationMap(s)
      */
-    public IList<TexByte> getPopulatedLocations(int blkId) {
+    public IList<TexByte> getPopulatedLocationProperties(int blkId) {
         return locationProperties.getAllByKey1(blkId);
     }
 
@@ -309,33 +308,87 @@ public class BlockLocation {
      *
      * @param chunkId chunkId to check (block) population.
      *
+     * @return List of Vector3f of populated locationMap(s)
+     */
+    public IList<Vector3f> getPopulatedLocations(int chunkId) {
+        IList<Vector3f> result = new GapList<>();
+
+        // Calculate bounds for y based on chunk constraints
+        float lowerYBound = -Chunk.BOUND + 2.0f;
+        float upperYBound = Chunk.BOUND - 2.0f;
+
+        // Half the chunk length for spatial calculations
+        final float halfLength = Chunk.LENGTH / 2.0f;
+
+        // Calculate the centroid position of the chunk
+        Vector3f chunkCenter = Chunk.invChunkFunc(chunkId);
+
+        // Iterate over each position within the chunk's bounds
+        for (float y = lowerYBound; y <= upperYBound; y += 2.0f) {
+            for (float x = chunkCenter.x - halfLength; x < chunkCenter.x + halfLength; x += 2.0f) {
+                for (float z = chunkCenter.z - halfLength; z < chunkCenter.z + halfLength; z += 2.0f) {
+                    // Map the world coordinates to grid indices
+                    int i = (int) ((x + Chunk.BOUND) / 2.0f);
+                    int j = (int) ((z + Chunk.BOUND) / 2.0f);
+                    int k = (int) ((y + Chunk.BOUND) / 2.0f);
+
+                    // Skip invalid or unsafe positions
+                    if (!safeCheck(i, j, k)) {
+                        continue;
+                    }
+
+                    // Check if the position is populated
+                    TexByte value = locationMap[i][j][k];
+                    if (value != null) {
+                        result.add(new Vector3f(x, y, z));
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * List of populated locations with given predicated. Warning: this is
+     * performance costly - So don't call it in a loop!
+     *
+     * @param chunkId chunkId to check (block) population.
+     *
      * @param predicate predicate
      * @return List of Vector3f of populated locationMap(s)
      */
     public IList<Vector3f> getPopulatedLocations(int chunkId, Predicate<TexByte> predicate) {
         IList<Vector3f> result = new GapList<>();
 
-        float lYBound = -Chunk.BOUND + 2.0f;
-        float rYBound = Chunk.BOUND - 2.0f;
+        // Calculate bounds for y based on chunk constraints
+        float lowerYBound = -Chunk.BOUND + 2.0f;
+        float upperYBound = Chunk.BOUND - 2.0f;
 
-        final float halfLen = Chunk.LENGTH / 2.0f;
-        Vector3f chunkPos = Chunk.invChunkFunc(chunkId);
+        // Half the chunk length for spatial calculations
+        final float halfLength = Chunk.LENGTH / 2.0f;
 
-        for (float y = lYBound; y <= rYBound; y += 2.0f) {
-            for (float x = chunkPos.x - halfLen; x < chunkPos.x + halfLen; x += 2.0f) {
-                for (float z = chunkPos.z - halfLen; z < chunkPos.z + halfLen; z += 2.0f) {
+        // Calculate the centroid position of the chunk
+        Vector3f chunkCenter = Chunk.invChunkFunc(chunkId);
+
+        // Iterate over each position within the chunk's bounds
+        for (float y = lowerYBound; y <= upperYBound; y += 2.0f) {
+            for (float x = chunkCenter.x - halfLength; x < chunkCenter.x + halfLength; x += 2.0f) {
+                for (float z = chunkCenter.z - halfLength; z < chunkCenter.z + halfLength; z += 2.0f) {
+                    // Map the world coordinates to grid indices
                     int i = (int) ((x + Chunk.BOUND) / 2.0f);
                     int j = (int) ((z + Chunk.BOUND) / 2.0f);
                     int k = (int) ((y + Chunk.BOUND) / 2.0f);
 
+                    // Skip invalid or unsafe positions
                     if (!safeCheck(i, j, k)) {
                         continue;
                     }
 
+                    // Check if the position is populated
                     TexByte value = locationMap[i][j][k];
                     if (value != null && predicate.test(value)) {
-                        Vector3f pos = new Vector3f(x, y, z);
-                        result.add(pos);
+                        result.add(new Vector3f(x, y, z));
                     }
                 }
             }
