@@ -182,11 +182,6 @@ public class Game implements DSMachine {
                     ups++;
                     accumulator -= TICK_TIME;
                 }
-
-                // Refresh console (component) messages ~ 250 ms
-                if ((ups & (TPS_QUARTER - 1)) == 0) {
-                    gameObject.WINDOW.refreshConsole();
-                }
             }
         };
         gameLoopTimer.scheduleAtFixedRate(task0, (long) (0.5 * TICK_TIME * 1000L), (long) (0.5 * TICK_TIME * 1000L));

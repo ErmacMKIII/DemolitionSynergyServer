@@ -39,28 +39,25 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutionException;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
-import javax.swing.JTextPane;
-import javax.swing.SwingUtilities;
+import javax.swing.ListModel;
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Element;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyledDocument;
 import org.magicwerk.brownies.collections.BigList;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
@@ -89,25 +86,41 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
  */
 public class Window extends javax.swing.JFrame {
 
+    public final Configuration config = Configuration.getInstance();
+
     /**
-     * Prevent add/fetch message without control
+     * Console refresh timer 5000 milliseconds
      */
-    public final Object internMsgLogMutex = new Object();
+    public final Timer conRefreshTimer = new Timer((int) Math.round(1000.0 * config.getConsoleRefreshTimer()), (ActionEvent e) -> refreshConsole());
+
+    public static final Color CON_INFO_COLOR = new Color(0, 191, 255); // Deep sky blue
+    public static final Color CON_ERR_COLOR = Color.RED;
+    public static final Color CON_WARN_COLOR = new Color(255, 215, 0); // Gold
+
+    /**
+     * Pass of logger
+     */
+    public static int logPass = 0;
+
+    /**
+     * Console chunk of lines (provides efficient rendering)
+     */
+    public static final int CON_CHUNK_LINES_SIZE = 1000;
 
     /**
      * Max line to store
      */
-    public static int MAX_LINES = 1000000; // one-million
+    public static final int MAX_LINES = 1000000; // one-million
 
     /**
      * Max line to store half
      */
-    public static int MAX_LINES_HALF = 500000; // half a million
+    public static final int MAX_LINES_HALF = 500000; // half a million
 
     /**
      * Max line to store quarter
      */
-    public static int MAX_LINES_QUARTER = 250000; // quarter of million
+    public static final int MAX_LINES_QUARTER = 250000; // quarter of million
 
     public static enum BuildType {
         PUBLIC, DEVELOPMENT
@@ -169,8 +182,6 @@ public class Window extends javax.swing.JFrame {
     public final SystemInfo si = new SystemInfo();
     public final HardwareAbstractionLayer hal = si.getHardware();
     public final OperatingSystem os = si.getOperatingSystem();
-
-    public final Configuration config = Configuration.getInstance();
 
     public final GameObject gameObject;
     public static final Dimension DIM = Toolkit.getDefaultToolkit().getScreenSize();
@@ -249,6 +260,7 @@ public class Window extends javax.swing.JFrame {
         this.tboxLocalIP.setText(config.getLocalIP());
         this.spinServerPort.setValue(config.getServerPort());
         initPopUpMenu();
+        initConsoleRenderer();
     }
 
     public void initCenterWindow() {
@@ -263,14 +275,7 @@ public class Window extends javax.swing.JFrame {
      */
     public void logMessage(String msg, Status status) {
         Message message = new Message(msg, status);
-        synchronized (internMsgLogMutex) {
-            messageLog.add(message);
-
-            // prevent mem overflow
-            if (messageLog.size() > MAX_LINES_HALF) {
-                messageLog.remove(0, MAX_LINES_QUARTER);
-            }
-        }
+        messageLog.add(message);
     }
 
     /**
@@ -297,6 +302,38 @@ public class Window extends javax.swing.JFrame {
                     logPopupMenu.show(e.getComponent(), e.getX(), e.getY());
                 }
             }
+        });
+    }
+
+    /**
+     * Console renderer (JList)
+     */
+    private void initConsoleRenderer() {
+        // Custom renderer for log messages
+        this.console.setCellRenderer((JList<? extends String> list, String value, int index, boolean isSelected, boolean cellHasFocus)
+                -> {
+            JLabel label = new JLabel(value); // Create a JLabel to display the text
+
+            // Apply color based on message content
+            if (value.contains("ERR")) {
+                label.setForeground(CON_ERR_COLOR);
+            } else if (value.contains("WARN")) {
+                label.setForeground(CON_WARN_COLOR);
+            } else {
+                label.setForeground(CON_INFO_COLOR);
+            }
+
+            // Handle selection highlighting
+            if (isSelected) {
+                label.setBackground(list.getSelectionBackground());
+                label.setForeground(list.getSelectionForeground());
+                label.setOpaque(true);
+            } else {
+                label.setBackground(list.getBackground());
+                label.setOpaque(false);
+            }
+
+            return label; // Return the customized component
         });
     }
 
@@ -493,7 +530,7 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
-    public JTextPane getConsole() {
+    public JList<String> getConsole() {
         return console;
     }
 
@@ -587,7 +624,7 @@ public class Window extends javax.swing.JFrame {
         togBtnWarn = new javax.swing.JToggleButton();
         togBtnInfo = new javax.swing.JToggleButton();
         spConsole = new javax.swing.JScrollPane();
-        console = new javax.swing.JTextPane();
+        console = new javax.swing.JList<>();
         mainMenu = new javax.swing.JMenuBar();
         fileMenu = new javax.swing.JMenu();
         fileMenuStart = new javax.swing.JMenuItem();
@@ -991,7 +1028,8 @@ public class Window extends javax.swing.JFrame {
 
         panelConsole.add(togBtnBar, java.awt.BorderLayout.PAGE_START);
 
-        console.setEditable(false);
+        console.setModel(new DefaultListModel<String>()
+        );
         spConsole.setViewportView(console);
 
         panelConsole.add(spConsole, java.awt.BorderLayout.CENTER);
@@ -1107,7 +1145,9 @@ public class Window extends javax.swing.JFrame {
         logMenuSaveAs.setEnabled(true);
 
         messageLog.clear();
-        refreshConsole();
+
+        // Start logging in a (rendered) swing component
+        gameObject.WINDOW.conRefreshTimer.start();
     }
 
     public void stopServerAndUpdate() {
@@ -1134,6 +1174,9 @@ public class Window extends javax.swing.JFrame {
 
         logMenuCopy.setEnabled(false);
         logMenuSaveAs.setEnabled(false);
+
+        // Stop logging of (rendered) swing component
+        gameObject.WINDOW.conRefreshTimer.stop();
     }
 
     private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed
@@ -1558,7 +1601,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v1.9 (%s BUILD reviewed on 2024-11-29 at 16:35).\n", BUILD.toString()));
+            sb.append(String.format("VERSION v1.9 (%s BUILD reviewed on 2024-11-30 at 03:07).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1581,7 +1624,12 @@ public class Window extends javax.swing.JFrame {
      * Copy Log to ClipBoard
      */
     private void copyLog() {
-        String text = console.getText();
+        StringBuilder sb = new StringBuilder();
+        ListModel<String> model = console.getModel();
+        for (int i = 0; i < model.getSize(); i++) {
+            sb.append(model.getElementAt(i));
+        }
+        String text = sb.toString();
         StringSelection stringSelection = new StringSelection(text);
         Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stringSelection, null);
     }
@@ -1599,7 +1647,14 @@ public class Window extends javax.swing.JFrame {
                 protected Void doInBackground() throws Exception {
                     try (BufferedWriter writer = new BufferedWriter(new FileWriter(file))) {
                         // Write the content of the JTextArea to the file
-                        writer.write(console.getText());
+                        StringBuilder sb = new StringBuilder();
+                        ListModel<String> model = console.getModel();
+                        for (int i = 0; i < model.getSize(); i++) {
+                            sb.append(model.getElementAt(i));
+                        }
+                        String text = sb.toString();
+
+                        writer.write(text);
                         JOptionPane.showMessageDialog(Window.this, "Log saved successfully!");
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(Window.this, "Error saving log: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
@@ -1686,99 +1741,74 @@ public class Window extends javax.swing.JFrame {
 
     private void spinLineNumStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_spinLineNumStateChanged
         // TODO add your handling code here:
-        if (togBtnError.isSelected()) {
-            filter |= Status.ERR.mask;
-        } else {
-            filter &= ~Status.ERR.mask;
-        }
 
-        // TODO add your handling code here:
-        if (togBtnWarn.isSelected()) {
-            filter |= Status.WARN.mask;
-        } else {
-            filter &= ~Status.WARN.mask;
-        }
-
-        if (togBtnInfo.isSelected()) {
-            filter |= Status.INFO.mask;
-        } else {
-            filter &= ~Status.INFO.mask;
-        }
     }//GEN-LAST:event_spinLineNumStateChanged
-
-    private void limitDocumentSize(StyledDocument doc, int maxLines) {
-        try {
-            int lines = doc.getRootElements()[0].getElementCount();
-            while (lines > maxLines) {
-                Element firstLine = doc.getRootElements()[0].getElement(0);
-                doc.remove(0, firstLine.getEndOffset());
-                lines--;
-            }
-        } catch (BadLocationException ex) {
-            DSLogger.reportError("Failed to trim document size", ex);
-        }
-    }
 
     /**
      * Append a single message to the console with styling.
      *
-     * @param doc the StyledDocument of the console
+     * @param listModel model of the console
      * @param msg the message to append
      */
-    private void appendToConsole(StyledDocument doc, Message msg) {
-        SimpleAttributeSet attributes = new SimpleAttributeSet();
-        switch (msg.status) {
-            case ERR:
-                StyleConstants.setForeground(attributes, Color.RED);
-                break;
-            case WARN:
-                StyleConstants.setForeground(attributes, Color.YELLOW);
-                break;
-            case INFO:
-            default:
-                StyleConstants.setForeground(attributes, Color.CYAN);
-                break;
-        }
-
-        try {
-            int position = doc.getLength();
-            doc.insertString(position, msg.text + "\r\n", attributes);
-        } catch (BadLocationException ex) {
-            DSLogger.reportError("Failed to insert string at valid position", ex);
-        }
+    private void appendToConsole(DefaultListModel listModel, Message msg) {
+        listModel.addElement(msg.status + ":" + msg.text + "\r\n");
     }
 
     /**
-     * Refresh console log. Works with filters. {INFO, WARN, ERR}
+     * Refresh console log in chunks. Works with filters {INFO, WARN, ERR}.
+     * Called by a Swing Timer to append messages in manageable chunks.
      */
     public void refreshConsole() {
-        SwingUtilities.invokeLater(() -> {
-            if (messageLog.isEmpty()) {
-                console.setText("");
-                return;
-            }
+        final DefaultListModel<String> conListModel = (DefaultListModel<String>) console.getModel();
+        if (messageLog.isEmpty()) {
+            conListModel.clear();
+            logPass = 0; // Reset logPass for future use
+            return;
+        }
 
-            IList<Message> filteredMessages;
-            int lines = (int) this.spinLineNum.getValue();
-            synchronized (internMsgLogMutex) {
-                filteredMessages = messageLog.filter(m -> (m.status.mask & filter) != 0);
-            }
+        IList<Message> filteredMessages;
+        int lines = (int) this.spinLineNum.getValue();
 
-            int size = filteredMessages.size();
-            if (size == 0) {
-                console.setText("");
-                return;
-            }
+        // Prevent memory overflow by trimming the logs
+        if (messageLog.size() > 2 * lines) {
+            messageLog.remove(0, lines);
+        }
+        if (conListModel.size() > 2 * lines) {
+            conListModel.removeRange(0, lines);
+        }
 
-            int startIndex = Math.max(size - lines, 0);
-            IList<Message> lastNMessages = filteredMessages.getAll(startIndex, size - startIndex);
+        // Filter messages
+        filteredMessages = messageLog.immutableList().filter(m -> (m.status.mask & filter) != 0);
 
-            StyledDocument doc = console.getStyledDocument();
-            console.setText(""); // Clear content
+        int size = filteredMessages.size();
+        if (size == 0) {
+            conListModel.clear();
+            logPass = 0; // Reset logPass for future use
+            return;
+        }
 
-            lastNMessages.forEach(msg -> appendToConsole(doc, msg));
-            limitDocumentSize(doc, lines); // Trim to last 1000 lines
-        });
+        // Calculate the range of messages to display
+        int startIndex = Math.max(size - lines, 0);
+        final IList<Message> lastNMessages = filteredMessages.getAll(startIndex, size - startIndex);
+
+        // If this is the first pass, clear the model
+        if (logPass == 0) {
+            conListModel.clear();
+        }
+
+        // Append messages in chunks
+        int chunkSize = Window.CON_CHUNK_LINES_SIZE;
+        int start = logPass * chunkSize;
+        int end = Math.min(start + chunkSize, lastNMessages.size());
+
+        lastNMessages.getAll(start, end - start).forEach(msg -> appendToConsole(conListModel, msg));
+
+        // Check if we are done processing all messages
+        if (end >= lastNMessages.size()) {
+            logPass = 0; // Reset logPass for the next refresh
+        } else {
+            logPass++; // Prepare for the next chunk
+        }
     }
 
     private void infoHelp() {
@@ -1829,6 +1859,10 @@ public class Window extends javax.swing.JFrame {
         return spinMapSeed;
     }
 
+    public Timer getConRefreshTimer() {
+        return conRefreshTimer;
+    }
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnErase;
     private javax.swing.JButton btnExport;
@@ -1840,7 +1874,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JButton btnStop;
     private javax.swing.JTable clientInfoTbl;
     private javax.swing.JComboBox<String> cmbLevelSize;
-    private javax.swing.JTextPane console;
+    private javax.swing.JList<String> console;
     private javax.swing.JMenu fileHelp;
     private javax.swing.JMenu fileMenu;
     private javax.swing.JMenuItem fileMenuExit;
