@@ -232,7 +232,7 @@ public class GameServer implements DSMachine, Runnable {
                 });
 
                 // Remove kicked and timed out players
-                clients.removeIf(cli -> cli.timeToLive <= 0 || kicklist.contains(cli.uniqueId));
+                clients.removeIf(cli -> cli.timeToLive <= 0);
 
                 // Kicklist is processed, clear it
                 kicklist.clear();
@@ -404,16 +404,16 @@ public class GameServer implements DSMachine, Runnable {
                 ResponseIfc response = new Response(0L, ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, "KICK");
                 response.send(clientInfo.uniqueId, gameServer, clientInfo.session);
 
-                // remove from client list
-                gameServer.clients.removeIf(c -> c.uniqueId.equals(clientInfo.uniqueId));
-                // close session (with the client)
-                clientInfo.session.closeNow().await(GameServer.GOODBYE_TIMEOUT);
+//                // remove from client list
+//                gameServer.clients.removeIf(c -> c.uniqueId.equals(clientInfo.uniqueId));
+//                // close session (with the client)
+//                clientInfo.session.closeNow().await(GameServer.GOODBYE_TIMEOUT);
 
                 // clean up server from client data
                 GameServer.performCleanUp(gameServer.gameObject, clientInfo.uniqueId, false);
 
                 // add to kick list for later removal from client list
-                gameServer.kicklist.add(playerGuid);
+                gameServer.kicklist.addIfAbsent(playerGuid);
             } catch (Exception ex) {
                 DSLogger.reportError(String.format("Error during kick client %s !", clientInfo.uniqueId), ex);
                 DSLogger.reportError(ex.getMessage(), ex);
