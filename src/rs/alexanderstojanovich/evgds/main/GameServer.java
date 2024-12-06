@@ -408,7 +408,6 @@ public class GameServer implements DSMachine, Runnable {
 //                gameServer.clients.removeIf(c -> c.uniqueId.equals(clientInfo.uniqueId));
 //                // close session (with the client)
 //                clientInfo.session.closeNow().await(GameServer.GOODBYE_TIMEOUT);
-
                 // clean up server from client data
                 GameServer.performCleanUp(gameServer.gameObject, clientInfo.uniqueId, false);
 

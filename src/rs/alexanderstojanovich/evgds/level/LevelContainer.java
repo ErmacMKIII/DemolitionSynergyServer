@@ -25,8 +25,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
-import java.util.Comparator;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -48,7 +46,6 @@ import rs.alexanderstojanovich.evgds.models.Model;
 import rs.alexanderstojanovich.evgds.resources.Assets;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
 import rs.alexanderstojanovich.evgds.util.ModelUtils;
-import rs.alexanderstojanovich.evgds.util.Pair;
 import rs.alexanderstojanovich.evgds.util.VectorFloatUtils;
 import rs.alexanderstojanovich.evgds.weapons.Weapons;
 
@@ -88,27 +85,8 @@ public class LevelContainer implements GravityEnviroment {
     public final BlockEnvironment blockEnvironment;
     public final LightSources lightSources;
 
-    public static final int LIST_CAPACITY = 8;
-    public static final Comparator<Pair<Integer, Float>> VIPAIR_COMPARATOR = new Comparator<Pair<Integer, Float>>() {
-        @Override
-        public int compare(Pair<Integer, Float> o1, Pair<Integer, Float> o2) {
-            if (o1 == null || o2 == null) {
-                return 0;
-            } else {
-                if (o1.getValue() > o2.getValue()) {
-                    return 1;
-                } else if (Objects.equals(o1.getValue(), o2.getValue())) {
-                    return 0;
-                } else {
-                    return -1;
-                }
-            }
-
-        }
-    };
-
-    private final IList<Integer> vChnkIdList = new GapList<>(LIST_CAPACITY);
-    private final IList<Integer> iChnkIdList = new GapList<>(LIST_CAPACITY);
+    private final IList<Integer> vChnkIdList = new GapList<>();
+    private final IList<Integer> iChnkIdList = new GapList<>();
 
     public final byte[] buffer = new byte[0x1000000]; // 16 MB Buffer
     public int pos = 0;
@@ -133,9 +111,6 @@ public class LevelContainer implements GravityEnviroment {
 
     // position of all the solid blocks to texture name & neighbors
     public static final BlockLocation AllBlockMap = new BlockLocation();
-
-    // std time to live
-    public static final float STD_TTL = 30.0f * (float) Game.TICK_TIME;
 
     protected static boolean actorInFluid = false;
 
@@ -493,6 +468,8 @@ public class LevelContainer implements GravityEnviroment {
             }
             buffer[pos++] = (byte) (count);
             buffer[pos++] = (byte) (count >> 8);
+            buffer[pos++] = (byte) (count >> 16);
+            buffer[pos++] = (byte) (count >> 24);
             for (Vector3f p : blkPos) {
                 if (gameObject.gameServer.isShutDownSignal()) {
                     break;
@@ -617,113 +594,6 @@ public class LevelContainer implements GravityEnviroment {
         return success;
     }
 
-//    public Future<Boolean> loadLevelFromBufferAsync() {
-//        progress = 0.0f;
-//
-//        Callable<Boolean> task = () -> {
-//            if (progress > 0.0f) {
-//                return false;
-//            }
-//            boolean okey = false;
-//            progress = 0.0f;
-//            levelActors.freeze();
-//            gameObject.getMusicPlayer().play(AudioFile.INTERMISSION, true, true);
-//            pos = 0;
-//            if (buffer[0] == 'D' && buffer[1] == 'S') {
-//                chunks.clear();
-//
-//                AllBlockMap.init();
-//
-//                lightSources.retainLights(2);
-//
-//                CacheModule.deleteCache();
-//
-//                pos += 2;
-//                byte[] posArr = new byte[12];
-//                System.arraycopy(buffer, pos, posArr, 0, posArr.length);
-//                Vector3f campos = VectorFloatUtils.vec3fFromByteArray(posArr);
-//                pos += posArr.length;
-//
-//                byte[] frontArr = new byte[12];
-//                System.arraycopy(buffer, pos, frontArr, 0, frontArr.length);
-//                Vector3f camfront = VectorFloatUtils.vec3fFromByteArray(frontArr);
-//                pos += frontArr.length;
-//
-//                byte[] upArr = new byte[12];
-//                System.arraycopy(buffer, pos, frontArr, 0, upArr.length);
-//                Vector3f camup = VectorFloatUtils.vec3fFromByteArray(upArr);
-//                pos += upArr.length;
-//
-//                byte[] rightArr = new byte[12];
-//                System.arraycopy(buffer, pos, rightArr, 0, rightArr.length);
-//                Vector3f camright = VectorFloatUtils.vec3fFromByteArray(rightArr);
-//                pos += rightArr.length;
-//
-//                levelActors.configureMainObserver(campos, camfront, camup, camright);
-//
-//                char[] solid = new char[5];
-//                for (int i = 0; i < solid.length; i++) {
-//                    solid[i] = (char) buffer[pos++];
-//                }
-//                String strSolid = String.valueOf(solid);
-//
-//                if (strSolid.equals("SOLID")) {
-//                    int solidNum = ((buffer[pos + 1] & 0xFF) << 8) | (buffer[pos] & 0xFF);
-//                    pos += 2;
-//                    for (int i = 0; i < solidNum && ! gameObject.gameServer.isShutDownSignal(); i++) {
-//                        byte[] byteArraySolid = new byte[29];
-//                        System.arraycopy(buffer, pos, byteArraySolid, 0, 29);
-//                        Block solidBlock = Block.fromByteArray(byteArraySolid, true);
-//                        chunks.addBlock(solidBlock);
-//                        pos += 29;
-//                        progress += 50.0f / solidNum;
-//                    }
-//
-//                    //                solidChunks.updateSolids();
-//                    char[] fluid = new char[5];
-//                    for (int i = 0; i < fluid.length; i++) {
-//                        fluid[i] = (char) buffer[pos++];
-//                    }
-//                    String strFluid = String.valueOf(fluid);
-//
-//                    if (strFluid.equals("FLUID")) {
-//                        int fluidNum = ((buffer[pos + 1] & 0xFF) << 8) | (buffer[pos] & 0xFF);
-//                        pos += 2;
-//                        for (int i = 0; i < fluidNum && ! gameObject.gameServer.isShutDownSignal(); i++) {
-//                            byte[] byteArrayFluid = new byte[29];
-//                            System.arraycopy(buffer, pos, byteArrayFluid, 0, 29);
-//                            Block fluidBlock = Block.fromByteArray(byteArrayFluid, false);
-//                            chunks.addBlock(fluidBlock);
-//                            pos += 29;
-//                            progress += 50.0f / fluidNum;
-//                        }
-//
-//                        //                    fluidChunks.updateFluids();
-//                        char[] end = new char[3];
-//                        for (int i = 0; i < end.length; i++) {
-//                            end[i] = (char) buffer[pos++];
-//                        }
-//                        String strEnd = String.valueOf(end);
-//                        if (strEnd.equals("END")) {
-//                            okey = true;
-//                        }
-//                    }
-//
-//                }
-//
-//            }
-//            levelActors.unfreeze();
-//            blockEnvironment.clear();
-//
-//            progress = 100.0f;
-//            working = false;
-//            gameObject.getMusicPlayer().stop();
-//
-//            return okey;
-//        };
-//
-//        return GameObject.SINGLE_THR_EXEC.submit(task);
-//    }
     public boolean loadLevelFromBufferNewFormat() throws UnsupportedEncodingException {
         working = true;
         boolean success = false;
@@ -766,6 +636,10 @@ public class LevelContainer implements GravityEnviroment {
                 int totalBlocks = (buffer[pos++] & 0xFF) | ((buffer[pos++] & 0xFF) << 8)
                         | ((buffer[pos++] & 0xFF) << 16) | ((buffer[pos++] & 0xFF) << 24);
 
+                if (totalBlocks <= 0) {
+                    throw new IllegalStateException("No blocks to process!");
+                }
+
                 while (true) {
                     char[] texNameChars = new char[5];
                     for (int i = 0; i < texNameChars.length; i++) {
@@ -773,7 +647,8 @@ public class LevelContainer implements GravityEnviroment {
                     }
                     String texName = new String(texNameChars);
 
-                    int count = (buffer[pos++] & 0xFF) | ((buffer[pos++] & 0xFF) << 8);
+                    int count = (buffer[pos++] & 0xFF) | ((buffer[pos++] & 0xFF) << 8)
+                            | ((buffer[pos++] & 0xFF) << 16) | ((buffer[pos++] & 0xFF) << 24);
 
                     for (int i = 0; i < count && !gameObject.gameServer.isShutDownSignal(); i++) {
                         byte[] byteArrayBlock = new byte[29];
