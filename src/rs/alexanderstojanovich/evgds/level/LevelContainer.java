@@ -832,11 +832,12 @@ public class LevelContainer implements GravityEnviroment {
      * Applies gravity to the player, making them fall downwards if not
      * supported below.
      *
+     * @param critter critter affected by gravity
      * @param deltaTime The time elapsed since the last handleInput.
      * @return {@code true} if the player is falling, {@code false} otherwise.
      */
     @Override
-    public boolean gravityDo(float deltaTime) {
+    public boolean gravityDo(Critter critter, float deltaTime) {
         return false;
     }
 
