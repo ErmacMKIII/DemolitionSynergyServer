@@ -48,6 +48,8 @@ public class Tuple extends Series {
     protected final String name;
 
     protected final int facesNum;
+    protected final int faceEnBits;
+    protected final String texName;
 
     /**
      * Tuple comparator sorting tuples by (String) name.
@@ -61,6 +63,8 @@ public class Tuple extends Series {
      * @param faceEnBits face enabled bits
      */
     public Tuple(String texName, int faceEnBits) {
+        this.texName = texName;
+        this.faceEnBits = faceEnBits;
         this.name = String.format("%s%02d", texName, faceEnBits);
 
         int numberOfOnes = 0;
@@ -83,6 +87,8 @@ public class Tuple extends Series {
      * @param original to copy properties from
      */
     public Tuple(Tuple original) {
+        this.texName = original.texName;
+        this.faceEnBits = original.faceEnBits;
         this.name = String.format("%s%02d", original.texName(), original.faceBits());
         this.facesNum = original.facesNum;
         this.verticesNum = original.verticesNum; // affects buffering of vertices
@@ -241,15 +247,15 @@ public class Tuple extends Series {
     }
 
     public String texName() {
-        return name.substring(0, 5);
+        return texName;
     }
 
     public int faceBits() {
-        return Integer.parseInt(name.substring(5));
+        return faceEnBits;
     }
 
     public boolean isSolid() {
-        return !texName().equals("water") && !texName().equals("cloud");
+        return !texName().equals("water");
     }
 
     public int getVec4Vbo() {

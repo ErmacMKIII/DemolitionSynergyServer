@@ -617,8 +617,8 @@ public class Window extends javax.swing.JFrame {
         panelConsole = new javax.swing.JPanel();
         lblHealthMini = new javax.swing.JLabel();
         togBtnBar = new javax.swing.JPanel();
-        panelEmpty = new javax.swing.JPanel();
-        jLabel1 = new javax.swing.JLabel();
+        btnRefresh = new javax.swing.JButton();
+        lblLines = new javax.swing.JLabel();
         spinLineNum = new javax.swing.JSpinner();
         togBtnError = new javax.swing.JToggleButton();
         togBtnWarn = new javax.swing.JToggleButton();
@@ -975,11 +975,21 @@ public class Window extends javax.swing.JFrame {
 
         togBtnBar.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Filter", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Segoe UI", 0, 10))); // NOI18N
         togBtnBar.setLayout(new java.awt.GridLayout(2, 5));
-        togBtnBar.add(panelEmpty);
 
-        jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        jLabel1.setText("Lines:");
-        togBtnBar.add(jLabel1);
+        btnRefresh.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
+        btnRefresh.setIcon(new javax.swing.ImageIcon(getClass().getResource("/rs/alexanderstojanovich/evgds/resources/refresh.png"))); // NOI18N
+        btnRefresh.setText("Refresh");
+        btnRefresh.setToolTipText("Refresh the messages (Console)");
+        btnRefresh.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRefreshActionPerformed(evt);
+            }
+        });
+        togBtnBar.add(btnRefresh);
+
+        lblLines.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblLines.setText("Preview Lines:");
+        togBtnBar.add(lblLines);
 
         spinLineNum.setModel(new javax.swing.SpinnerNumberModel(10000, 1, 500000, 1));
         spinLineNum.setToolTipText("Top number of lines to preview (from the end).");
@@ -1601,7 +1611,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v1.9 (%s BUILD reviewed on 2024-11-30 at 05:40).\n", BUILD.toString()));
+            sb.append(String.format("VERSION v2.0 (%s BUILD reviewed on 2024-12-15 at 08:45).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1744,6 +1754,13 @@ public class Window extends javax.swing.JFrame {
 
     }//GEN-LAST:event_spinLineNumStateChanged
 
+    private void btnRefreshActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRefreshActionPerformed
+        // TODO add your handling code here:
+        btnRefresh.setEnabled(false);
+        refreshConsole();
+        btnRefresh.setEnabled(true);
+    }//GEN-LAST:event_btnRefreshActionPerformed
+
     /**
      * Append a single message to the console with styling.
      *
@@ -1869,6 +1886,7 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JButton btnGenerate;
     private javax.swing.JButton btnHealth;
     private javax.swing.JButton btnImport;
+    private javax.swing.JButton btnRefresh;
     private javax.swing.JButton btnRestart;
     private javax.swing.JButton btnStart;
     private javax.swing.JButton btnStop;
@@ -1885,10 +1903,10 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JLabel gameTimeText;
     private javax.swing.JMenuItem helpMenuAbout;
     private javax.swing.JMenuItem helpMenuHowToUse;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel lblBlockNum;
     private javax.swing.JLabel lblHealthMini;
     private javax.swing.JLabel lblLevelSize;
+    private javax.swing.JLabel lblLines;
     private javax.swing.JLabel lblLocalIP;
     private javax.swing.JLabel lblMapSeed;
     private javax.swing.JLabel lblServerPort;
@@ -1898,7 +1916,6 @@ public class Window extends javax.swing.JFrame {
     private javax.swing.JPopupMenu logPopupMenu;
     private javax.swing.JMenuBar mainMenu;
     private javax.swing.JPanel panelConsole;
-    private javax.swing.JPanel panelEmpty;
     private javax.swing.JPanel panelInfo;
     private javax.swing.JPanel panelNetwork;
     private javax.swing.JPanel panelWorld;

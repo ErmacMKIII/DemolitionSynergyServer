@@ -41,6 +41,7 @@ public class Configuration {
     private int textureSize = 512;
     private float gameTimeMultiplier = 1.0f;
     private int optimizationPasses = 8;
+    private int consoleChunkLines = 1000;
     // console refresh timer in seconds
     private double consoleRefreshTimer = 5.0;
     private double gameTicks = 0.0;
@@ -111,6 +112,12 @@ public class Configuration {
                                 break;
                             case "logtofile":
                                 logToFile = Boolean.parseBoolean(words[1].toLowerCase());
+                                break;
+                            case "consolechunklines":
+                                number = Integer.parseInt(words[1]);
+                                if (number > 0 && number <= 1E6) {
+                                    consoleChunkLines = number;
+                                }
                                 break;
                             case "blockdynamicsize":
                                 number = Integer.parseInt(words[1]);
@@ -238,9 +245,12 @@ public class Configuration {
             pw.println("LogLevel = " + logLevel.ordinal());
             pw.println("# If true generate log file, otherwise print only to console. Used in conjuction with log level.");
             pw.println("LogToFile = " + logToFile);
+
             pw.println("BlockDynamicSize = " + blockDynamicSize);
 //            pw.println("TextDynamicSize = " + textDynamicSize);
             pw.println("OptimizationPasses = " + optimizationPasses);
+            pw.println("# Number of lines to append to console when timer triggers.");
+            pw.println("ConsoleChunkLines = " + consoleChunkLines);
             pw.println("# Timer value (decimal, in seconds) to refresh console (dedicated server).");
             pw.println("ConsoleRefreshTimer = " + consoleRefreshTimer);
             pw.println("# Texture size. Must be power of two, non-zero and lesser or equal than 4096.");
@@ -392,6 +402,10 @@ public class Configuration {
 
     public int getMaxClients() {
         return maxClients;
+    }
+
+    public int getConsoleChunkLines() {
+        return consoleChunkLines;
     }
 
     public double getConsoleRefreshTimer() {

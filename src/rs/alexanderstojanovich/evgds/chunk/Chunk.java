@@ -47,7 +47,7 @@ public class Chunk { // some operations are mutually exclusive
     // MODULATOR, DIVIDER, VISION are used in chunkCheck and for determining visible chunks
     public static final int BOUND = 256;
     public static final float VISION = 256.0f; // determines visibility
-    public static final int GRID_SIZE = 4;
+    public static final int GRID_SIZE = 8;
 
     public static final float STEP = 1.0f / (float) (GRID_SIZE);
     public static final int CHUNK_NUM = GRID_SIZE * GRID_SIZE;
@@ -63,8 +63,6 @@ public class Chunk { // some operations are mutually exclusive
     public final IList<Tuple> tupleList = new GapList<>();
 
     private boolean buffered = false;
-
-    private float timeToLive = LevelContainer.STD_TTL;
 
     public Chunk(int id) {
         this.id = id;
@@ -333,6 +331,8 @@ public class Chunk { // some operations are mutually exclusive
             if (faceBitsBefore != faceBitsAfter) {
                 Chunk.transfer(tupleList, block, faceBitsBefore, faceBitsAfter);
             }
+            // tranfer units
+            IList<TransferUnit> blkUnits = new GapList<>();
             // query all neighbors and update this block and adjacent blocks accordingly
             for (int j = Block.LEFT; j <= Block.FRONT; j++) {
                 // -------------------------------------------------------------------
@@ -365,11 +365,15 @@ public class Chunk { // some operations are mutually exclusive
                             if (adjFaceBitsBefore != adjFaceBitsAfter) {
                                 // if bits changed, i.e. some face(s) got disabled
                                 // tranfer to correct tuple
-                                Chunk.transfer(tupleList, adjBlock, adjFaceBitsBefore, adjFaceBitsAfter);
+                                blkUnits.add(new TransferUnit(adjBlock, adjFaceBitsBefore, adjFaceBitsAfter));
                             }
                         }
                     }
                 }
+            }
+
+            if (!blkUnits.isEmpty()) {
+                Chunk.transfer(tupleList, blkUnits);
             }
         }
     }
@@ -679,25 +683,6 @@ public class Chunk { // some operations are mutually exclusive
 
     public void setBuffered(boolean buffered) {
         this.buffered = buffered;
-    }
-
-    public float getTimeToLive() {
-        return timeToLive;
-    }
-
-    public void setTimeToLive(float timeToLive) {
-        this.timeToLive = timeToLive;
-    }
-
-    public void decTimeToLive(float timeDec) {
-        this.timeToLive -= timeDec;
-        if (this.timeToLive < 0.0f) {
-            this.timeToLive = 0.0f;
-        }
-    }
-
-    public boolean isAlive() {
-        return timeToLive > 0.0f;
     }
 
 }

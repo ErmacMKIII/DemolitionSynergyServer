@@ -20,8 +20,6 @@ import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import org.joml.Vector3f;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import rs.alexanderstojanovich.evgds.level.RandomLevelGenerator;
@@ -51,7 +49,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
 
     private final Configuration cfg = Configuration.getInstance();
 
-    public static final int VERSION = 52;
+    public static final int VERSION = 53;
     public static final String WINDOW_TITLE = String.format("Demolition Synergy - v%s", VERSION);
     // makes default window -> Renderer sets resolution from config
 
@@ -75,11 +73,6 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      * Async Task Executor
      */
     public static final ExecutorService SINGLE_THR_EXEC = Executors.newSingleThreadExecutor();
-    /**
-     * Update/Generate for Level Container Mutex. Responsible for read/write to
-     * chunks.
-     */
-    public static final Lock updateRenderLCLock = new ReentrantLock();
 
     protected static GameObject instance = null;
     protected boolean chunkOperationPerformed = false;
@@ -266,12 +259,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     public boolean loadLevelFromFile(String fileName) {
         boolean ok = false;
         this.clearEverything();
-        updateRenderLCLock.lock();
-        try {
-            ok |= levelContainer.loadLevelFromFile(fileName);
-        } finally {
-            updateRenderLCLock.unlock();
-        }
+        ok |= levelContainer.loadLevelFromFile(fileName);
 
         return ok;
     }
@@ -285,12 +273,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      */
     public boolean saveLevelToFile(String fileName) {
         boolean ok = false;
-        updateRenderLCLock.lock();
-        try {
-            ok |= levelContainer.saveLevelToFile(fileName);
-        } finally {
-            updateRenderLCLock.unlock();
-        }
+        ok |= levelContainer.saveLevelToFile(fileName);
 
         return ok;
     }
@@ -309,13 +292,8 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     public boolean generateRandomLevel(int numberOfBlocks) {
         boolean ok = false;
         this.clearEverything();
-        updateRenderLCLock.lock();
-        try {
-            ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
-            ok |= levelContainer.saveLevelToFile(gameServer.worldName + ".ndat");
-        } finally {
-            updateRenderLCLock.unlock();
-        }
+        ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
+        ok |= levelContainer.saveLevelToFile(gameServer.worldName + ".ndat");
 
         return ok;
     }
@@ -334,29 +312,24 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     public boolean generateRandomLevel(GameObject.MapLevelSize levelSize) {
         boolean ok = false;
         this.clearEverything();
-        updateRenderLCLock.lock();
         final int numberOfBlocks;
-        try {
-            switch (levelSize) {
-                default:
-                case SMALL:
-                    numberOfBlocks = 25000;
-                    break;
-                case MEDIUM:
-                    numberOfBlocks = 50000;
-                    break;
-                case LARGE:
-                    numberOfBlocks = 100000;
-                    break;
-                case HUGE:
-                    numberOfBlocks = 131070;
-                    break;
-            }
-            ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
-            ok |= levelContainer.saveLevelToFile(gameServer.worldName + ".ndat");
-        } finally {
-            updateRenderLCLock.unlock();
+        switch (levelSize) {
+            default:
+            case SMALL:
+                numberOfBlocks = 25000;
+                break;
+            case MEDIUM:
+                numberOfBlocks = 50000;
+                break;
+            case LARGE:
+                numberOfBlocks = 100000;
+                break;
+            case HUGE:
+                numberOfBlocks = 131070;
+                break;
         }
+        ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
+        ok |= levelContainer.saveLevelToFile(gameServer.worldName + ".ndat");
 
         return ok;
     }
