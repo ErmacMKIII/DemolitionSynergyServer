@@ -523,9 +523,9 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             client2.timeToLive = GameServer.TIME_TO_LIVE;
                             client2.requestPerSecond++;
                         });
-                msg = String.format("Client %s %s %s OK", procResult.hostname, procResult.guid, procResult.message);
-                DSLogger.reportInfo(msg, null);
-                gameServer.gameObject.WINDOW.logMessage(msg, Window.Status.INFO);
+//                msg = String.format("Client %s %s %s OK", procResult.hostname, procResult.guid, procResult.message);
+//                DSLogger.reportInfo(msg, null);
+//                gameServer.gameObject.WINDOW.logMessage(msg, Window.Status.INFO);
                 break;
         }
     }

@@ -172,7 +172,7 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
-    public static final BuildType BUILD = BuildType.DEVELOPMENT;
+    public static final BuildType BUILD = BuildType.PUBLIC;
 
     protected double lastTime = 0.0;
     protected double currTime = 0.0;
