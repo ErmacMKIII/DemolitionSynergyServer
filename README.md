@@ -21,12 +21,12 @@ All information is provided in game time.
 Project originated by removing code from Demolition Synergy client/server.
 Client interface is replaced with server graphical user interface (GUI).
 
+![Alt text](/misc/Screenshot.png?raw=true "Demolition Synergy Server")
+
 # Java Version
 Game Server (dedicated) requires Java 11 LTS (11.0.1 or later).
 Java 11 Installer could be downloaded from:
 https://mega.nz/file/DYUwUS5J#ftHxZFKlsyaIlJJQ9E4cmpTrZG9byW9P_QeQNRNrIhQ
-
-![Alt text](/misc/Screenshot.png?raw=true "Demolition Synergy Server")
 
 # How To Build
 Build was coded in Apache NetBeans IDE 21. Requires Java JDK 11 (or later).
