@@ -331,6 +331,8 @@ public class Chunk { // some operations are mutually exclusive
             if (faceBitsBefore != faceBitsAfter) {
                 Chunk.transfer(tupleList, block, faceBitsBefore, faceBitsAfter);
             }
+            // tranfer units
+            IList<TransferUnit> blkUnits = new GapList<>();
             // query all neighbors and update this block and adjacent blocks accordingly
             for (int j = Block.LEFT; j <= Block.FRONT; j++) {
                 // -------------------------------------------------------------------
@@ -363,11 +365,15 @@ public class Chunk { // some operations are mutually exclusive
                             if (adjFaceBitsBefore != adjFaceBitsAfter) {
                                 // if bits changed, i.e. some face(s) got disabled
                                 // tranfer to correct tuple
-                                Chunk.transfer(tupleList, adjBlock, adjFaceBitsBefore, adjFaceBitsAfter);
+                                blkUnits.add(new TransferUnit(adjBlock, adjFaceBitsBefore, adjFaceBitsAfter));
                             }
                         }
                     }
                 }
+            }
+
+            if (!blkUnits.isEmpty()) {
+                Chunk.transfer(tupleList, blkUnits);
             }
         }
     }
