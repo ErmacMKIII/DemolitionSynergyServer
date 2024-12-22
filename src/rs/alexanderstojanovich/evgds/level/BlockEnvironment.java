@@ -82,6 +82,7 @@ public class BlockEnvironment {
      * @param camera in-game camera
      */
     public void optimizeByControl(IList<Integer> vqueue, Camera camera) {
+        pull();
         optimizing = true;
 
         // Determine lastFaceBits mask

@@ -38,6 +38,7 @@ import rs.alexanderstojanovich.evgds.texture.Texture;
 import rs.alexanderstojanovich.evgds.util.BlockUtils;
 import rs.alexanderstojanovich.evgds.util.GlobalColors;
 import rs.alexanderstojanovich.evgds.util.MathUtils;
+import rs.alexanderstojanovich.evgds.util.ModelUtils;
 import rs.alexanderstojanovich.evgds.util.VectorFloatUtils;
 
 /**
@@ -1152,30 +1153,7 @@ public class Block extends Model {
      * @return unique int
      */
     private int genId() {
-        // Convert boolean solid to integer based on ASCII values of 'S' and 'F'
-        int a = solid ? 'S' : 'F';
-
-        // Get texture index
-        int b = Texture.getOrDefaultIndex(texName);
-        b++;
-
-        // Get chunk function
-        int c = Chunk.chunkFunc(pos);
-        c++;
-
-        // Calculate indices for the position
-        float iFloat = (pos.x + Chunk.BOUND) / 2.0f;
-        float jFloat = (pos.z + Chunk.BOUND) / 2.0f;
-        float kFloat = (pos.y + Chunk.BOUND) / 2.0f;
-
-        // Calculate unique integer using the position indices using FMA
-        int d = (int) Math.fma(Math.round(kFloat), Math.fma(Chunk.BOUND, Chunk.BOUND, Math.fma(Math.round(jFloat), Chunk.BOUND, Math.round(iFloat))), 0);
-        d++;
-
-        // Combine all components to generate the final ID using FMA
-        int result = Math.round(Math.fma(b ^ c, d, a));
-
-        return result;
+        return ModelUtils.blockSpecsToUniqueInt(solid, texName, getFaceBits(), pos);
     }
 
     // returns array of adjacent free face numbers (those faces without adjacent neighbor nearby)
