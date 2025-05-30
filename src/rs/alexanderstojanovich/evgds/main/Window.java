@@ -358,6 +358,11 @@ public class Window extends javax.swing.JFrame {
         return result;
     }
 
+    /**
+     * Init Day/Night Clock on Gui Window JFrame.
+     *
+     * @return
+     */
     private static IList<Icon> initDayNight() {
         IList<Icon> result = new GapList<>();
         for (int i = 0; i < 8; i++) {
@@ -390,13 +395,26 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Update/Insert player info in table (client tab).
+     *
+     * @param newPlayerInfos new player info data
+     */
     public void upsertPlayerInfo(PlayerInfo[] newPlayerInfos) {
+        if (playerInfoModel == null || newPlayerInfos == null) {
+            return;
+        }
+
         // Remove rows not in the new data
         for (int i = playerInfoModel.getRowCount() - 1; i >= 0; i--) {
+            if (playerInfoModel.getRowCount() == 0) {
+                break;
+            }
+
             String uniqueId = (String) playerInfoModel.getValueAt(i, 0);
             boolean exists = false;
             for (PlayerInfo info : newPlayerInfos) {
-                if (info.getUniqueId().equals(uniqueId)) {
+                if (info != null && info.getUniqueId() != null && info.getUniqueId().equals(uniqueId)) {
                     exists = true;
                     break;
                 }
@@ -408,9 +426,14 @@ public class Window extends javax.swing.JFrame {
 
         // Add or update rows
         for (PlayerInfo info : newPlayerInfos) {
+            if (info == null || info.getUniqueId() == null) {
+                continue;
+            }
+
             boolean found = false;
             for (int i = 0; i < playerInfoModel.getRowCount(); i++) {
-                if (playerInfoModel.getValueAt(i, 0).equals(info.getUniqueId())) {
+                Object value = playerInfoModel.getValueAt(i, 0);
+                if (value != null && value.equals(info.getUniqueId())) {
                     playerInfoModel.setValueAt(info.name, i, 1);
                     playerInfoModel.setValueAt(info.texModel, i, 2);
                     playerInfoModel.setValueAt(info.color.toString(NumberFormat.getInstance(Locale.US)), i, 3);
@@ -421,9 +444,9 @@ public class Window extends javax.swing.JFrame {
             }
             if (!found) {
                 playerInfoModel.addRow(new Object[]{
+                    info.getUniqueId(), // Fixed order - uniqueId should be first to match column 0
                     info.name,
                     info.texModel,
-                    info.uniqueId,
                     info.color.toString(NumberFormat.getInstance(Locale.US)),
                     info.weapon
                 });
@@ -431,13 +454,26 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Update/Insert pos info in table (pos tab).
+     *
+     * @param newPosInfos new client pos data
+     */
     public void upsertPosInfo(PosInfo[] newPosInfos) {
+        if (posInfoModel == null || newPosInfos == null) {
+            return;
+        }
+
         // Remove rows not in the new data
         for (int i = posInfoModel.getRowCount() - 1; i >= 0; i--) {
+            if (posInfoModel.getRowCount() == 0) {
+                break;
+            }
+
             String uniqueId = (String) posInfoModel.getValueAt(i, 0);
             boolean exists = false;
             for (PosInfo info : newPosInfos) {
-                if (info.getUniqueId().equals(uniqueId)) {
+                if (info != null && info.getUniqueId() != null && info.getUniqueId().equals(uniqueId)) {
                     exists = true;
                     break;
                 }
@@ -449,9 +485,14 @@ public class Window extends javax.swing.JFrame {
 
         // Add or update rows
         for (PosInfo info : newPosInfos) {
+            if (info == null || info.getUniqueId() == null) {
+                continue;
+            }
+
             boolean found = false;
             for (int i = 0; i < posInfoModel.getRowCount(); i++) {
-                if (posInfoModel.getValueAt(i, 0).equals(info.getUniqueId())) {
+                Object value = posInfoModel.getValueAt(i, 0);
+                if (value != null && value.equals(info.getUniqueId())) {
                     posInfoModel.setValueAt(info.getPos().toString(NumberFormat.getNumberInstance(Locale.US)), i, 1);
                     posInfoModel.setValueAt(info.getFront().toString(NumberFormat.getNumberInstance(Locale.US)), i, 2);
                     found = true;
@@ -468,14 +509,25 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Update/Insert client info in table (client tab).
+     *
+     * @param newClientInfos new client info data
+     */
     public void upsertClientInfo(ClientInfo[] newClientInfos) {
+        if (clientInfoModel == null || clientInfoTbl == null || newClientInfos == null) {
+            return;
+        }
+
         final ButtonEditor kickBtnEdit = new ButtonEditor(new JButton("Kick"));
         kickBtnEdit.getButton().addActionListener((ActionEvent e) -> {
             final int srow = this.clientInfoTbl.getSelectedRow();
-            String client = this.clientInfoModel.getValueAt(srow, clientInfoModel.findColumn("Unique ID")).toString();
-            DSLogger.reportInfo("Kick player: " + client, null);
-            logMessage("Kick player: " + client, Status.INFO);
-            GameServer.kickPlayer(gameObject.gameServer, client);
+            if (srow >= 0 && srow < clientInfoModel.getRowCount()) {
+                String client = this.clientInfoModel.getValueAt(srow, clientInfoModel.findColumn("Unique ID")).toString();
+                DSLogger.reportInfo("Kick player: " + client, null);
+                logMessage("Kick player: " + client, Status.INFO);
+                GameServer.kickPlayer(gameObject.gameServer, client);
+            }
         });
         final ButtonRenderer btnKickRend = new ButtonRenderer(kickBtnEdit.getButton());
 
@@ -485,10 +537,14 @@ public class Window extends javax.swing.JFrame {
 
         // Remove rows not in the new data
         for (int i = clientInfoModel.getRowCount() - 1; i >= 0; i--) {
+            if (clientInfoModel.getRowCount() == 0) {
+                break;
+            }
+
             String guid = (String) clientInfoModel.getValueAt(i, clientInfoModel.findColumn("Unique ID"));
             boolean exists = false;
             for (ClientInfo info : newClientInfos) {
-                if (info.uniqueId.equals(guid)) {
+                if (info != null && info.uniqueId != null && info.uniqueId.equals(guid)) {
                     exists = true;
                     break;
                 }
@@ -500,9 +556,14 @@ public class Window extends javax.swing.JFrame {
 
         // Add or update rows
         for (ClientInfo info : newClientInfos) {
+            if (info == null || info.uniqueId == null) {
+                continue;
+            }
+
             boolean found = false;
             for (int i = 0; i < clientInfoModel.getRowCount(); i++) {
-                if (clientInfoModel.getValueAt(i, 1).equals(info.uniqueId)) {
+                Object value = clientInfoModel.getValueAt(i, 1);
+                if (value != null && value.equals(info.uniqueId)) {
                     clientInfoModel.setValueAt(info.hostName, i, 0);
                     clientInfoModel.setValueAt(info.uniqueId, i, 1);
                     clientInfoModel.setValueAt(info.timeToLive, i, 2);
@@ -513,7 +574,13 @@ public class Window extends javax.swing.JFrame {
                 }
             }
             if (!found) {
-                clientInfoModel.addRow(new Object[]{info.getHostName(), info.getUniqueId(), info.getTimeToLive(), info.dateAssigned.toString(), info.requestPerSecond});
+                clientInfoModel.addRow(new Object[]{
+                    info.getHostName(),
+                    info.getUniqueId(),
+                    info.getTimeToLive(),
+                    info.dateAssigned.toString(),
+                    info.requestPerSecond
+                });
             }
         }
     }
@@ -525,8 +592,10 @@ public class Window extends javax.swing.JFrame {
      * @param model DefaultTableModel from which the row will be removed.
      */
     private void removeAllRows(DefaultTableModel model) {
-        for (int i = 0; i < model.getRowCount(); i++) {
-            model.removeRow(i);
+        if (model != null) {
+            while (model.getRowCount() > 0) {
+                model.removeRow(0);
+            }
         }
     }
 
@@ -1611,7 +1680,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v2.1 (%s BUILD reviewed on 2024-12-26 at 09:20).\n", BUILD.toString()));
+            sb.append(String.format("VERSION v2.2 (%s BUILD reviewed on 2025-05-30 at 22:42).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");

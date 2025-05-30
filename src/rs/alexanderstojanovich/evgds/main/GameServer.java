@@ -146,7 +146,7 @@ public class GameServer implements DSMachine, Runnable {
     /**
      * Server util helper (time to live etc.)
      */
-    public final ExecutorService serverHelperExecutor = Executors.newSingleThreadExecutor();
+    public ExecutorService serverHelperExecutor;
 
     /**
      * List of blacklisted hosts
@@ -161,7 +161,7 @@ public class GameServer implements DSMachine, Runnable {
     /**
      * Timer for checking client timeouts
      */
-    public final Timer timerClientChk = new Timer("Server Utils");
+    public Timer timerClientChk;
 
     /**
      * UDP acceptor and session settings
@@ -197,7 +197,11 @@ public class GameServer implements DSMachine, Runnable {
     public void startServer() {
         this.shutDownSignal = false;
 
+        // Start server helper
+        serverHelperExecutor = Executors.newSingleThreadExecutor();
+
         // Schedule timer task to decrease Time-to-live for clients
+        timerClientChk = new Timer("Server Utils");
         TimerTask task1 = new TimerTask() {
             @Override
             public void run() {
@@ -236,7 +240,6 @@ public class GameServer implements DSMachine, Runnable {
 
                 // Remove kicked and timed out players
                 clients.removeIf(cli -> cli.timeToLive <= 0);
-
                 // Update server window title with current player count
                 GameServer.this.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + GameServer.this.worldName + " - Player Count: " + (GameServer.this.clients.size()));
             }
@@ -258,7 +261,7 @@ public class GameServer implements DSMachine, Runnable {
     public void stopServer() {
         if (running) {
             // Kick all players
-            clients.forEach(cli -> GameServer.kickPlayer(gameObject.gameServer, cli.uniqueId));
+            clients.immutableList().forEach(cli -> GameServer.kickPlayer(gameObject.gameServer, cli.uniqueId));
 
             // Reset server window title
             gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE);
@@ -281,6 +284,9 @@ public class GameServer implements DSMachine, Runnable {
             clients.clear();
             running = false;
 
+            // Stop server loop and helpers
+            shutDown();
+
             // Log server shutdown completion
             DSLogger.reportInfo("Game Server finished!", null);
             gameObject.WINDOW.logMessage("Game Server finished!", Window.Status.INFO);
@@ -294,8 +300,12 @@ public class GameServer implements DSMachine, Runnable {
      * timer.
      */
     public void shutDown() {
-        this.serverHelperExecutor.shutdown();
-        this.timerClientChk.cancel();
+        if (this.timerClientChk != null) {
+            this.timerClientChk.cancel();
+        }
+        if (this.serverHelperExecutor != null) {
+            this.serverHelperExecutor.shutdown();
+        }
     }
 
     /**
