@@ -49,7 +49,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
 
     private final Configuration cfg = Configuration.getInstance();
 
-    public static final int VERSION = 54;
+    public static final int VERSION = 55;
     public static final String WINDOW_TITLE = String.format("Demolition Synergy - v%s", VERSION);
     // makes default window -> Renderer sets resolution from config
 
@@ -180,37 +180,6 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
 
         this.WINDOW.getProgBar().setValue(Math.round(this.levelContainer.getProgress()));
         this.WINDOW.getProgBar().validate();
-    }
-
-    /**
-     * Pull fullyOptimized tuples to working tuples in Block Environment.
-     */
-    public void pull() {
-        if (isWorking()) {
-            return;
-        }
-        levelContainer.blockEnvironment.pull();
-    }
-
-    /**
-     * Push working to fullyOptimized tuples tuples in Block Environment.
-     */
-    public void push() {
-        if (isWorking()) {
-            return;
-        }
-        levelContainer.blockEnvironment.push();
-    }
-
-    /**
-     * Swap working tuples & optimizing tuples in Block Environment. Zero cost
-     * operation. Doesn't require synchronized block.
-     */
-    public void swap() {
-        if (isWorking() || levelContainer.blockEnvironment.isOptimizing()) {
-            return;
-        }
-        levelContainer.blockEnvironment.swap();
     }
 
     // -------------------------------------------------------------------------

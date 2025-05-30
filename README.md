@@ -25,8 +25,8 @@ Client interface is replaced with server graphical user interface (GUI).
 
 # Java Version
 Game Server (dedicated) requires Java 11 LTS (11.0.1 or later).
-Java 11 Installer could be downloaded from:
-https://mega.nz/file/DYUwUS5J#ftHxZFKlsyaIlJJQ9E4cmpTrZG9byW9P_QeQNRNrIhQ
+Java 11 Installer (11.0.26) could be downloaded from:
+https://mega.nz/file/FMNB2RTJ#-jNDrxX2RAxcf-jdJEKBfDHI9FpqxSX-m4kxN8sm9bE
 
 # How To Build
 Build was coded in Apache NetBeans IDE 21. Requires Java JDK 11 (or later).
