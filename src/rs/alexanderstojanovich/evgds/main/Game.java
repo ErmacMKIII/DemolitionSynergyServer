@@ -44,7 +44,6 @@ public class Game implements DSMachine {
 
     public static final double TICK_TIME = 1.0 / (double) TPS;
 
-    public static final float AMOUNT = 0.0075f;
     private static int ups; // current handleInput per second    
 
     // if this is reach game will close without exception!

@@ -22,11 +22,8 @@ import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
 import rs.alexanderstojanovich.evgds.chunk.Chunks;
 import rs.alexanderstojanovich.evgds.chunk.Tuple;
-import rs.alexanderstojanovich.evgds.core.Camera;
 import rs.alexanderstojanovich.evgds.main.Configuration;
 import rs.alexanderstojanovich.evgds.main.GameObject;
-import rs.alexanderstojanovich.evgds.models.Block;
-import rs.alexanderstojanovich.evgds.resources.Assets;
 
 /**
  * Module with blocks from all the chunks. Effectively ready for rendering after

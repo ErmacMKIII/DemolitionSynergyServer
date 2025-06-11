@@ -206,7 +206,7 @@ public class GameServer implements DSMachine, Runnable {
             @Override
             public void run() {
                 // Decrease time-to-live for each client and remove expired clients
-                clients.forEach((ClientInfo client) -> {
+                clients.immutableList().forEach((ClientInfo client) -> {
                     client.timeToLive--;
                     // if client is OK -- not timing out ; not on kicklist ; not abusing request per second
                     boolean timedOut = client.timeToLive <= 0;
@@ -215,7 +215,7 @@ public class GameServer implements DSMachine, Runnable {
                     if (maxRPSReached) {
                         // issuing kick to the client (guid as data) ~ best effort if has not successful first time
                         // also adds to kick list
-                        GameServer.kickPlayer(GameServer.this, client.uniqueId);
+                        kickPlayer(client.uniqueId);
                     }
 
                     // timed out -> just clean up resources
@@ -261,7 +261,7 @@ public class GameServer implements DSMachine, Runnable {
     public void stopServer() {
         if (running) {
             // Kick all players
-            clients.immutableList().forEach(cli -> GameServer.kickPlayer(gameObject.gameServer, cli.uniqueId));
+            clients.immutableList().forEach(cli -> kickPlayer(cli.uniqueId));
 
             // Reset server window title
             gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE);
@@ -317,7 +317,7 @@ public class GameServer implements DSMachine, Runnable {
      */
     public void assertTstFailure(String failedHostName, String failedGuid) {
         // Filter clients who failed the test
-        ClientInfo filtered = clients.getIf(client -> client.hostName.equals(failedHostName) && client.uniqueId.equals(failedGuid));
+        ClientInfo filtered = clients.immutableList().getIf(client -> client.hostName.equals(failedHostName) && client.uniqueId.equals(failedGuid));
 
         // Blacklist the client if they exceeded maximum failed attempts
         if (filtered != null && ++filtered.failedAttempts >= FAIL_ATTEMPT_MAX && !blacklist.contains(failedHostName)) {
@@ -403,26 +403,25 @@ public class GameServer implements DSMachine, Runnable {
      * Issue kick to the client. Client will be force to disconnect and it will
      * be cleaned up.
      *
-     * @param gameServer game server managing
      * @param playerGuid player guid (16 chars) to be kicked
      */
-    public static void kickPlayer(GameServer gameServer, String playerGuid) {
+    public void kickPlayer(String playerGuid) {
         final ClientInfo clientInfo;
-        if ((clientInfo = gameServer.clients.getIf(cli -> cli.uniqueId.equals(playerGuid))) != null) {
+        if ((clientInfo = clients.getIf(cli -> cli.uniqueId.equals(playerGuid))) != null) {
             try {
                 // issuing kick to the client (guid as data)
                 ResponseIfc response = new Response(0L, ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, "KICK");
-                response.send(clientInfo.uniqueId, gameServer, clientInfo.session);
+                response.send(clientInfo.uniqueId, GameServer.this, clientInfo.session);
 
                 // remove from client list
-                gameServer.clients.removeIf(c -> c.uniqueId.equals(clientInfo.uniqueId));
-//                // close session (with the client)
-//                clientInfo.session.closeNow().await(GameServer.GOODBYE_TIMEOUT);
+                clients.removeIf(c -> c.uniqueId.equals(clientInfo.uniqueId));
+                // close session (with the client)
+                clientInfo.session.closeNow().await(GameServer.GOODBYE_TIMEOUT);
                 // clean up server from client data
-                GameServer.performCleanUp(gameServer.gameObject, clientInfo.uniqueId, false);
+                GameServer.performCleanUp(gameObject, clientInfo.uniqueId, false);
 
                 // add to kick list for later removal from client list
-                gameServer.kicklist.addIfAbsent(playerGuid);
+                kicklist.addIfAbsent(playerGuid);
             } catch (Exception ex) {
                 DSLogger.reportError(String.format("Error during kick client %s !", clientInfo.uniqueId), ex);
                 DSLogger.reportError(ex.getMessage(), ex);

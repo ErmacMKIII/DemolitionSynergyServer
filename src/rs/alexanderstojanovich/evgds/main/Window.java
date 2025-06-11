@@ -523,10 +523,10 @@ public class Window extends javax.swing.JFrame {
         kickBtnEdit.getButton().addActionListener((ActionEvent e) -> {
             final int srow = this.clientInfoTbl.getSelectedRow();
             if (srow >= 0 && srow < clientInfoModel.getRowCount()) {
-                String client = this.clientInfoModel.getValueAt(srow, clientInfoModel.findColumn("Unique ID")).toString();
-                DSLogger.reportInfo("Kick player: " + client, null);
-                logMessage("Kick player: " + client, Status.INFO);
-                GameServer.kickPlayer(gameObject.gameServer, client);
+                String clientGuid = this.clientInfoModel.getValueAt(srow, clientInfoModel.findColumn("Unique ID")).toString();
+                DSLogger.reportInfo("Kick player: " + clientGuid, null);
+                logMessage("Kick player: " + clientGuid, Status.INFO);
+                gameObject.gameServer.kickPlayer(clientGuid);
             }
         });
         final ButtonRenderer btnKickRend = new ButtonRenderer(kickBtnEdit.getButton());
@@ -1680,7 +1680,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v2.2 (%s BUILD reviewed on 2025-05-30 at 22:42).\n", BUILD.toString()));
+            sb.append(String.format("VERSION v2.2 (%s BUILD reviewed on 2025-06-11 at 06:00).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1688,7 +1688,7 @@ public class Window extends javax.swing.JFrame {
             sb.append("\n");
             sb.append(String.format("Demolition Synergy Version: %d\n", GameObject.VERSION));
             sb.append("\n");
-            sb.append("Copyright © 2024\n");
+            sb.append("Copyright © 2025\n");
             sb.append("Alexander \"Ermac\" Stojanovich\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
