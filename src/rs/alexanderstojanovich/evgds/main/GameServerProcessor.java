@@ -68,6 +68,11 @@ import rs.alexanderstojanovich.evgds.weapons.Weapons;
 public class GameServerProcessor extends IoHandlerAdapter {
 
     /**
+     * One and only configuration instance
+     */
+    public static final Configuration config = Configuration.getInstance();
+
+    /**
      * Game (DSynergy) server. Server is UDP (connectionless).
      */
     public final GameServer gameServer;
@@ -532,9 +537,11 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             client2.timeToLive = GameServer.TIME_TO_LIVE;
                             client2.requestPerSecond++;
                         });
-//                msg = String.format("Client %s %s %s OK", procResult.hostname, procResult.guid, procResult.message);
-//                DSLogger.reportInfo(msg, null);
-//                gameServer.gameObject.WINDOW.logMessage(msg, Window.Status.INFO);
+                if (config.getLogLevel() == DSLogger.DSLogLevel.DEBUG || config.getLogLevel() == DSLogger.DSLogLevel.ALL)  {
+                    msg = String.format("Client %s %s %s OK", procResult.hostname, procResult.guid, procResult.message);
+                    DSLogger.reportInfo(msg, null);
+                    gameServer.gameObject.WINDOW.logMessage(msg, Window.Status.INFO);
+                }
                 break;
         }
     }

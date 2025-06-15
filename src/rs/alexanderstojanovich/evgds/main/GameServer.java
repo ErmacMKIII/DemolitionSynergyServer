@@ -59,7 +59,7 @@ public class GameServer implements DSMachine, Runnable {
     /**
      * Total maximum failed attempts allowed for the server
      */
-    public static final int TOTAL_FAIL_ATTEMPT_MAX = 10;
+    public static final int TOTAL_FAIL_ATTEMPT_MAX = 1000;
 
     /**
      * Total failed attempts counter
