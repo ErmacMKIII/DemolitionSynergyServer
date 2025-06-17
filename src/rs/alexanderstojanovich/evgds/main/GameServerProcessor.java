@@ -68,6 +68,11 @@ import rs.alexanderstojanovich.evgds.weapons.Weapons;
 public class GameServerProcessor extends IoHandlerAdapter {
 
     /**
+     * One and only configuration instance
+     */
+    public static final Configuration config = Configuration.getInstance();
+
+    /**
      * Game (DSynergy) server. Server is UDP (connectionless).
      */
     public final GameServer gameServer;
@@ -136,7 +141,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
             return new Result(Status.INTERNAL_ERROR, null, null, "Invalid request - Is null or client address is null");
         }
 
-        String clientGuid = request.getGuid();
+        String clientGuid = request.getSenderGuid();
         final InetAddress clientAddress = request.getClientAddress();
         String clientHostName = clientAddress.getHostName();
 
@@ -147,7 +152,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
 
         // Handle null data type (Possible & always erroneous)
         if (request.getDataType() == null) {
-            Response response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
+            Response response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
             response.send(clientGuid, gameServer, session);
 
             return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Bad Request - Bad data type!");
@@ -157,8 +162,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
             gameServer.assertTstFailure(clientHostName, clientGuid);
 
             // issuing kick to the client (guid as data) ~ best effort if has not successful first time
-            GameServer.kickPlayer(gameServer, clientGuid);
-
+//            gameServer.kickPlayer(clientGuid);
             return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Client issued invalid request type (other than HELLO)");
         }
 
@@ -179,11 +183,11 @@ public class GameServerProcessor extends IoHandlerAdapter {
             case HELLO:
                 if (gameServer.clients.containsIf(c -> c.getUniqueId().equals(clientGuid))) {
                     msg = String.format("Bad Request - You are already connected to %s, v%s!", gameServer.worldName, gameServer.version);
-                    response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
+                    response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
                 } else {
                     // Send a simple message with magic bytes prepended
                     msg = String.format("Hello, you are connected to %s, v%s, for help append \"help\" without quotes. Welcome!", gameServer.worldName, gameServer.version);
-                    response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
+                    response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                     gameServer.clients.add(new ClientInfo(session, clientHostName, clientGuid, GameServer.TIME_TO_LIVE));
                     gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
                 }
@@ -197,14 +201,14 @@ public class GameServerProcessor extends IoHandlerAdapter {
                         if ((levelActors.otherPlayers.getIf(ot -> ot.uniqueId.equals(newPlayerUniqueId)) == null)) {
                             levelActors.otherPlayers.add(new Critter(this.gameServer.gameObject.GameAssets, newPlayerUniqueId, new Model(gameServer.gameObject.GameAssets.ALEX_BODY_DEFAULT)));
                             msg = String.format("Player ID is registered!", gameServer.worldName, gameServer.version);
-                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
+                            response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
 
                             gameServer.gameObject.WINDOW.logMessage((String.format("Player %s has connected.", newPlayerUniqueId)), Window.Status.INFO);
                             DSLogger.reportInfo(String.format("Player %s has connected.", newPlayerUniqueId), null);
 
                         } else {
                             msg = String.format("Player ID is invalid or already exists!", gameServer.worldName, gameServer.version);
-                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
+                            response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
                         }
                         break;
                     }
@@ -223,22 +227,22 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             DSLogger.reportInfo(String.format("Player %s (%s) has connected.", info.name, info.uniqueId), null);
 
                             msg = String.format("Player ID is registered!", gameServer.worldName, gameServer.version);
-                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
+                            response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                         } else {
                             msg = String.format("Player ID is invalid or already exists!", gameServer.worldName, gameServer.version);
-                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
+                            response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
                         }
                         break;
                     }
                     default:
-                        response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
+                        response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
                         break;
                 }
                 response.send(clientGuid, gameServer, session);
                 break;
             case GOODBYE:
                 msg = "Goodbye, hope we will see you again!";
-                response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
+                response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                 response.send(clientGuid, gameServer, session);
                 gameServer.clients.removeIf(c -> c.uniqueId.equals(clientGuid));
                 gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
@@ -249,12 +253,12 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 break;
             case GET_TIME:
                 gameTime = Game.gameTicks;
-                response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.DOUBLE, gameTime);
+                response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.DOUBLE, gameTime);
                 response.send(clientGuid, gameServer, session);
                 break;
             case PING:
                 msg = String.format("You pinged %s", gameServer.worldName);
-                response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
+                response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                 response.send(clientGuid, gameServer, session);
                 break;
             case GET_POS:
@@ -271,15 +275,15 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             vec3fView = levelActors.player.getFront();
                             posInfo = new PosInfo(levelActors.player.uniqueId, vec3fPos, vec3fView);
                             obj = posInfo.toString();
-                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
+                            response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
                         } else if (playerIndex >= 0 && playerIndex < levelActors.otherPlayers.size()) {
                             vec3fPos = levelActors.otherPlayers.get(playerIndex).getPos();
                             vec3fView = levelActors.otherPlayers.get(playerIndex).getFront();
                             posInfo = new PosInfo(levelActors.player.uniqueId, vec3fPos, vec3fView);
                             obj = posInfo.toString();
-                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
+                            response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
                         } else {
-                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Invalid argument!");
+                            response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Invalid argument!");
                         }
                         break;
                     }
@@ -295,7 +299,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             vec3fView = levelActors.player.getFront();
                             posInfo = new PosInfo(levelActors.player.uniqueId, vec3fPos, vec3fView);
                             obj = posInfo.toString();
-                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
+                            response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
                         } else {
                             Critter other = levelActors.otherPlayers.getIf(ply -> ply.uniqueId.equals(uuid));
                             if (other != null) {
@@ -303,15 +307,15 @@ public class GameServerProcessor extends IoHandlerAdapter {
                                 vec3fView = other.getFront();
                                 posInfo = new PosInfo(levelActors.player.uniqueId, vec3fPos, vec3fView);
                                 obj = posInfo.toString();
-                                response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
+                                response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
                             } else {
-                                response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.OBJECT, "Bad Request - Invalid Player ID or not registered!");
+                                response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.OBJECT, "Bad Request - Invalid Player ID or not registered!");
                             }
                         }
                         break;
                     }
                     default:
-                        response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
+                        response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
                         break;
                 }
                 response.send(clientGuid, gameServer, session);
@@ -345,7 +349,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 int remainingBytes = totalBytes % bytesPerFragment;
 
                 int totalFragments = fullFragments + (remainingBytes > 0 ? 1 : 0);
-                final ResponseIfc downloadResponse = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.INT, totalFragments);
+                final ResponseIfc downloadResponse = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.INT, totalFragments);
                 try {
                     downloadResponse.send(clientGuid, gameServer, session);
                 } catch (Exception ex) {
@@ -359,7 +363,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 final byte[] buffer = gameServer.gameObject.levelContainer.bak_buffer;
 
                 if (n < 0 || n * BUFF_SIZE >= totalBytes) {
-                    response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Invalid fragment number");
+                    response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Invalid fragment number");
                     response.send(clientGuid, gameServer, session);
                     return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Invalid fragment number!");
                 }
@@ -386,7 +390,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                     playerInfos.add(new PlayerInfo(op.getName(), op.body.texName, op.uniqueId, op.body.getPrimaryRGBAColor(), op.getWeapon().getTexName()));
                 });
                 String obj = gson.toJson(playerInfos, IList.class);
-                response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
+                response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
                 response.send(clientGuid, gameServer, session);
                 break;
             case SAY:
@@ -400,7 +404,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 gameServer.gameObject.WINDOW.logMessage(String.format("%s:%s", senderName, request.getData()), Window.Status.INFO);
                 DSLogger.reportInfo(String.format("%s:%s", senderName, request.getData()), null);
 
-                response = new Response(0L, ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, senderName + ":" + request.getData());
+                response = new Response(DSObject.NIL_ID, 0L, ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, senderName + ":" + request.getData());
                 gameServer.clients.forEach(ci -> {
                     try {
                         if (!ci.uniqueId.equals(clientGuid)) {
@@ -454,7 +458,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                     checksum.update(buffc);
 
                     LevelMapInfo mapInfo = new LevelMapInfo(gameServer.worldName, checksum.getValue(), sizeBytes);
-                    response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, mapInfo.toString());
+                    response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, mapInfo.toString());
                     response.send(clientGuid, gameServer, session);
                 } catch (IOException ex) {
                     DSLogger.reportError(ex.getMessage(), ex);
@@ -470,7 +474,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                         Critter targCrit = levelActors.otherPlayers.getIf(ot -> ot.uniqueId.equals(info.uniqueId));
                         if (targCrit == null) {
                             msg = String.format("Players ID is not registered. Registration required!", gameServer.worldName, gameServer.version);
-                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
+                            response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
                         } else {
                             targCrit.setName(info.name);
                             targCrit.body.setPrimaryRGBAColor(info.color);
@@ -482,12 +486,12 @@ public class GameServerProcessor extends IoHandlerAdapter {
                                 weapon = Weapons.NONE;
                             }
                             targCrit.switchWeapon(weapon);
-                            response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, "OK - Player info updated.");
+                            response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, "OK - Player info updated.");
                         }
                         break;
                     }
                     default:
-                        response = new Response(request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
+                        response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, "Bad Request - Bad data type!");
                         break;
                 }
                 response.send(clientGuid, gameServer, session);
@@ -515,7 +519,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 break;
             case CLIENT_ERROR:
                 // kick violators
-                GameServer.kickPlayer(gameServer, procResult.guid);
+                gameServer.kickPlayer(procResult.guid);
                 gameServer.assertTstFailure(procResult.hostname, procResult.guid);
                 msg = String.format("Client %s %s %s error!", procResult.hostname, procResult.guid, procResult.message);
                 DSLogger.reportError(msg, null);
@@ -532,9 +536,11 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             client2.timeToLive = GameServer.TIME_TO_LIVE;
                             client2.requestPerSecond++;
                         });
-//                msg = String.format("Client %s %s %s OK", procResult.hostname, procResult.guid, procResult.message);
-//                DSLogger.reportInfo(msg, null);
-//                gameServer.gameObject.WINDOW.logMessage(msg, Window.Status.INFO);
+                if (config.getLogLevel() == DSLogger.DSLogLevel.DEBUG || config.getLogLevel() == DSLogger.DSLogLevel.ALL) {
+                    msg = String.format("Client %s %s %s OK", procResult.hostname, procResult.guid, procResult.message);
+                    DSLogger.reportInfo(msg, null);
+                    gameServer.gameObject.WINDOW.logMessage(msg, Window.Status.INFO);
+                }
                 break;
         }
     }

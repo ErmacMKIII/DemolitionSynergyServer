@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.zip.CRC32C;
 import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.session.IoSession;
@@ -59,6 +60,7 @@ public class Request implements RequestIfc {
 
     protected long checksum = 0L;
     protected long timestamp = 0L;
+    protected String id = NIL_ID;
 
     /**
      * Invalid request. If receiving fails!
@@ -91,6 +93,8 @@ public class Request implements RequestIfc {
         this.data = data;
         this.clientAddress = null;
         this.clientPort = 0;
+        // Automatically set id for new requests
+        this.id = UUID.randomUUID().toString().substring(20, 36);
     }
 
     @Override
@@ -176,6 +180,8 @@ public class Request implements RequestIfc {
                 }
             }
 
+            // Write Id
+            out.writeBytes(id);
             // Write timestamp
             out.writeLong(timestamp); // Include the timestamp in serialization
         }
@@ -259,6 +265,10 @@ public class Request implements RequestIfc {
                     throw new IOException("Unsupported data type during deserialization!");
             }
 
+            // Read Id
+            byte[] idBytes = new byte[ID_LENGTH];
+            in.readFully(idBytes);
+            this.id = new String(idBytes);
             // Read timestamp
             this.timestamp = in.readLong(); // Read the timestamp during deserialization
         }
@@ -312,7 +322,7 @@ public class Request implements RequestIfc {
     }
 
     @Override
-    public String getGuid() {
+    public String getSenderGuid() {
         return guid;
     }
 
@@ -320,4 +330,10 @@ public class Request implements RequestIfc {
     public long getTimestamp() {
         return timestamp;
     }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
 }

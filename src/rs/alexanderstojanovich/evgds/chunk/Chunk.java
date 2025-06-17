@@ -47,7 +47,7 @@ public class Chunk { // some operations are mutually exclusive
     // MODULATOR, DIVIDER, VISION are used in chunkCheck and for determining visible chunks
     public static final int BOUND = 256;
     public static final float VISION = 256.0f; // determines visibility
-    public static final int GRID_SIZE = 8;
+    public static final int GRID_SIZE = 4;
 
     public static final float STEP = 1.0f / (float) (GRID_SIZE);
     public static final int CHUNK_NUM = GRID_SIZE * GRID_SIZE;
@@ -602,87 +602,6 @@ public class Chunk { // some operations are mutually exclusive
         float z = nz * (BOUND << 1) - BOUND;
 
         return new Vector3f(x, 0.0f, z);
-    }
-
-    /**
-     * Does camera sees chunk. Useful.
-     *
-     * @param chunkId chunk id (number)
-     * @param camera main camera (or other camera)
-     * @param angleDegrees angle degrees
-     * @return boolean condition see (or not see)
-     */
-    public static boolean doesSeeChunk(int chunkId, Camera camera, float angleDegrees) {
-        final Vector3f chunkPos = invChunkFunc(chunkId);
-        final Vector2f chunkPosXZ = new Vector2f(chunkPos.x, chunkPos.z);
-        final Vector2f camPosXZ = new Vector2f(camera.pos.x, camera.pos.z);
-        final Vector2f camFrontXZNeg = new Vector2f(-camera.getFront().x, -camera.getFront().z);
-        final float cosine = org.joml.Math.cos(org.joml.Math.toRadians(angleDegrees));
-        boolean yea = false;
-
-        // Now iterate and perform calculations
-        OUTER:
-        for (int x = -1; x <= 1; x++) {
-            for (int z = -1; z <= 1; z++) {
-                Vector2f temp = new Vector2f();
-                Vector2f tst = new Vector2f(x, z).add(chunkPosXZ.sub(camPosXZ, temp), temp).normalize();
-                if (tst.dot(camFrontXZNeg) <= cosine) {
-                    yea |= true;
-                    break OUTER;
-                }
-            }
-        }
-
-        return yea;
-    }
-
-    /**
-     * Determine which chunks are visible by this chunk.If visible put into the
-     * V list, otherwise put into the I list.
-     *
-     * @param vChnkIdList visible chunk queue
-     * @param iChnkIdList invisible chunk queue
-     * @param camera (Observer) camera
-     *
-     * @return list of changed chunks
-     */
-    public static boolean determineVisible(IList<Integer> vChnkIdList, IList<Integer> iChnkIdList, Camera camera) {
-        final Object[] before = vChnkIdList.toArray();
-
-        vChnkIdList.clear();
-        iChnkIdList.clear();
-
-        // current chunk where player is        
-        int currChunkId = chunkFunc(camera.pos);
-        int currCol = currChunkId % GRID_SIZE;
-        int currRow = currChunkId / GRID_SIZE;
-
-        if (!vChnkIdList.contains(currChunkId)) {
-            vChnkIdList.add(currChunkId);
-        }
-
-        // rest of the chunks
-        for (int chunkId = 0; chunkId < Chunk.CHUNK_NUM; chunkId++) {
-            if (chunkId != currChunkId) {
-                int col = chunkId % GRID_SIZE;
-                int row = chunkId / GRID_SIZE;
-
-                int deltaCol = Math.abs(currCol - col);
-                int deltaRow = Math.abs(currRow - row);
-
-                if (deltaCol <= 1 && deltaRow <= 1) {
-                    vChnkIdList.add(chunkId);
-                } else if (!iChnkIdList.contains(chunkId)) {
-                    iChnkIdList.add(chunkId);
-                }
-
-            }
-        }
-
-        final Object[] after = vChnkIdList.toArray();
-        boolean changed = !Arrays.equals(before, after);
-
-        return changed;
     }
 
     public IList<Block> getBlockList() {

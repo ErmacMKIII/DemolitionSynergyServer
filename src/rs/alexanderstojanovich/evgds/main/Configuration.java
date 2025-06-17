@@ -231,9 +231,7 @@ public class Configuration {
         if (cfg.exists()) {
             cfg.delete();
         }
-        PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(cfg);
+        try (PrintWriter pw = new PrintWriter(cfg)) {
             pw.println("# Theme {Light, Dark, Default/Metal, Darcula}");
             pw.println("Theme = " + theme);
 
@@ -273,10 +271,6 @@ public class Configuration {
             pw.println("UseBakGuid = " + useBakGuid);
         } catch (FileNotFoundException ex) {
             DSLogger.reportFatalError(ex.getMessage(), ex);
-        } finally {
-            if (pw != null) {
-                pw.close();
-            }
         }
     }
 

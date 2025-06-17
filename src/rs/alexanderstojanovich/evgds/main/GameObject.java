@@ -211,14 +211,6 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     }
 
     /**
-     * Start new level from editor. Editor by default adds 9 'Doom' blocks at
-     * the starting position. Called from concurrent thread.
-     */
-    public void startNewLevel() {
-        levelContainer.startNewLevel();
-    }
-
-    /**
      * Load level from external file (which is in root of game dir). Called from
      * concurrent thread.
      *
