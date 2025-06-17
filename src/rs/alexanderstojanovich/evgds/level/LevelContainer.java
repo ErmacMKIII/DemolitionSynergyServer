@@ -50,6 +50,7 @@ import rs.alexanderstojanovich.evgds.util.VectorFloatUtils;
 import rs.alexanderstojanovich.evgds.weapons.Weapons;
 
 /**
+ * World container. Contains everything.
  *
  * @author Alexander Stojanovich <coas91@rocketmail.com>
  */
@@ -228,52 +229,13 @@ public class LevelContainer implements GravityEnviroment {
 
     // -------------------------------------------------------------------------    
     // -------------------------------------------------------------------------
-    public boolean startNewLevel() {
-        if (working) {
-            return false;
-        }
-        boolean success = false;
-        working = true;
-        progress = 0.0f;
-        levelActors.freeze();
-
-        chunks.clear();
-        levelActors.npcList.clear();
-        AllBlockMap.init();
-
-        lightSources.retainLights(2);
-
-        for (int i = 0; i <= 2; i++) {
-            for (int j = 0; j <= 2; j++) {
-                Block blk = new Block("doom0");
-                blk.getPos().x = (4 * i) & 0xFFFFFFFE;
-                blk.getPos().y = (4 * j) & 0xFFFFFFFE;
-                blk.getPos().z = 3 & 0xFFFFFFFE;
-
-                blk.getPrimaryRGBAColor().x = 0.5f * i + 0.25f;
-                blk.getPrimaryRGBAColor().y = 0.5f * j + 0.25f;
-                blk.getPrimaryRGBAColor().z = 0.0f;
-
-                chunks.addBlock(blk);
-
-                progress += 100.0f / 9.0f;
-            }
-        }
-
-        levelActors.configureMainObserver(new Vector3f(10.5f, 0.0f, -4.0f), new Vector3f(Camera.Z_AXIS), new Vector3f(Camera.Y_AXIS), new Vector3f(Camera.X_AXIS));
-
-        blockEnvironment.clear();
-//        NPC npc = new NPC(critter.getModel());
-//        npc.getModel().setPos(new Vector3f(0f, 20f, 0f));
-//        levelActors.npcList.add(npc);
-        levelActors.unfreeze();
-        progress = 100.0f;
-        working = false;
-        success = true;
-
-        return success;
-    }
-
+    /**
+     * Generate random level for multiplayer (Host)
+     *
+     * @param randomLevelGenerator random level generator (from game object)
+     * @param numberOfBlocks pre-defined number of blocks
+     * @return on success
+     */
     public boolean generateRandomLevel(RandomLevelGenerator randomLevelGenerator, int numberOfBlocks) {
         if (working) {
             return false;
@@ -297,8 +259,6 @@ public class LevelContainer implements GravityEnviroment {
             success = true;
         }
 
-//        solidChunks.updateSolids(this);
-//        fluidChunks.updateFluids(this);
         blockEnvironment.clear();
 
         progress = 100.0f;
@@ -318,6 +278,12 @@ public class LevelContainer implements GravityEnviroment {
         return filename;
     }
 
+    /**
+     * Store level in binary DAT (old) format to internal level container
+     * buffer.
+     *
+     * @return on success
+     */
     public boolean storeLevelToBufferOldFormat() {
         working = true;
         boolean success = false;
@@ -594,6 +560,13 @@ public class LevelContainer implements GravityEnviroment {
         return success;
     }
 
+    /**
+     * Load level in binary NDAT (new) format from internal level container
+     * buffer. Used in Multiplayer.
+     *
+     * @return on success
+     * @throws java.io.UnsupportedEncodingException
+     */
     public boolean loadLevelFromBufferNewFormat() throws UnsupportedEncodingException {
         working = true;
         boolean success = false;
@@ -678,6 +651,13 @@ public class LevelContainer implements GravityEnviroment {
         return success;
     }
 
+    /**
+     * Save level to exported file. Extension is chosen (dat|ndat) in filename
+     * arg.
+     *
+     * @param filename filename to export on drive (dat|ndat).
+     * @return on success
+     */
     public boolean saveLevelToFile(String filename) {
         if (working) {
             return false;
@@ -715,6 +695,13 @@ public class LevelContainer implements GravityEnviroment {
         return success;
     }
 
+    /**
+     * Load level from imported file. Extension is chosen (dat|ndat) in filename
+     * arg.
+     *
+     * @param filename filename to export on drive (dat|ndat).
+     * @return on success
+     */
     public boolean loadLevelFromFile(String filename) {
         if (working) {
             return false;
@@ -754,6 +741,11 @@ public class LevelContainer implements GravityEnviroment {
         return success;
     }
 
+    /**
+     * Is main actor player in fluid check.
+     *
+     * @return if is in fluid
+     */
     public boolean isActorInFluidChk() {
         boolean yea = false;
         Vector3f camPos = levelActors.mainActor().getPos();
@@ -789,6 +781,12 @@ public class LevelContainer implements GravityEnviroment {
         return yea;
     }
 
+    /**
+     * Is main actor player in fluid check.
+     *
+     * @param lc specified level container
+     * @return if is in fluid
+     */
     public static boolean isActorInFluidChk(LevelContainer lc) {
         boolean yea = false;
         Vector3f camPos = lc.levelActors.mainActor().getPos();
@@ -824,6 +822,11 @@ public class LevelContainer implements GravityEnviroment {
         return yea;
     }
 
+    /**
+     * Update static variable 'actor in fluid' by perform checking
+     *
+     * @param lc Level Container specified.
+     */
     public static void updateActorInFluid(LevelContainer lc) {
         actorInFluid = isActorInFluidChk(lc);
     }
