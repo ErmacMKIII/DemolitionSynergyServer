@@ -26,7 +26,7 @@ import rs.alexanderstojanovich.evgds.models.Block;
  *
  * Contains all the various tuples (of textures x facebits combinations).
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class Chunks {
 

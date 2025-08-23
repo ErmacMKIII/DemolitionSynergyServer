@@ -27,7 +27,7 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
 /**
  * DSynergy Game client. With multiplayer capabilities.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class Game implements DSMachine {
 

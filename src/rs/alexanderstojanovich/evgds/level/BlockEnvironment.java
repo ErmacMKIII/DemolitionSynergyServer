@@ -29,7 +29,7 @@ import rs.alexanderstojanovich.evgds.main.GameObject;
  * Module with blocks from all the chunks. Effectively ready for rendering after
  * optimization.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class BlockEnvironment {
 

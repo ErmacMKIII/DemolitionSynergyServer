@@ -23,7 +23,7 @@ import rs.alexanderstojanovich.evgds.models.Model;
  * Demolition Synergy weapon interface. Contains all texture, models and sounds
  * associated with weapon.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class Weapon implements WeaponIfc {
 

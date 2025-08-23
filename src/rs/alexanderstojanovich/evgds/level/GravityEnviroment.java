@@ -21,7 +21,7 @@ import rs.alexanderstojanovich.evgds.critter.Critter;
 /**
  * Interface for gravity (world) environment.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public interface GravityEnviroment {
 
@@ -44,10 +44,9 @@ public interface GravityEnviroment {
      *
      * @param critter level actor critter (player or npc)
      * @param amountY amount Y-axis multiplier (velocity)
-     * @param deltaTime delta time
      * @return did critter jump
      */
-    public boolean jump(Critter critter, float amountY, float deltaTime);
+    public boolean jump(Critter critter, float amountY);
 
     /**
      * Makes the player push downwards, pressuring the bottom surface (or air),
@@ -55,10 +54,9 @@ public interface GravityEnviroment {
      *
      * @param critter The player.
      * @param amountYNeg The amount of upward movement.
-     * @param deltaTime The time elapsed since the last handleInput.
      * @return did player crouch
      */
-    public boolean crouch(Critter critter, float amountYNeg, float deltaTime);
+    public boolean crouch(Critter critter, float amountYNeg);
 
     /**
      * Get falling velocity

@@ -29,7 +29,7 @@ import rs.alexanderstojanovich.evgds.weapons.Weapons;
  * Critter is class of living things. Has capabilities moving. Is collision
  * predictable. However no observation. Renders with body in some shader.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class Critter implements Predictable, Moveable {
 

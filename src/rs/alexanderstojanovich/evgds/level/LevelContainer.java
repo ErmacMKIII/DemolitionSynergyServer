@@ -52,10 +52,13 @@ import rs.alexanderstojanovich.evgds.weapons.Weapons;
 /**
  * World container. Contains everything.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class LevelContainer implements GravityEnviroment {
 
+    /**
+     * World level map format. For save/load use.
+     */
     public static enum LevelMapFormat {
         /**
          * Old format. Exists for quite long time.
@@ -849,12 +852,11 @@ public class LevelContainer implements GravityEnviroment {
      *
      * @param critter The player.
      * @param jumpStrength The amount of upward movement.
-     * @param deltaTime The time elapsed since the last handleInput.
      * @return {@code true} if the player successfully jumped, {@code false}
      * otherwise.
      */
     @Override
-    public boolean jump(Critter critter, float jumpStrength, float deltaTime) {
+    public boolean jump(Critter critter, float jumpStrength) {
         return false;
     }
 
@@ -863,11 +865,10 @@ public class LevelContainer implements GravityEnviroment {
      *
      * @param critter The player.
      * @param amountYNeg The amount of downward movement.
-     * @param deltaTime The time elapsed since the last handleInput.
      * @return was crouch performed by player (was able to)
      */
     @Override
-    public boolean crouch(Critter critter, float amountYNeg, float deltaTime) {
+    public boolean crouch(Critter critter, float amountYNeg) {
         return false;
     }
 

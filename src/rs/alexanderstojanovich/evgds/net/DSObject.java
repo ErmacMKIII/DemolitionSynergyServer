@@ -19,7 +19,7 @@ package rs.alexanderstojanovich.evgds.net;
 /**
  * DSObject is common term for Request and Response in DSynergy.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public interface DSObject {
 

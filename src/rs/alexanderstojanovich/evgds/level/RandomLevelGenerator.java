@@ -38,7 +38,7 @@ import rs.alexanderstojanovich.evgds.util.MathUtils;
 /**
  * Class responsible for Random Level generation.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class RandomLevelGenerator {
 

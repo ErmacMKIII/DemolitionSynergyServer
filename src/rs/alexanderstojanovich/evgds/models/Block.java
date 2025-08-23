@@ -43,7 +43,7 @@ import rs.alexanderstojanovich.evgds.util.VectorFloatUtils;
 
 /**
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class Block extends Model {
 

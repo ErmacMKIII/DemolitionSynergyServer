@@ -43,7 +43,7 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
  * This class represents a UDP-based game server for Demolition Synergy. It
  * manages client connections, game sessions, and server operations.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class GameServer implements DSMachine, Runnable {
 

@@ -63,7 +63,7 @@ import rs.alexanderstojanovich.evgds.weapons.Weapons;
 /**
  * Task to handle each endpoint asynchronously.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class GameServerProcessor extends IoHandlerAdapter {
 

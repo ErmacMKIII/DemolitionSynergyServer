@@ -29,7 +29,7 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
 /**
  * Game Engine composed of Game (Loop), Game Renderer and core components.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public final class GameObject { // is mutual object for {Main, Renderer, Random Level Generator}
 
@@ -49,7 +49,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
 
     private final Configuration cfg = Configuration.getInstance();
 
-    public static final int VERSION = 55;
+    public static final int VERSION = 56;
     public static final String WINDOW_TITLE = String.format("Demolition Synergy - v%s", VERSION);
     // makes default window -> Renderer sets resolution from config
 

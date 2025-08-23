@@ -41,7 +41,7 @@ import rs.alexanderstojanovich.evgds.weapons.Weapons;
 /**
  * Define all the level observers & critters. Present in the level container.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class LevelActors {
 
