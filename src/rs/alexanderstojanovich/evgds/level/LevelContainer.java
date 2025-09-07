@@ -738,8 +738,8 @@ public class LevelContainer implements GravityEnviroment {
      * @return {@code true} if the player is falling, {@code false} otherwise.
      */
     @Override
-    public boolean gravityDo(Critter critter, float deltaTime) {
-        return false;
+    public Result gravityDo(Critter critter, float deltaTime) {
+        return Result.NEUTRAL;
     }
 
     /**
