@@ -16,11 +16,9 @@
  */
 package rs.alexanderstojanovich.evgds.chunk;
 
-import java.util.Arrays;
 import java.util.List;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.magicwerk.brownies.collections.BigList;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
 import rs.alexanderstojanovich.evgds.core.Camera;
@@ -42,7 +40,7 @@ import rs.alexanderstojanovich.evgds.util.ModelUtils;
  *
  * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
-public class Chunk { // some operations are mutually exclusive    
+public interface Chunk { // some operations are mutually exclusive    
 
     // MODULATOR, DIVIDER, VISION are used in chunkCheck and for determining visible chunks
     public static final int BOUND = 256;
@@ -53,48 +51,10 @@ public class Chunk { // some operations are mutually exclusive
     public static final int CHUNK_NUM = GRID_SIZE * GRID_SIZE;
     public static final float LENGTH = BOUND * STEP * 2.0f;
 
-    // id of the chunk (signed)
-    public final int id;
-
     // is a group of blocks which are prepared for instanced rendering
     // where each tuple is considered as:                
     //--------------------------MODULATOR--------DIVIDER--------VISION-------D--------E-----------------------------
     //------------------------blocks-vec4Vbos-mat4Vbos-texture-faceEnBits------------------------
-    public final IList<Tuple> tupleList = new GapList<>();
-
-    private boolean buffered = false;
-
-    public Chunk(int id) {
-        this.id = id;
-    }
-
-    /**
-     * Binary search of the tuple. Tuples are sorted by name ascending.
-     * Complexity is logarithmic.
-     *
-     * @param keyTexture texture name part
-     * @param keyFaceBits face bits part
-     * @return Tuple if found (null if not found)
-     */
-    public Tuple getTuple(String keyTexture, Integer keyFaceBits) {
-        String keyName = String.format("%s%02d", keyTexture, keyFaceBits);
-        int left = 0;
-        int right = tupleList.size() - 1;
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            Tuple candidate = tupleList.get(mid);
-            int res = candidate.getName().compareTo(keyName);
-            if (res < 0) {
-                left = mid + 1;
-            } else if (res == 0) {
-                return candidate;
-            } else {
-                right = mid - 1;
-            }
-        }
-        return null;
-    }
-
     /**
      * Binary search of the tuple. Tuples are sorted by name ascending.
      * Complexity is logarithmic.
@@ -343,7 +303,7 @@ public class Chunk { // some operations are mutually exclusive
      * @param tupleList provided tuple list
      * @param block block to update
      */
-    protected static void updateForAdd(IList<Tuple> tupleList, Block block) {
+    private static void updateForAdd(IList<Tuple> tupleList, Block block) {
         // only same solidity - solid to solid or fluid to fluid is updated        
         int neighborBits = block.isSolid()
                 ? LevelContainer.AllBlockMap.getNeighborSolidBits(block.pos)
@@ -360,9 +320,9 @@ public class Chunk { // some operations are mutually exclusive
             if (faceBitsBefore != faceBitsAfter) {
                 Chunk.transfer(tupleList, block, faceBitsBefore, faceBitsAfter);
             }
+            // query all neighbors and update this block and adjacent blocks accordingly
             // tranfer units
             IList<TransferUnit> blkUnits = new GapList<>();
-            // query all neighbors and update this block and adjacent blocks accordingly
             for (int j = Block.LEFT; j <= Block.FRONT; j++) {
                 // -------------------------------------------------------------------
                 // following logic updates adjacent block 
@@ -416,7 +376,7 @@ public class Chunk { // some operations are mutually exclusive
      * @param tupleList provided tuple list
      * @param block block to update
      */
-    protected static void updateForRem(IList<Tuple> tupleList, Block block) {
+    private static void updateForRem(IList<Tuple> tupleList, Block block) {
         // setSafeCheck adjacent blocks
         for (int j = Block.LEFT; j <= Block.FRONT; j++) {
             Vector3f adjPos = Block.getAdjacentPos(block.pos, j);
@@ -472,7 +432,7 @@ public class Chunk { // some operations are mutually exclusive
             tupleList.add(tuple);
             tupleList.sort(Tuple.TUPLE_COMP);
         }
-        List<Block> blockList = tuple.getBlockList();
+        IList<Block> blockList = tuple.blockList;
         blockList.add(block);
         blockList.sort(Block.UNIQUE_BLOCK_CMP);
 
@@ -604,33 +564,76 @@ public class Chunk { // some operations are mutually exclusive
         return new Vector3f(x, 0.0f, z);
     }
 
-    public IList<Block> getBlockList() {
-        IList<Block> result = new BigList<>();
-        for (Tuple tuple : tupleList) {
-            result.addAll(tuple.getBlockList());
+    /**
+     * Does camera sees chunk. Useful.
+     *
+     * @param chunkId chunk id (number)
+     * @param camera main camera (or other camera)
+     * @param angleDegrees angle degrees
+     * @return boolean condition see (or not see)
+     */
+    public static boolean doesSeeChunk(int chunkId, Camera camera, float angleDegrees) {
+        final Vector3f chunkPos = invChunkFunc(chunkId);
+        final Vector2f chunkPosXZ = new Vector2f(chunkPos.x, chunkPos.z);
+        final Vector2f camPosXZ = new Vector2f(camera.pos.x, camera.pos.z);
+        final Vector2f camFrontXZNeg = new Vector2f(-camera.getFront().x, -camera.getFront().z);
+        final float cosine = org.joml.Math.cos(org.joml.Math.toRadians(angleDegrees));
+        boolean yea = false;
+
+        // Now iterate and perform calculations
+        OUTER:
+        for (int x = -1; x <= 1; x++) {
+            for (int z = -1; z <= 1; z++) {
+                Vector2f temp = new Vector2f();
+                Vector2f tst = new Vector2f(x, z).add(chunkPosXZ.sub(camPosXZ, temp), temp).normalize();
+                if (tst.dot(camFrontXZNeg) <= cosine) {
+                    yea |= true;
+                    break OUTER;
+                }
+            }
         }
-        return result;
+
+        return yea;
     }
 
-    public void clear() {
-        this.tupleList.forEach(t -> t.blockList.clear());
-        this.tupleList.clear();
-    }
+    /**
+     * Determine which chunks are visible by this chunk. If visible put into the
+     * V list, otherwise put into the I list.
+     *
+     * @param vChnkIdList visible chunk queue
+     * @param iChnkIdList invisible chunk queue
+     * @param camera (Observer) camera
+     *
+     * @return list of changed chunks
+     */
+    public static boolean determineVisible(IList<Integer> vChnkIdList, IList<Integer> iChnkIdList, Camera camera) {
+        boolean changed = false;
+        // current chunk where player is        
+        int currChunkId = chunkFunc(camera.pos);
+        int currCol = currChunkId % GRID_SIZE;
+        int currRow = currChunkId / GRID_SIZE;
 
-    public int getId() {
-        return id;
-    }
+        vChnkIdList.addIfAbsent(currChunkId);
 
-    public IList<Tuple> getTupleList() {
-        return tupleList;
-    }
+        // rest of the chunks
+        for (int chunkId = 0; chunkId < Chunk.CHUNK_NUM; chunkId++) {
+            if (chunkId != currChunkId) {
+                int col = chunkId % GRID_SIZE;
+                int row = chunkId / GRID_SIZE;
 
-    public boolean isBuffered() {
-        return buffered;
-    }
+                int deltaCol = Math.abs(currCol - col);
+                int deltaRow = Math.abs(currRow - row);
 
-    public void setBuffered(boolean buffered) {
-        this.buffered = buffered;
+                if (deltaCol <= 1 && deltaRow <= 1) {
+                    changed |= vChnkIdList.addIfAbsent(chunkId);
+                } else if (!iChnkIdList.contains(chunkId)) {
+                    changed |= iChnkIdList.addIfAbsent(chunkId);
+                }
+
+            }
+        }
+
+        return changed;
     }
 
 }

@@ -26,6 +26,7 @@ import rs.alexanderstojanovich.evgds.chunk.Chunk;
 import rs.alexanderstojanovich.evgds.models.Block;
 
 /**
+ * Big static memory arrays of block location properties
  *
  * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */

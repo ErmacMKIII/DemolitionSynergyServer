@@ -45,7 +45,7 @@ public interface GravityEnviroment {
          */
         FALL,
         /**
-         * Gravity method returned jump
+         * Gravity method return jump
          */
         JUMP
     }

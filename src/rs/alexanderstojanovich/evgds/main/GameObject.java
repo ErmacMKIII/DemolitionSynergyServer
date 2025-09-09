@@ -190,7 +190,6 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     public void clearEverything() {
         LevelContainer.AllBlockMap.init();
         levelContainer.chunks.clear();
-        levelContainer.blockEnvironment.clear();
 
         Arrays.fill(levelContainer.buffer, (byte) 0x00);
         Arrays.fill(levelContainer.bak_buffer, (byte) 0x00);

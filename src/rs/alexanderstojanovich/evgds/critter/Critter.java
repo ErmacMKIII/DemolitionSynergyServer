@@ -19,6 +19,8 @@ package rs.alexanderstojanovich.evgds.critter;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.evgds.core.Camera;
+import rs.alexanderstojanovich.evgds.level.GravityEnviroment;
+import rs.alexanderstojanovich.evgds.level.GravityEnviroment.Result;
 import rs.alexanderstojanovich.evgds.models.Model;
 import rs.alexanderstojanovich.evgds.resources.Assets;
 import rs.alexanderstojanovich.evgds.util.HardwareUtils;
@@ -41,7 +43,7 @@ public class Critter implements Predictable, Moveable {
     protected Vector3f front = Camera.Z_AXIS;
     protected Vector3f up = Camera.Y_AXIS;
     protected Vector3f right = Camera.X_AXIS;
-    protected boolean underGravity = false;
+    protected GravityEnviroment.Result gravityResult = GravityEnviroment.Result.NEUTRAL;
     protected boolean inJump = false;
 
     /**
@@ -525,12 +527,12 @@ public class Critter implements Predictable, Moveable {
         updateCameraVectors(newFront);
     }
 
-    public boolean isUnderGravity() {
-        return underGravity;
+    public Result getGravityResult() {
+        return gravityResult;
     }
 
-    public void setUnderGravity(boolean underGravity) {
-        this.underGravity = underGravity;
+    public void setGravityResult(Result gravityResult) {
+        this.gravityResult = gravityResult;
     }
 
     public boolean isInJump() {

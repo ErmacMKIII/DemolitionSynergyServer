@@ -25,6 +25,8 @@ import rs.alexanderstojanovich.evgds.models.Block;
 import rs.alexanderstojanovich.evgds.util.ModelUtils;
 
 /**
+ * List of world block with same properties like face enabled bits and same
+ * texture name. Designated for instanced rendering.
  *
  * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */

@@ -18,8 +18,8 @@ package rs.alexanderstojanovich.evgds.chunk;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import org.magicwerk.brownies.collections.BigList;
 import org.magicwerk.brownies.collections.IList;
+import org.magicwerk.brownies.collections.Key1List;
 import rs.alexanderstojanovich.evgds.main.Configuration;
 import rs.alexanderstojanovich.evgds.models.Block;
 
@@ -31,7 +31,13 @@ public class Series { // mutual class for both solid blocks and fluid blocks wit
 
     public static final int DYNAMIC_INCREMENT = Configuration.getInstance().getBlockDynamicSize();
 
-    public final IList<Block> blockList = new BigList<>(DYNAMIC_INCREMENT);
+    /**
+     * List of (environment) blocks with access keys to chunk id
+     */
+    public final Key1List<Block, Integer> blockList = new Key1List.Builder<Block, Integer>()
+            .withKey1Map(blk -> Chunk.chunkFunc(blk.pos))
+            .withKey1Sort(true)
+            .build();
     protected int bigVbo = 0;
     // array with offsets in the big float buffer
     // this is maximum amount of blocks of the type game can hold

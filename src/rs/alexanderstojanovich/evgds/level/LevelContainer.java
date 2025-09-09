@@ -86,7 +86,6 @@ public class LevelContainer implements GravityEnviroment {
             = new LightSource(SUN.pos, SUN_COLOR_RGB, SUN_INTENSITY);
 
     public final Chunks chunks = new Chunks();
-    public final BlockEnvironment blockEnvironment;
     public final LightSources lightSources;
 
     private final IList<Integer> vChnkIdList = new GapList<>();
@@ -181,7 +180,6 @@ public class LevelContainer implements GravityEnviroment {
 
     public LevelContainer(GameObject gameObject) {
         this.gameObject = gameObject;
-        this.blockEnvironment = new BlockEnvironment(gameObject, chunks);
         this.lightSources = new LightSources();
 
         this.weapons = new Weapons(this);
@@ -246,8 +244,6 @@ public class LevelContainer implements GravityEnviroment {
             randomLevelGenerator.generate();
             success = true;
         }
-
-        blockEnvironment.clear();
 
         progress = 100.0f;
         working = false;
@@ -540,8 +536,6 @@ public class LevelContainer implements GravityEnviroment {
 
         }
         levelActors.unfreeze();
-        blockEnvironment.clear();
-
         progress = 100.0f;
         working = false;
 
@@ -631,8 +625,6 @@ public class LevelContainer implements GravityEnviroment {
         }
 
         levelActors.unfreeze();
-        blockEnvironment.clear();
-
         progress = 100.0f;
         working = false;
 
@@ -822,10 +814,6 @@ public class LevelContainer implements GravityEnviroment {
     @Override
     public float getFallVelocity() {
         return fallVelocity;
-    }
-
-    public BlockEnvironment getBlockEnvironment() {
-        return blockEnvironment;
     }
 
     public LightSources getLightSources() {
