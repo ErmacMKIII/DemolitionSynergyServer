@@ -23,8 +23,6 @@ import java.util.Set;
 import org.joml.Vector3f;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
-import rs.alexanderstojanovich.evgds.core.Camera;
-import rs.alexanderstojanovich.evgds.level.LevelContainer;
 
 /**
  *
