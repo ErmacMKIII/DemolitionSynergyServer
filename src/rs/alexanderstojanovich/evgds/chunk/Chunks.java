@@ -26,7 +26,7 @@ import rs.alexanderstojanovich.evgds.models.Block;
  *
  * Contains all the various tuples (of textures x facebits combinations).
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class Chunks {
 
@@ -137,6 +137,35 @@ public class Chunks {
         tupleList.forEach(tuple -> blocks.addAll(tuple.blockList));
 
         return blocks;
+    }
+
+    /**
+     * Gets the chunk block list using chunk id.
+     *
+     * This version (MK2) uses access to chunk id as key to provide faster
+     * filtering.
+     *
+     * @param texName tuple texName
+     * @param faceBits face bits of the tuple
+     * @param chunkIdList provided chunk id list
+     * @return null if tuple doest not exist otherwise block list from tuple
+     */
+    public IList<Block> getFilteredBlockListMK2(String texName, int faceBits, IList<Integer> chunkIdList) {
+        // binary search of the tuple
+        Tuple tuple = Chunk.getTuple(tupleList, texName, faceBits);
+
+        // block list filter of the tuple
+        if (tuple != null) {
+            final IList<Block> filteredBlocks = new GapList<>();
+            for (int chunkId : chunkIdList) {
+                IList<Block> filtered = tuple.blockList.getAllByKey1(chunkId);
+                filteredBlocks.addAll(filtered);
+            }
+
+            return filteredBlocks;
+        }
+
+        return null;
     }
 
     public String printInfo() { // for debugging purposes

@@ -44,7 +44,7 @@ import static rs.alexanderstojanovich.evgds.net.DSObject.DataType.VOID;
 /**
  * DSynergy Request implementation
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class Request implements RequestIfc {
 

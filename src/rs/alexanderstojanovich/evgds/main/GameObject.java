@@ -29,7 +29,7 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
 /**
  * Game Engine composed of Game (Loop), Game Renderer and core components.
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public final class GameObject { // is mutual object for {Main, Renderer, Random Level Generator}
 
@@ -49,7 +49,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
 
     private final Configuration cfg = Configuration.getInstance();
 
-    public static final int VERSION = 55;
+    public static final int VERSION = 56;
     public static final String WINDOW_TITLE = String.format("Demolition Synergy - v%s", VERSION);
     // makes default window -> Renderer sets resolution from config
 
@@ -190,13 +190,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     public void clearEverything() {
         LevelContainer.AllBlockMap.init();
         levelContainer.chunks.clear();
-        levelContainer.blockEnvironment.clear();
-
-        Arrays.fill(levelContainer.buffer, (byte) 0x00);
-        Arrays.fill(levelContainer.bak_buffer, (byte) 0x00);
-        levelContainer.pos = 0;
-        levelContainer.bak_pos = 0;
-
+        levelContainer.levelBuffer.clear();
         levelContainer.levelActors.player.setPos(new Vector3f());
         levelContainer.levelActors.player.setRegistered(false);
         levelContainer.levelActors.spectator.setPos(new Vector3f());
@@ -220,7 +214,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     public boolean loadLevelFromFile(String fileName) {
         boolean ok = false;
         this.clearEverything();
-        ok |= levelContainer.loadLevelFromFile(fileName);
+        ok |= levelContainer.levelBuffer.loadLevelFromFile(fileName);
 
         return ok;
     }
@@ -234,7 +228,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      */
     public boolean saveLevelToFile(String fileName) {
         boolean ok = false;
-        ok |= levelContainer.saveLevelToFile(fileName);
+        ok |= levelContainer.levelBuffer.saveLevelToFile(fileName);
 
         return ok;
     }
@@ -254,7 +248,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         boolean ok = false;
         this.clearEverything();
         ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
-        ok |= levelContainer.saveLevelToFile(gameServer.worldName + ".ndat");
+        ok |= levelContainer.levelBuffer.saveLevelToFile(gameServer.worldName + ".ndat");
 
         return ok;
     }
@@ -290,7 +284,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
                 break;
         }
         ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
-        ok |= levelContainer.saveLevelToFile(gameServer.worldName + ".ndat");
+        ok |= levelContainer.levelBuffer.saveLevelToFile(gameServer.worldName + ".ndat");
 
         return ok;
     }

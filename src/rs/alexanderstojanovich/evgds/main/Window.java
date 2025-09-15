@@ -1298,6 +1298,8 @@ public class Window extends javax.swing.JFrame {
             protected void done() {
                 try {
                     if (get()) {
+                        // Copy content to multiplayer upload
+                        gameObject.levelContainer.levelBuffer.copyMain2UploadBuffer();
                         JOptionPane.showMessageDialog(Window.this, "New world succesfully generated!", "Generate New World", JOptionPane.INFORMATION_MESSAGE);
                         tboxBlockNum.setText(String.valueOf(LevelContainer.AllBlockMap.getPopulation()));
                         btnErase.setEnabled(true);
@@ -1421,13 +1423,15 @@ public class Window extends javax.swing.JFrame {
             SwingWorker<Boolean, Void> swingWorker = new SwingWorker<Boolean, Void>() {
                 @Override
                 protected Boolean doInBackground() throws Exception {
-                    return gameObject.levelContainer.loadLevelFromFile(file.getAbsolutePath());
+                    return gameObject.levelContainer.levelBuffer.loadLevelFromFile(file.getAbsolutePath());
                 }
 
                 @Override
                 protected void done() {
                     try {
                         if (get()) {
+                            // Copy content to multiplayer upload
+                            gameObject.levelContainer.levelBuffer.copyMain2UploadBuffer();
                             JOptionPane.showMessageDialog(Window.this, "World sucessfully imported from file!", "Import World", JOptionPane.INFORMATION_MESSAGE);
                             tboxBlockNum.setText(String.valueOf(LevelContainer.AllBlockMap.getPopulation()));
                             btnErase.setEnabled(true);
@@ -1459,7 +1463,7 @@ public class Window extends javax.swing.JFrame {
         SwingWorker<Boolean, Void> swingWorker = new SwingWorker<Boolean, Void>() {
             @Override
             protected Boolean doInBackground() throws Exception {
-                return gameObject.levelContainer.loadLevelFromFile(fileImport.getAbsolutePath());
+                return gameObject.levelContainer.levelBuffer.loadLevelFromFile(fileImport.getAbsolutePath());
             }
 
             @Override
@@ -1494,7 +1498,7 @@ public class Window extends javax.swing.JFrame {
             SwingWorker<Boolean, Void> swingWorker = new SwingWorker<Boolean, Void>() {
                 @Override
                 protected Boolean doInBackground() throws Exception {
-                    return gameObject.levelContainer.saveLevelToFile(file.getAbsolutePath());
+                    return gameObject.levelContainer.levelBuffer.saveLevelToFile(file.getAbsolutePath());
                 }
 
                 @Override
@@ -1682,7 +1686,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v2.2 (%s BUILD reviewed on 2025-06-17 at 08:19).\n", BUILD.toString()));
+            sb.append(String.format("VERSION v56 (%s BUILD reviewed on 2025-09-14 at 01:05).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");

@@ -23,12 +23,10 @@ import java.util.Set;
 import org.joml.Vector3f;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
-import rs.alexanderstojanovich.evgds.core.Camera;
-import rs.alexanderstojanovich.evgds.level.LevelContainer;
 
 /**
  *
- * @author Alexander Stojanovich <coas91@rocketmail.com>
+ * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class LightSources {
 
