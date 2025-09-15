@@ -158,12 +158,13 @@ public class GameServerProcessor extends IoHandlerAdapter {
             return new Result(Status.INTERNAL_ERROR, clientHostName, clientGuid, "Bad Request - Bad data type!");
         }
 
-        if (!gameServer.clients.containsIf(c -> c.getUniqueId().equals(clientGuid)) && request.getRequestType() != RequestIfc.RequestType.HELLO) {
+        // If server has registered client and received request other than hello or goodbye (is probably invalid/malicious request)
+        if (!gameServer.clients.containsIf(c -> c.getUniqueId().equals(clientGuid)) && request.getRequestType() != RequestIfc.RequestType.HELLO && request.getRequestType() != RequestIfc.RequestType.GOODBYE) {
             gameServer.assertTstFailure(clientHostName, clientGuid);
 
             // issuing kick to the client (guid as data) ~ best effort if has not successful first time
 //            gameServer.kickPlayer(clientGuid);
-            return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Client issued invalid request type (other than HELLO)");
+            return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Client issued invalid request type (other than HELLO/GOODBYE)");
         }
 
         if (gameServer.blacklist.contains(clientHostName) || gameServer.clients.size() >= MAX_CLIENTS) {
