@@ -190,7 +190,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
     public void clearEverything() {
         LevelContainer.AllBlockMap.init();
         levelContainer.chunks.clear();
-
+        levelContainer.levelBuffer.clear();
         levelContainer.levelActors.player.setPos(new Vector3f());
         levelContainer.levelActors.player.setRegistered(false);
         levelContainer.levelActors.spectator.setPos(new Vector3f());

@@ -18,8 +18,6 @@ package rs.alexanderstojanovich.evgds.level;
 
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.magicwerk.brownies.collections.GapList;
-import org.magicwerk.brownies.collections.IList;
 import rs.alexanderstojanovich.evgds.chunk.Chunk;
 import rs.alexanderstojanovich.evgds.chunk.Chunks;
 import rs.alexanderstojanovich.evgds.core.Camera;
@@ -102,9 +100,6 @@ public class LevelContainer implements GravityEnviroment {
 
     public final Chunks chunks = new Chunks();
     public final LightSources lightSources;
-
-    private final IList<Integer> vChnkIdList = new GapList<>();
-    private final IList<Integer> iChnkIdList = new GapList<>();
 
     public static final float BASE = 22.5f;
     public static final float SKYBOX_SCALE = BASE * BASE * BASE;
@@ -242,21 +237,20 @@ public class LevelContainer implements GravityEnviroment {
         DSLogger.reportDebug(sb.toString(), null);
     }
 
-    public void printQueues() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n");
-        sb.append("VISIBLE QUEUE\n");
-        sb.append(vChnkIdList);
-        sb.append("\n");
-        sb.append("---------------------------");
-        sb.append("\n");
-        sb.append("INVISIBLE QUEUE\n");
-        sb.append(iChnkIdList);
-        sb.append("\n");
-        sb.append("---------------------------");
-        DSLogger.reportDebug(sb.toString(), null);
-    }
-
+//    public void printQueues() {
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("\n");
+//        sb.append("VISIBLE QUEUE\n");
+//        sb.append(vChnkIdList);
+//        sb.append("\n");
+//        sb.append("---------------------------");
+//        sb.append("\n");
+//        sb.append("INVISIBLE QUEUE\n");
+//        sb.append(iChnkIdList);
+//        sb.append("\n");
+//        sb.append("---------------------------");
+//        DSLogger.reportDebug(sb.toString(), null);
+//    }
     // -------------------------------------------------------------------------    
     // -------------------------------------------------------------------------
     /**
@@ -467,7 +461,9 @@ public class LevelContainer implements GravityEnviroment {
 
     /**
      * Perform update to the day/night cycle. Sun position & sunlight is
-     * updated. Skybox rotates counter-clockwise (from -right to right)
+     * updated. Skybox rotates counter-clockwise (from -right to right).
+     *
+     * Do not call this method. Serves as reference.
      */
     @Deprecated
     public void update() { // call it externally from the main thread 
@@ -510,12 +506,12 @@ public class LevelContainer implements GravityEnviroment {
             }
             lightSources.setModified(0, true); // Player index is always 0
             // updateEnvironment light blocks set light modified for visible lights
-            lightSources.sourceList.forEach(ls -> {
-                int chnkId = Chunk.chunkFunc(ls.pos);
-                if (vChnkIdList.contains(chnkId)) {
-                    lightSources.setModified(ls.pos, true);
-                }
-            });
+//            lightSources.sourceList.forEach(ls -> {
+//                int chnkId = Chunk.chunkFunc(ls.pos);
+//                if (vChnkIdList.contains(chnkId)) {
+//                    lightSources.setModified(ls.pos, true);
+//                }
+//            });
         }
     }
 
@@ -547,14 +543,13 @@ public class LevelContainer implements GravityEnviroment {
         return chunks;
     }
 
-    public IList<Integer> getvChnkIdList() {
-        return vChnkIdList;
-    }
-
-    public IList<Integer> getiChnkIdList() {
-        return iChnkIdList;
-    }
-
+//    public IList<Integer> getvChnkIdList() {
+//        return vChnkIdList;
+//    }
+//
+//    public IList<Integer> getiChnkIdList() {
+//        return iChnkIdList;
+//    }
     public LevelActors getLevelActors() {
         return levelActors;
     }
