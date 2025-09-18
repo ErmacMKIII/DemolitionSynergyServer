@@ -259,6 +259,33 @@ public class Request implements RequestIfc {
                     float vw = in.readFloat();
                     data = new Vector4f(vx, vy, vz, vw);
                     break;
+                case ARRAY:
+                    int sizeOf = in.readByte();
+                    int length = in.readUnsignedShort();
+                    switch (sizeOf) {
+                        case 1:
+                            byte[] arr1 = new byte[length];
+                            for (int i = 0; i < length; i++) {
+                                arr1[i] = in.readByte();
+                            }
+                            data = arr1;
+                            break;
+                        case 2:
+                            short[] arr2 = new short[length];
+                            for (int i = 0; i < length; i++) {
+                                arr2[i] = in.readByte();
+                            }
+                            data = arr2;
+                        case 4:
+                            int[] arr4 = new int[length];
+                            for (int i = 0; i < length; i++) {
+                                arr4[i] = in.readByte();
+                            }
+                            data = arr4;
+                        default:
+                            throw new IOException("Unsupported ARRAY format during deserialization!");
+                    }
+                    break;
                 case VOID:
                     break;
                 default:
