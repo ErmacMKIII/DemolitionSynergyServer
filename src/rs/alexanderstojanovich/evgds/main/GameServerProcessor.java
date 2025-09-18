@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.zip.CRC32C;
-import org.apache.mina.core.buffer.IoBuffer;
 import org.apache.mina.core.service.IoHandlerAdapter;
 import org.apache.mina.core.session.IoSession;
 import org.joml.Vector3f;
@@ -77,7 +76,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
      */
     public final GameServer gameServer;
 
-    public static final int BUFF_SIZE = 8192; // append bytes (chunk) buffer size
+    public static final int BUFF_SIZE = 16384; // append bytes (chunk) buffer size
 
     public static final int FAIL_ATTEMPT_MAX = 10;
     public static final int TOTAL_FAIL_ATTEMPT_MAX = 3000;
@@ -167,7 +166,8 @@ public class GameServerProcessor extends IoHandlerAdapter {
             return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Client issued invalid request type (other than HELLO/GOODBYE)");
         }
 
-        if (gameServer.blacklist.contains(clientHostName) || gameServer.clients.size() >= MAX_CLIENTS) {
+        if (gameServer.blacklist.contains(clientHostName)
+                || gameServer.clients.size() >= MAX_CLIENTS) {
             gameServer.assertTstFailure(clientHostName, clientGuid);
 
             return new Result(Status.CLIENT_ERROR, clientHostName, clientGuid, "Client is banned");
@@ -182,17 +182,19 @@ public class GameServerProcessor extends IoHandlerAdapter {
         double gameTime;
         switch (request.getRequestType()) {
             case HELLO:
-                if (gameServer.clients.containsIf(c -> c.getUniqueId().equals(clientGuid))) {
+                ClientInfo clientInfo = gameServer.clients.getIf(c -> c.getUniqueId().equals(clientGuid));
+                if (clientInfo != null && clientInfo.timeToLive == GameServer.TIME_TO_LIVE) {
                     msg = String.format("Bad Request - You are already connected to %s, v%s!", gameServer.worldName, gameServer.version);
                     response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
-                } else {
+                    response.send(clientGuid, gameServer, session);
+                } else if (clientInfo == null) {
                     // Send a simple message with magic bytes prepended
                     msg = String.format("Hello, you are connected to %s, v%s, for help append \"help\" without quotes. Welcome!", gameServer.worldName, gameServer.version);
                     response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                     gameServer.clients.add(new ClientInfo(session, clientHostName, clientGuid, GameServer.TIME_TO_LIVE));
                     gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
+                    response.send(clientGuid, gameServer, session);
                 }
-                response.send(clientGuid, gameServer, session);
                 break;
             case REGISTER:
                 switch (request.getDataType()) {
@@ -372,11 +374,8 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 buffer.get(fragment, 0, fragmentSize); // Read from BAK Buffer into fragment buffer
                 buffer.rewind(); // Clear BAK Buffer, so it could be read from beginning
 
-                IoBuffer buffer1 = IoBuffer.allocate(fragmentSize, true);
-                buffer1.put(fragment);
-                buffer1.flip();
-
-                session.write(buffer1);
+                response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.ARRAY, fragment);
+                response.send(clientGuid, gameServer, session);
 
                 DSLogger.reportInfo(String.format("Sent %d fragment, %d total bytes written", n, fragmentSize), null);
                 break;
