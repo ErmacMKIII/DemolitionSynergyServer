@@ -71,10 +71,7 @@ import rs.alexanderstojanovich.evgds.helper.ButtonEditor;
 import rs.alexanderstojanovich.evgds.helper.ButtonRenderer;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import static rs.alexanderstojanovich.evgds.main.Game.RESOURCES_DIR;
-import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.HUGE;
-import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.LARGE;
-import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.MEDIUM;
-import static rs.alexanderstojanovich.evgds.main.GameObject.MapLevelSize.SMALL;
+
 import rs.alexanderstojanovich.evgds.net.ClientInfo;
 import rs.alexanderstojanovich.evgds.net.PlayerInfo;
 import rs.alexanderstojanovich.evgds.net.PosInfo;
@@ -1226,7 +1223,7 @@ public class Window extends javax.swing.JFrame {
         messageLog.clear();
 
         // Start logging in a (rendered) swing component
-        gameObject.WINDOW.conRefreshTimer.start();
+        gameObject.mainWindow.conRefreshTimer.start();
     }
 
     public void stopServerAndUpdate() {
@@ -1257,7 +1254,7 @@ public class Window extends javax.swing.JFrame {
         logMenuSaveAs.setEnabled(false);
 
         // Stop logging of (rendered) swing component
-        gameObject.WINDOW.conRefreshTimer.stop();
+        gameObject.mainWindow.conRefreshTimer.stop();
     }
 
     private void btnStopActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStopActionPerformed

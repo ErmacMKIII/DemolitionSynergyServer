@@ -81,13 +81,13 @@ public class Main {
             final GameObject gameObject = new GameObject(); // throws ex
             // parse arguments
             if (argList.contains("-runonstart")) {
-                gameObject.WINDOW.startServerAndUpdate();
+                gameObject.mainWindow.startServerAndUpdate();
 
                 if (argList.contains("-genworld")) {
                     if (argList.contains("-size")) {
                         String someString = argList.get(argsList.indexOf("-size") + 1);
                         if (!someString.isEmpty()) {
-                            gameObject.WINDOW.setWorldLevelSize(someString.toUpperCase());
+                            gameObject.mainWindow.setWorldLevelSize(someString.toUpperCase());
                         }
                     }
 
@@ -96,11 +96,11 @@ public class Main {
                         if (someString2.matches("^-?\\d{1,19}$")) {
                             long seed = Long.parseLong(someString2);
                             gameObject.randomLevelGenerator.setSeed(seed);
-                            gameObject.WINDOW.getSpinMapSeed().setValue(seed);
+                            gameObject.mainWindow.getSpinMapSeed().setValue(seed);
                         }
                     }
 
-                    gameObject.WINDOW.generateWorld();
+                    gameObject.mainWindow.generateWorld();
                 }
             }
 
@@ -130,7 +130,7 @@ public class Main {
                     time[0] = time[1];
 
 //                    DSLogger.reportInfo("deltaTime" + deltaTime, null);
-                    gameObject.WINDOW.checkHealthMini(deltaTime);
+                    gameObject.mainWindow.checkHealthMini(deltaTime);
                 }
             };
             timer0.scheduleAtFixedRate(task1, 1000L, 1000L);

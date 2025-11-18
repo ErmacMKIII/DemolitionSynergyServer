@@ -16,13 +16,10 @@
  */
 package rs.alexanderstojanovich.evgds.core;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import rs.alexanderstojanovich.evgds.critter.Observer;
 import rs.alexanderstojanovich.evgds.models.Model;
-import rs.alexanderstojanovich.evgds.models.Vertex;
 
 /**
  * Represents 3D, first person abstract looking camera. Yaw (sideways rotation)
@@ -223,103 +220,6 @@ public class Camera implements Observer { // is 3D looking camera
         front.x = (float) (org.joml.Math.cos(this.yaw) * org.joml.Math.cos(this.pitch));
         front.y = (float) org.joml.Math.sin(this.pitch);
         front.z = (float) (-org.joml.Math.sin(this.yaw) * org.joml.Math.cos(this.pitch));
-    }
-
-    public boolean intersects(Model model) {
-        boolean coll = false;
-        if (model.isSolid()) {
-            boolean boolX = pos.x >= model.getPos().x - model.getWidth() / 2.0f && pos.x <= model.getPos().x + model.getWidth() / 2.0f;
-            boolean boolY = pos.y >= model.getPos().y - model.getHeight() / 2.0f && pos.y <= model.getPos().y + model.getHeight() / 2.0f;
-            boolean boolZ = pos.z >= model.getPos().z - model.getDepth() / 2.0f && pos.z <= model.getPos().z + model.getDepth() / 2.0f;
-            coll = boolX && boolY && boolZ;
-        }
-        return coll;
-    }
-
-    /**
-     * Small function to determine if camera does see model from its position
-     * and front vector (Legacy.)
-     *
-     * @param model observation model
-     *
-     * @return wether or not camera does see model
-     */
-    public boolean doesSee(Model model) {
-        boolean yea = false;
-        Vector3f camFrontNeg = new Vector3f(-front.x, -front.y, -front.z);
-        for (Vertex vertex : model.meshes.getFirst().vertices) {
-            Vector3f temp = new Vector3f();
-            Vector3f vx = vertex.getPos().add(model.pos.sub(pos, temp), temp).normalize(temp);
-            if (vx.dot(camFrontNeg) <= 0.25f) {
-                yea = true;
-                break;
-            }
-        }
-        return yea;
-    }
-
-    /**
-     * Efficient small function to determine if camera does see model from its
-     * position and front vector. Efficiency comes from removing duplicate
-     * vertices first. (Before check.)
-     *
-     * @param model observation model
-     *
-     * @return wether or not camera does see model
-     */
-    public boolean doesSeeEff(Model model) {
-        boolean yea = false;
-
-        Vector3f camFrontNeg = new Vector3f(-front.x, -front.y, -front.z);
-
-        // Remove duplicates & return vertex position(s)
-        final List<Vector3f> v_PosList = model.meshes.getFirst().vertices.stream()
-                .map(Vertex::getPos)
-                .distinct()
-                .collect(Collectors.toList());
-
-        // Now iterate and perform calculations
-        for (Vector3f v_pos : v_PosList) {
-            Vector3f temp = new Vector3f();
-            Vector3f vx = v_pos.add(model.pos.sub(pos, temp), temp).normalize(temp);
-            if (vx.dot(camFrontNeg) <= 0.25f) {
-                yea = true;
-                break;
-            }
-        }
-        return yea;
-    }
-
-    /**
-     * Efficient small function to determine if camera does see model from its
-     * position and front vector. Efficiency comes from removing duplicate
-     * vertices first. (Before check.)
-     *
-     * @param model observation model
-     * @param degrees angle degrees of front view
-     * @return whether or not the camera does see the model
-     */
-    public boolean doesSeeEff(Model model, float degrees) {
-        boolean isVisible = false;
-        final float cosine = org.joml.Math.cos(org.joml.Math.toRadians(degrees));
-        final Vector3f camFrontNeg = new Vector3f(-front.x, -front.y, -front.z);
-
-        // Remove duplicates & return vertex positions
-        final List<Vector3f> uniqueVertexPositions = model.meshes.getFirst().vertices.stream()
-                .map(Vertex::getPos)
-                .distinct()
-                .collect(Collectors.toList());
-
-        // Iterate over unique vertex positions
-        for (Vector3f vertexPos : uniqueVertexPositions) {
-            Vector3f temp = new Vector3f();
-            Vector3f directionToVertex = vertexPos.add(model.pos.sub(pos, temp), temp).normalize(temp);
-            if (directionToVertex.dot(camFrontNeg) <= cosine) {
-                isVisible = true;
-                break;
-            }
-        }
-        return isVisible;
     }
 
     @Override

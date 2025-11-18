@@ -22,7 +22,6 @@ import rs.alexanderstojanovich.evgds.chunk.Chunk;
 import rs.alexanderstojanovich.evgds.chunk.Chunks;
 import rs.alexanderstojanovich.evgds.core.Camera;
 import rs.alexanderstojanovich.evgds.critter.Critter;
-import rs.alexanderstojanovich.evgds.level.GravityEnviroment.Result;
 import rs.alexanderstojanovich.evgds.light.LightSource;
 import rs.alexanderstojanovich.evgds.light.LightSources;
 import rs.alexanderstojanovich.evgds.location.BlockLocation;
@@ -524,7 +523,7 @@ public class LevelContainer implements GravityEnviroment {
     }
 
     public Window getMyWindow() {
-        return gameObject.WINDOW;
+        return gameObject.mainWindow;
     }
 
     public float getProgress() {

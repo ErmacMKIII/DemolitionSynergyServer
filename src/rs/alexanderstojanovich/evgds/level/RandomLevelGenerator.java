@@ -641,24 +641,24 @@ public class RandomLevelGenerator {
                 final int hRMax = posR_Max >> 2;
 
                 DSLogger.reportDebug(String.format("Generating Part I - Noise (%d blocks)", totalNoise), null);
-                levelContainer.gameObject.WINDOW.logMessage(String.format("Generating Part I - Noise (%d blocks)", totalNoise), Window.Status.INFO);
+                levelContainer.gameObject.mainWindow.logMessage(String.format("Generating Part I - Noise (%d blocks)", totalNoise), Window.Status.INFO);
                 // 1. Noise Part
                 int blocksNoise = generateByNoise(soildNoise, fluidNoise, totalNoise, posN_Min, posN_Max, hNMin, hNMax);
                 DSLogger.reportDebug("Done.", null);
                 // --------------------------------------------------------------
                 //---------------------------------------------------------------------------------------------------------------------------
                 DSLogger.reportDebug(String.format("Generating Part II - Random (%d blocks)", totalRandom), null);
-                levelContainer.gameObject.WINDOW.logMessage(String.format("Generating Part II - Random (%d blocks)", totalRandom), Window.Status.INFO);
+                levelContainer.gameObject.mainWindow.logMessage(String.format("Generating Part II - Random (%d blocks)", totalRandom), Window.Status.INFO);
                 // 2. Random Part
                 int blocksRandom = generateByRandom(solidRandom, fluidRandom, totalRandom, posR_Min, posR_Max, hRMin, hRMax);
                 DSLogger.reportDebug("Done.", null);
                 // --------------------------------------------------------------
                 DSLogger.reportDebug("Generating Part III - Fluid Series", null);
-                levelContainer.gameObject.WINDOW.logMessage(String.format("Generating Part III - Fluid Series", totalNoise + totalRandom), Window.Status.INFO);
+                levelContainer.gameObject.mainWindow.logMessage(String.format("Generating Part III - Fluid Series", totalNoise + totalRandom), Window.Status.INFO);
                 // 3. Fluid Series
                 generateFluidSeries(numberOfBlocks - blocksNoise - blocksRandom);
                 DSLogger.reportDebug("Done.", null);
-                levelContainer.gameObject.WINDOW.logMessage("Done.", Window.Status.INFO);
+                levelContainer.gameObject.mainWindow.logMessage("Done.", Window.Status.INFO);
                 // --------------------------------------------------------------
             }
         }

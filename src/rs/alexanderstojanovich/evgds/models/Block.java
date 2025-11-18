@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2020 Alexander Stojanovich <coas91@rocketmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,7 +30,6 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
-import rs.alexanderstojanovich.evgds.chunk.Chunk;
 import rs.alexanderstojanovich.evgds.core.Camera;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import rs.alexanderstojanovich.evgds.location.TexByte;
@@ -42,6 +41,9 @@ import rs.alexanderstojanovich.evgds.util.ModelUtils;
 import rs.alexanderstojanovich.evgds.util.VectorFloatUtils;
 
 /**
+ * World block.
+ * Based on model.
+ * Each has unique id.
  *
  * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
@@ -62,30 +64,31 @@ public class Block extends Model {
     public static final int BACK = 4;
     public static final int FRONT = 5;
 
-    public static final int LEFT_BOTTOM = 6;
-    public static final int RIGHT_BOTTOM = 7;
-    public static final int LEFT_TOP = 8;
-    public static final int RIGHT_TOP = 9;
+    public static final int LEFT_BOTTOM = 6;        // -x-y
+    public static final int RIGHT_BOTTOM = 7;      // +x-y
+    public static final int LEFT_TOP = 8;         //  -x+y
+    public static final int RIGHT_TOP = 9;       //   +x+y
 
-    public static final int BOTTOM_BACK = 10;
-    public static final int BOTTOM_FRONT = 11;
-    public static final int TOP_BACK = 12;
-    public static final int TOP_FRONT = 13;
+    public static final int BOTTOM_BACK = 10;    // -y-z
+    public static final int BOTTOM_FRONT = 11;   // -y+z
+    public static final int TOP_BACK = 12;       // +y+-z
+    public static final int TOP_FRONT = 13;      // +y+z
 
     // which faces we enabled for rendering and which we disabled
     private final boolean[] enabledFaces = new boolean[6];
 
     private boolean verticesReversed = false;
 
-    protected int id = 0;
+    // unique id
+    private final int id;
 
     public static final Vector3f[] FACE_NORMALS = {
-        new Vector3f(-1.0f, 0.0f, 0.0f),
-        new Vector3f(1.0f, 0.0f, 0.0f),
-        new Vector3f(0.0f, -1.0f, 0.0f),
-        new Vector3f(0.0f, 1.0f, 0.0f),
-        new Vector3f(0.0f, 0.0f, -1.0f),
-        new Vector3f(0.0f, 0.0f, 1.0f)
+            new Vector3f(-1.0f, 0.0f, 0.0f),
+            new Vector3f(1.0f, 0.0f, 0.0f),
+            new Vector3f(0.0f, -1.0f, 0.0f),
+            new Vector3f(0.0f, 1.0f, 0.0f),
+            new Vector3f(0.0f, 0.0f, -1.0f),
+            new Vector3f(0.0f, 0.0f, 1.0f)
     };
 
     public static final int VERTEX_COUNT = 24;
@@ -122,7 +125,7 @@ public class Block extends Model {
 
     public Block(String texName) {
         super("cubex.txt", texName);
-        this.solid = !texName.equals("water");
+        this.solid = !texName.equals("water") && !texName.equals("cloud");
         Arrays.fill(enabledFaces, true);
         final Mesh mesh = new Mesh();
         deepCopyTo(mesh, texName);
@@ -150,6 +153,7 @@ public class Block extends Model {
 
     public Block(Model other) {
         super(other);
+        id = genId();
     }
 
     // cuz regular shallow copy doesn't work, for List of integers is applicable
@@ -700,8 +704,6 @@ public class Block extends Model {
             }
         }
 
-        this.id = genId();
-
         return counter;
     }
 
@@ -743,7 +745,7 @@ public class Block extends Model {
 
                 j++;
             }
-            faceBits >>= 1; // move bits to the right so they are compared again            
+            faceBits >>= 1; // move bits to the right so they are compared again
         }
 
         return indices;
@@ -756,7 +758,7 @@ public class Block extends Model {
      *
      * @param faceBits 6-bit form
      * @param baseConst const to add to all indices
-     * @return index buffer
+     * @return index mainBuffer
      */
     public static IList<Integer> createIndices(int faceBits, int baseConst) {
         // creating indices
@@ -775,10 +777,77 @@ public class Block extends Model {
 
                 j++;
             }
-            faceBits >>= 1; // move bits to the right so they are compared again            
+            faceBits >>= 1; // move bits to the right so they are compared again
         }
 
         return indices;
+    }
+
+    /**
+     * Returns array of adjacent free face numbers (those faces without adjacent
+     * neighbor nearby) used by Random Level Generator
+     *
+     * @return free face numbers (not block on that side
+     */
+    public List<Integer> getAdjacentFreeFaceNumbers() {
+        List<Integer> result = new ArrayList<>();
+
+        int sbits = 0;
+        TexByte pair = LevelContainer.AllBlockMap.getLocation(pos);
+        if (pair != null && pair.isSolid()) {
+            sbits = pair.getByteValue();
+        }
+
+        int fbits = 0;
+
+        if (pair != null && sbits == 0 && !pair.isSolid()) {
+            fbits = pair.getByteValue();
+        }
+
+        int tbits = sbits | fbits;
+
+        for (int j = 0; j <= 5; j++) {
+            int mask = 1 << j;
+            if ((tbits & mask) == 0) {
+                result.add(j);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Returns array of adjacent free face numbers (those faces without adjacent
+     * neighbor nearby) used by Random Level Generator
+     *
+     * @param pos block position
+     * @return free face numbers (not block on that side
+     */
+    public static List<Integer> getAdjacentFreeFaceNumbers(Vector3f pos) {
+        List<Integer> result = new ArrayList<>();
+
+        int sbits = 0;
+        TexByte pair = LevelContainer.AllBlockMap.getLocation(pos);
+        if (pair != null && pair.isSolid()) {
+            sbits = pair.getByteValue();
+        }
+
+        int fbits = 0;
+
+        if (pair != null && sbits == 0 && !pair.isSolid()) {
+            fbits = pair.getByteValue();
+        }
+
+        int tbits = sbits | fbits;
+
+        for (int j = 0; j <= 5; j++) {
+            int mask = 1 << j;
+            if ((tbits & mask) == 0) {
+                result.add(j);
+            }
+        }
+
+        return result;
     }
 
     // assuming that blocks are the same scale
@@ -1126,7 +1195,7 @@ public class Block extends Model {
     public String toString() {
         StringBuilder sb = new StringBuilder(super.toString());
         sb.append("Block{");
-        sb.append("enabledFaces=").append(enabledFaces);
+        sb.append("enabledFaces=").append(Arrays.toString(enabledFaces));
         sb.append(", verticesReversed=").append(verticesReversed);
         sb.append('}');
         return sb.toString();
@@ -1153,76 +1222,7 @@ public class Block extends Model {
      * @return unique int
      */
     private int genId() {
-        return ModelUtils.blockSpecsToUniqueInt(solid, texName, getFaceBits(), pos);
-    }
-
-    // returns array of adjacent free face numbers (those faces without adjacent neighbor nearby)
-    // used by Random Level Generator
-    /**
-     * Returns array of adjacent free face numbers (those faces without adjacent
-     * neighbor nearby) used by Random Level Generator
-     *
-     * @return free face numbers (not block on that side
-     */
-    public List<Integer> getAdjacentFreeFaceNumbers() {
-        List<Integer> result = new ArrayList<>();
-
-        int sbits = 0;
-        TexByte pair = LevelContainer.AllBlockMap.getLocation(pos);
-        if (pair != null && pair.isSolid()) {
-            sbits = pair.getByteValue();
-        }
-
-        int fbits = 0;
-
-        if (pair != null && sbits == 0 && !pair.isSolid()) {
-            fbits = pair.getByteValue();
-        }
-
-        int tbits = sbits | fbits;
-
-        for (int j = 0; j <= 5; j++) {
-            int mask = 1 << j;
-            if ((tbits & mask) == 0) {
-                result.add(j);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns array of adjacent free face numbers (those faces without adjacent
-     * neighbor nearby) used by Random Level Generator
-     *
-     * @param pos block position
-     * @return free face numbers (not block on that side
-     */
-    public static List<Integer> getAdjacentFreeFaceNumbers(Vector3f pos) {
-        List<Integer> result = new ArrayList<>();
-
-        int sbits = 0;
-        TexByte pair = LevelContainer.AllBlockMap.getLocation(pos);
-        if (pair != null && pair.isSolid()) {
-            sbits = pair.getByteValue();
-        }
-
-        int fbits = 0;
-
-        if (pair != null && sbits == 0 && !pair.isSolid()) {
-            fbits = pair.getByteValue();
-        }
-
-        int tbits = sbits | fbits;
-
-        for (int j = 0; j <= 5; j++) {
-            int mask = 1 << j;
-            if ((tbits & mask) == 0) {
-                result.add(j);
-            }
-        }
-
-        return result;
+        return ModelUtils.blockSpecsToUniqueInt(solid, texName, pos);
     }
 
     /**
@@ -1237,25 +1237,21 @@ public class Block extends Model {
     @Override
     public void setTexNameWithDeepCopy(String texName) {
         super.setTexNameWithDeepCopy(texName);
-        id = genId();
     }
 
     @Override
     public void setTexName(String texName) {
         super.setTexName(texName);
-        id = genId();
     }
 
     @Override
     public void setPos(Vector3f pos) {
         super.setPos(pos);
-        id = genId();
     }
 
     @Override
     public void setSolid(boolean solid) {
         super.setSolid(solid);
-        id = genId();
     }
 
 }
