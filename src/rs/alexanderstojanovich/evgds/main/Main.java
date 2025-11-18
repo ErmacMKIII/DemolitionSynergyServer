@@ -44,7 +44,7 @@ public class Main {
         // Init Config and Logging
         Configuration inCfg = Configuration.getInstance();
         inCfg.readConfigFile(); // this line reads if input file exists otherwise uses defaults
-        IList<String> argsList = new GapList();
+        IList<String> argsList = new GapList<>();
         argsList.addAll(Arrays.asList(args));
         final boolean logToFile = (argsList.contains("-logtofile") || inCfg.isLogToFile()); // determine debug flag (write in a log file or not)
         String arg = argsList.getIf(a -> a.equals("-" + DSLogger.DSLogLevel.ERR.name()) || a.equals("-" + DSLogger.DSLogLevel.DEBUG.name()) || a.equals("-" + DSLogger.DSLogLevel.ALL.name()));
