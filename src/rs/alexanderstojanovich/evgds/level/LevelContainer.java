@@ -122,6 +122,11 @@ public class LevelContainer implements GravityEnviroment {
     public static final BlockLocation AllBlockMap = new BlockLocation();
 
     /**
+     * Various items like e.g. weapons on the ground
+     */
+    public final ItemSystem items = new ItemSystem();
+
+    /**
      * Level Buffer to load or save (world) levels.
      */
     public final LevelBuffer levelBuffer;
@@ -268,8 +273,9 @@ public class LevelContainer implements GravityEnviroment {
 
         chunks.clear();
         levelActors.npcList.clear();
+        items.clear();
         AllBlockMap.init();
-
+        items.clear();
         lightSources.retainLights(2);
 
         for (int i = 0; i <= 2; i++) {
@@ -323,7 +329,7 @@ public class LevelContainer implements GravityEnviroment {
         chunks.clear();
 
         AllBlockMap.init();
-
+        items.clear();
         lightSources.retainLights(2);
 
         if (numberOfBlocks > 0 && numberOfBlocks <= MAX_NUM_OF_BLOCKS) {
@@ -360,7 +366,7 @@ public class LevelContainer implements GravityEnviroment {
         chunks.clear();
 
         AllBlockMap.init();
-
+        items.clear();
         lightSources.retainLights(2);
 
         if (numberOfBlocks > 0 && numberOfBlocks <= MAX_NUM_OF_BLOCKS) {
@@ -400,7 +406,7 @@ public class LevelContainer implements GravityEnviroment {
         chunks.clear();
 
         AllBlockMap.init();
-
+        items.clear();
         lightSources.retainLights(2);
 
         if (numberOfBlocks > 0 && numberOfBlocks <= MAX_NUM_OF_BLOCKS) {

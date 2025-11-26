@@ -17,6 +17,7 @@
 package rs.alexanderstojanovich.evgds.weapons;
 
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 import rs.alexanderstojanovich.evgds.critter.Critter;
 import rs.alexanderstojanovich.evgds.models.Model;
 
@@ -95,19 +96,21 @@ public interface WeaponIfc {
     public Model getModel();
 
     /**
+     * Model on ground. Use Main GLSL Shader.
+     * @param pos position of the weapon item
+     * @param color color of the weapon item
+     *
+     * @return get as item (Model).
+     */
+    public Model asItem(Vector3f pos, Vector4f color);
+
+    /**
      * Model on character. Use Main GLSL Shader.
      *
      * @param critter critter having that weapon
      * @return model on character
      */
     public Model deriveBodyModel(Critter critter);
-
-    /**
-     * Model on ground. Use Main GLSL Shader.
-     *
-     * @return
-     */
-    public Model deriveOnGroundItem();
 
     /**
      * Model in hands. Use Player GLSL Shader.

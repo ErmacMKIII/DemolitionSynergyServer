@@ -27,6 +27,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -171,7 +172,7 @@ public class LevelBuffer {
         levelContainer.levelActors.unfreeze();
         levelContainer.progress = 100.0f;
 
-        if (levelContainer.progress == 100.0f && !levelContainer.gameObject.gameServer.isShutDownSignal()) {
+        if (!levelContainer.gameObject.gameServer.isShutDownSignal()) {
             success = true;
         }
         levelContainer.working = false;
@@ -227,7 +228,7 @@ public class LevelBuffer {
         for (String texName : Assets.TEX_WORLD) {
             IList<Vector3f> blkPos = AllBlockMap.getPopulatedLocations(tb -> tb.texName.equals(texName));
             int count = blkPos.size();
-            byte[] texNameBytes = texName.getBytes(Charset.forName("US-ASCII"));
+            byte[] texNameBytes = texName.getBytes(StandardCharsets.US_ASCII);
             for (int i = 0; i < 5; i++) {
                 mainBuffer.put(texNameBytes[i]);
             }
@@ -258,7 +259,7 @@ public class LevelBuffer {
         levelContainer.levelActors.unfreeze();
         levelContainer.progress = 100.0f;
 
-        if (levelContainer.progress == 100.0f && !levelContainer.gameObject.gameServer.isShutDownSignal()) {
+        if (!levelContainer.gameObject.gameServer.isShutDownSignal()) {
             success = true;
         }
         levelContainer.working = false;
