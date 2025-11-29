@@ -85,21 +85,7 @@ public class DSLogger {
             // Add console appender into configuration            
             configuration.addAppender(appender);
             // Create loggerConfig
-            org.apache.logging.log4j.Level level;
-            switch (logLevel) {
-                default:
-                case ERR:
-                    level = org.apache.logging.log4j.Level.ERROR;
-                    break;
-                case ALL:
-                    level = org.apache.logging.log4j.Level.INFO;
-                    break;
-                case DEBUG:
-                    level = org.apache.logging.log4j.Level.DEBUG;
-                    break;
-            }
-
-            LoggerConfig loggerConfig = new LoggerConfig("DSLogger", level, false);
+            LoggerConfig loggerConfig = getLoggerConfig(logLevel);
             // Add logger and associate it with loggerConfig instance
             configuration.addLogger("DSLogger", loggerConfig);
             // Start logging system
@@ -126,6 +112,30 @@ public class DSLogger {
         } catch (IOException ex) {
             Logger.getLogger(DSLogger.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    /**
+     * Get logger config based on log level.
+     *
+     * @param logLevel log level
+     * @return logger config
+     */
+    private static LoggerConfig getLoggerConfig(DSLogLevel logLevel) {
+        org.apache.logging.log4j.Level level;
+        switch (logLevel) {
+            default:
+            case ERR:
+                level = org.apache.logging.log4j.Level.ERROR;
+                break;
+            case ALL:
+                level = org.apache.logging.log4j.Level.INFO;
+                break;
+            case DEBUG:
+                level = org.apache.logging.log4j.Level.DEBUG;
+                break;
+        }
+
+        return new LoggerConfig("DSLogger", level, false);
     }
 
     // used when catchin exceptions
