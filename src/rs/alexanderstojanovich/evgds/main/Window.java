@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Alexander Stojanovich <coas91@rocketmail.com>
+ * Copyright (C) 2024 Aleksandar Stojanovic <coas91@rocketmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,7 +79,7 @@ import rs.alexanderstojanovich.evgds.util.DSLogger;
 
 /**
  *
- * @author Alexander Stojanovich
+ * @author Aleksandar Stojanovic
  */
 public class Window extends javax.swing.JFrame {
 
@@ -585,7 +585,6 @@ public class Window extends javax.swing.JFrame {
     /**
      * Remove all rows from a DefaultTableModel.
      *
-     * @param rowIndex Index of the row to be removed.
      * @param model DefaultTableModel from which the row will be removed.
      */
     private void removeAllRows(DefaultTableModel model) {

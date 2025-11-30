@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2020 Alexander Stojanovich <coas91@rocketmail.com>
+ * Copyright (C) 2020 Aleksandar Stojanovic <coas91@rocketmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -304,7 +304,7 @@ public class RandomLevelGenerator {
     /**
      * Noise Task result
      */
-    protected class BlockResult {
+    protected static class BlockResult {
 
         public final int solidBlocks;
         public final int fluidBlocks;
@@ -340,7 +340,7 @@ public class RandomLevelGenerator {
         }
 
         @Override
-        public BlockResult call() throws Exception {
+        public BlockResult call() {
             int remSolidBlks = this.solidBlocks;
             int remFluidBlks = this.fluidBlocks;
 
@@ -470,12 +470,18 @@ public class RandomLevelGenerator {
 
     /**
      * Part II - Generate by Random.
+     * Blocks are generated in random patterns. This operation is very fast
+     * and attempts to cluster adjacent blocks to form contiguous structures
+     * (helps prevent water leaking).
      *
-     * Blocks are generated in random patterns. This operation is very fast.
-     *
-     * (To prevent water leaking).
-     *
-     * @param solidBlocks
+     * @param solidBlocks  number of solid blocks to generate
+     * @param fluidBlocks  number of fluid blocks to generate
+     * @param totalAmount  total number of blocks (used to report progress)
+     * @param posMin       minimum X/Z coordinate (inclusive, expected even)
+     * @param posMax       maximum X/Z coordinate (inclusive, expected even)
+     * @param hMin         minimum Y coordinate (inclusive, expected even)
+     * @param hMax         maximum Y coordinate (inclusive, expected even)
+     * @return the number of blocks actually generated
      */
     private int generateByRandom(int solidBlocks, int fluidBlocks, int totalAmount, int posMin, int posMax, int hMin, int hMax) {
         int genBlks = 0; // holds result
@@ -495,13 +501,12 @@ public class RandomLevelGenerator {
                         && !levelContainer.gameObject.gameServer.isShutDownSignal()) {
                     if (solidBlock == null) {
                         solidBlock = generateRandomSolidBlock(posMin, posMax, hMin, hMax);
-                        solidAdjBlock = solidBlock;
                         solidBatch--;
                         solidBlocks--;
                         genBlks++;
                         // this provides external monitoring of level generation progress                        
                         levelContainer.incProgress(100.0f / (float) totalAmount);
-                    } else if (solidAdjBlock != null) {
+                    } else {
                         solidAdjBlock = generateRandomSolidBlockAdjacent(solidBlock);
                         if (solidAdjBlock != null) {
                             solidBatch--;
@@ -530,13 +535,12 @@ public class RandomLevelGenerator {
                         && !levelContainer.gameObject.gameServer.isShutDownSignal()) {
                     if (fluidBlock == null) {
                         fluidBlock = generateRandomFluidBlock(posMin, posMax, hMin, hMax);
-                        fluidAdjBlock = fluidBlock;
                         fluidBatch--;
                         fluidBlocks--;
                         genBlks++;
                         // this provides external monitoring of level generation progress                        
                         levelContainer.incProgress(100.0f / (float) totalAmount);
-                    } else if (fluidAdjBlock != null) {
+                    } else {
                         fluidAdjBlock = generateRandomFluidBlockAdjacent(fluidBlock);
                         if (fluidAdjBlock != null) {
                             fluidBatch--;
@@ -562,13 +566,24 @@ public class RandomLevelGenerator {
     }
 
     /**
-     * *
      * Part III - Generate fluid series.
      *
-     * All water blocks, apart from top one (rarely) are sides are surrounded by
-     * solid blocks. (To prevent water leaking).
+     * Ensures that most fluid blocks (water) are enclosed by solid blocks on their
+     * sides to prevent fluid leakage. For every fluid block currently present in
+     * the global block map, this method inspects adjacent free faces and attempts
+     * to place solid blocks to seal them. The top face is treated specially and
+     * will only be sealed with a probability to allow some open water surfaces.
      *
-     * @param solidBlocks
+     * The method updates the generation progress on the associated
+     * `levelContainer` and will stop early if the application window requests
+     * closing.
+     *
+     * Side effects:
+     * - Adds new solid `Block` instances to `levelContainer.chunks`.
+     * - Consumes from the `solidBlocks` budget as blocks are placed.
+     *
+     * @param solidBlocks the maximum number of solid blocks available for sealing
+     *                    fluid faces; may be reduced to zero during execution.
      */
     private void generateFluidSeries(int solidBlocks) {
         // Clouds arent generated only fluid
@@ -601,70 +616,122 @@ public class RandomLevelGenerator {
     }
 
     /**
-     * Generate weapon items. Weapon items can appear only on solid blocks (above the water often and underwater rarely)
-     *
-     * @param numberOfBlocks parsed number of desired total blocks in the level
+     * Weapon Task result
      */
-    private void generateWeaponItems(int numberOfBlocks) {
-        // Reset progress
-        levelContainer.setProgress(0.0f);
-        // Random pool
-        Map<WeaponIfc.Clazz, Integer> poolMap = Map.ofEntries(
-                Map.entry(WeaponIfc.Clazz.OneHandedSmallGun, numberOfBlocks >> 10),
-                Map.entry(WeaponIfc.Clazz.TwoHandedSmallGun, numberOfBlocks >> 12),
-                Map.entry(WeaponIfc.Clazz.TwoHandedBigGuns, numberOfBlocks >> 14)
-        );
+    protected static class WeaponResult {
+        public final int itemsGenerated;
 
-        // Count total amount of weapons
-        int count = 0;
-        for (Integer v : poolMap.values()) {
-            count += v;
+        /**
+         * Constructor for WeaponResult.
+         * @param itemsGenerated number of weapon items generated
+         */
+        public WeaponResult(int itemsGenerated) {
+            this.itemsGenerated = itemsGenerated;
+        }
+    }
+
+    /**
+     * WeaponTask: Responsible for generating weapon items for one weapon class.
+     */
+    protected class WeaponTask implements Callable<WeaponResult> {
+        private final WeaponIfc.Clazz clazz;
+        private final int itemCount;
+        private final int totalCount;
+        private final IList<Vector3f> usedLocations;
+
+        public WeaponTask(WeaponIfc.Clazz clazz, int itemCount, int totalCount, IList<Vector3f> usedLocations) {
+            this.clazz = clazz;
+            this.itemCount = itemCount;
+            this.totalCount = totalCount;
+            this.usedLocations = usedLocations;
         }
 
-        // Used locations (only one weapon can occupy only one space)
-        IList<Vector3f> usedLocations = new GapList<>();
-
-        for (var entry : poolMap.entrySet()) {
+        @Override
+        public WeaponResult call() throws Exception {
+            int generated = 0;
             IList<WeaponIfc> allWeaponsByClazz = new GapList<>(Arrays.asList(levelContainer.weapons.AllWeapons));
-            IList<WeaponIfc> weapons = allWeaponsByClazz.filter(wep -> wep.getClazz() == entry.getKey());
-            for (int i = 0; i < entry.getValue(); i++) {
-                // Choose random index from all-weapons preset
+            IList<WeaponIfc> weapons = allWeaponsByClazz.filter(wep -> wep.getClazz() == clazz);
+
+            // Generate weapon items
+            for (int i = 0; i < itemCount; i++) {
                 int randIndex = random.nextInt(weapons.size());
-                // Random weapon
                 WeaponIfc randWeapon = weapons.get(randIndex);
 
-                // Solid populated locations (where weapon can spawn)
+                // find random solid location
                 IList<Vector3f> solidLocs;
                 if (random.nextFloat() >= 0.33f) {
-                    // above water
                     solidLocs = LevelContainer.AllBlockMap.getPopulatedLocations(texByte -> texByte.isSolid() && (~texByte.byteValue & Block.Y_MASK) != 0);
                 } else {
-                    // underwater
                     solidLocs = LevelContainer.AllBlockMap.getPopulatedLocations(texByte -> texByte.isSolid() && (~texByte.byteValue & Block.Y_MASK) == 0);
                 }
-                // Random location index
-                randIndex = random.nextInt(solidLocs.size());
 
-                // Random (solid) location
+                randIndex = random.nextInt(solidLocs.size());
                 Vector3f loc = solidLocs.get(randIndex);
 
-                if (usedLocations.contains(loc)) {
-                    levelContainer.incProgress(100.0f / (float) count);
-                    continue; // skip; weapon will not spawn
+                synchronized (usedLocations) {
+                    // check if location is already used
+                    if (usedLocations.contains(loc)) {
+                        levelContainer.incProgress(100.0f / (float) totalCount);
+                        continue;
+                    }
+                    usedLocations.add(loc);
                 }
 
-                // Weapon location (from random)
                 Vector3f wepLoc = new Vector3f(loc.x, loc.y + 2f, loc.z);
-
-                // Place weapon at random index -> solid location
                 Model weaponItem = randWeapon.asItem(wepLoc, GlobalColors.WHITE_RGBA);
-                levelContainer.items.allWeaponItems.add(weaponItem);
 
-                // Don't forget to add to used locations (since this place is now occupied)
-                usedLocations.add(loc);
+                // add to level container
+                synchronized (levelContainer.items.allWeaponItems) {
+                    levelContainer.items.allWeaponItems.add(weaponItem);
+                }
 
-                levelContainer.incProgress(100.0f / (float) count);
+                generated++;
+                levelContainer.incProgress(100.0f / (float) totalCount);
             }
+
+            return new WeaponResult(generated);
+        }
+    }
+
+    /**
+     * Generate weapon items in parallel tasks.
+     */
+    private void generateWeaponItems(int numberOfBlocks) {
+        levelContainer.setProgress(0.0f);
+
+        // Define pool map based on number of blocks
+        List<Integer> poolMap = Arrays.asList(
+                numberOfBlocks >> 10,
+                numberOfBlocks >> 12,
+                numberOfBlocks >> 14
+        );
+        int totalCount = poolMap.stream().mapToInt(Integer::intValue).sum();
+
+        // Initialize tasks
+        final WeaponIfc.Clazz[] classes = {WeaponIfc.Clazz.OneHandedSmallGun, WeaponIfc.Clazz.TwoHandedSmallGun, WeaponIfc.Clazz.TwoHandedBigGuns};
+        IList<Vector3f> usedLocations = new GapList<>();
+        ExecutorService exec = Executors.newFixedThreadPool(numberOfCores);
+        IList<Future<WeaponResult>> tasks = new GapList<>();
+
+        try {
+            // Loop through weapon classes and assign tasks
+            for (var clazz : classes) {
+                int itemCount = poolMap.get(clazz.ordinal() - 1);
+                WeaponTask task = new WeaponTask(clazz, itemCount, totalCount, usedLocations);
+                tasks.add(exec.submit(task));
+            }
+
+            // Process task results
+            for (Future<WeaponResult> future : tasks) {
+                future.get();
+            }
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            DSLogger.reportError("Interrupted during weapon generation", ex);
+        } catch (ExecutionException ex) {
+            DSLogger.reportError("Error during weapon generation", ex);
+        } finally {
+            exec.shutdown();
         }
     }
 
