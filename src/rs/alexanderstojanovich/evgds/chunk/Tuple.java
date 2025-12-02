@@ -108,7 +108,7 @@ public class Tuple extends Series {
      * @return block if found (null if not found)
      */
     public Block getBlock(Vector3f pos) {
-        Integer key = ModelUtils.blockSpecsToUniqueInt(isSolid(), this.texName(), pos);
+        Integer key = ModelUtils.blockSpecsToUniqueInt(this.texName(), pos);
 
         int left = 0;
         int right = this.blockList.size() - 1;

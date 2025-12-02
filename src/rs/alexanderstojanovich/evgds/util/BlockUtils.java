@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import rs.alexanderstojanovich.evgds.chunk.Chunk;
 import rs.alexanderstojanovich.evgds.main.Game;
 import rs.alexanderstojanovich.evgds.models.Block;
 import static rs.alexanderstojanovich.evgds.models.Block.INDICES;
@@ -155,4 +156,31 @@ public class BlockUtils {
         }
     }
 
+    /**
+     * Convert block specs {texName, VEC3} to unique int (hashcode).
+     * Used for block id generation.
+     *
+     * @param texName texName[5] string,
+     * @param pos float3(x,y,z) vector
+     *
+     * @return unique int
+     */
+    public static int blockSpecsToUniqueInt(String texName, Vector3f pos) {
+        // Direct computation - 10-15 CPU operations total
+
+        // 1. Texture hash: 5 operations
+        int texHash = texName.charAt(0)
+                ^ (texName.charAt(1) << 6)
+                ^ (texName.charAt(2) << 12)
+                ^ (texName.charAt(3) << 18)
+                ^ (texName.charAt(4) << 24);
+
+        // 2. Position hash: 3 multiplies, 3 casts, 3 masks, 2 shifts
+        int posHash = ((int)(pos.x * Chunk.GRID_SIZE) & Chunk.SOME_MASK)
+                | (((int)(pos.y * Chunk.GRID_SIZE) & Chunk.SOME_MASK) << 10)
+                | (((int)(pos.z * Chunk.GRID_SIZE) & Chunk.SOME_MASK) << 20);
+
+        // 3. Combine: 1 operation
+        return texHash ^ posHash;
+    }
 }

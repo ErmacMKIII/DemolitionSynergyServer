@@ -1222,7 +1222,7 @@ public class Block extends Model {
      * @return unique int
      */
     private int genId() {
-        return ModelUtils.blockSpecsToUniqueInt(solid, texName, pos);
+        return ModelUtils.blockSpecsToUniqueInt(texName, pos);
     }
 
     /**

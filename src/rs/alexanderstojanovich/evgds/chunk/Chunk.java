@@ -48,6 +48,10 @@ public interface Chunk { // some operations are mutually exclusive
      */
     public static final int BOUND = 256;
     /**
+     * Some mask constant - used for Block ID generation
+     */
+    public static final int SOME_MASK = 0xFF;
+    /**
      * Visibility of chunks. Not used in live code
      */
     public static final float VISION = 256.0f; // determines visibility
@@ -109,7 +113,7 @@ public interface Chunk { // some operations are mutually exclusive
      * @return block if found (null if not found)
      */
     public static Block getBlock(Tuple tuple, Vector3f pos) {
-        Integer key = ModelUtils.blockSpecsToUniqueInt(tuple.isSolid(), tuple.texName(), pos);
+        Integer key = ModelUtils.blockSpecsToUniqueInt(tuple.texName(), pos);
         int left = 0;
         int right = tuple.blockList.size() - 1;
         int startIndex = -1;
