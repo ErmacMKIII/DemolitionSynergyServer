@@ -314,7 +314,7 @@ public class ModelUtils {
             return null;
         }
 
-        int globlIndex = -1;
+        int globlIndex = 0;
         int texIndex = -1;
         final float oneOver = 1.0f / (float) gridSize;
 
@@ -372,7 +372,7 @@ public class ModelUtils {
                 } else if (things[0].equals("g")) {
                     // Detect group name
                     if (things.length >= 2 && pattern.asPredicate().test(things[1])) {
-                        globlIndex++;
+                        globlIndex = 1; // Gun
                     }
                 } else if (things[0].equals("f")) {
                     if (things.length < 4) {

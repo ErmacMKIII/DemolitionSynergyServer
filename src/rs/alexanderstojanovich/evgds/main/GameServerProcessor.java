@@ -376,7 +376,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 Gson gson = new Gson();
                 IList<PlayerInfo> playerInfos = new GapList<>();
                 levelActors.otherPlayers.forEach(op -> {
-                    playerInfos.add(new PlayerInfo(op.getName(), op.body.texName, op.uniqueId, op.body.getPrimaryRGBAColor(), op.getWeapon().getTexName()));
+                    playerInfos.add(new PlayerInfo(op.getName(), op.body.texName, op.uniqueId, op.body.getPrimaryRGBAColor(), op.activeWeapon().getTexName()));
                 });
                 String obj = gson.toJson(playerInfos, IList.class);
                 response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
@@ -474,7 +474,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             if (weapon == null) { // if there is no weapon, switch to 'NONE' - unarmed, avoid nulls!
                                 weapon = Weapons.NONE;
                             }
-                            targCrit.switchWeapon(weapon);
+                            targCrit.switchWeapon(targCrit.getActiveHand());
                             response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, "OK - Player info updated.");
                         }
                         break;
