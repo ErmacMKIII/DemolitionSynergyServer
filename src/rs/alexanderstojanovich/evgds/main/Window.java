@@ -1682,7 +1682,7 @@ public class Window extends javax.swing.JFrame {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v56 (%s BUILD reviewed on 2025-09-18 at 04:43).\n", BUILD.toString()));
+            sb.append(String.format("VERSION v56 (%s BUILD reviewed on 2025-12-04 at 13:58).\n", BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1691,7 +1691,7 @@ public class Window extends javax.swing.JFrame {
             sb.append(String.format("Demolition Synergy Version: %d\n", GameObject.VERSION));
             sb.append("\n");
             sb.append("Copyright © 2025\n");
-            sb.append("Alexander \"Ermac\" Stojanovich\n");
+            sb.append("Aleksandar \"Ermac\" Stojanovic\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
             JTextArea textArea = new JTextArea(sb.toString(), 15, 35);

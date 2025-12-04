@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact name="DSS">
+    <output-path>$PROJECT_DIR$/out/artifacts/DSS</output-path>
+    <root id="root">
+      <element id="directory" name="lib">
+        <element id="library" level="project" name="lib" />
+      </element>
+      <element id="archive" name="DSS.jar">
+        <element id="module-output" name="DemolitionSynergyServer" />
+      </element>
+    </root>
+  </artifact>
+</component>
