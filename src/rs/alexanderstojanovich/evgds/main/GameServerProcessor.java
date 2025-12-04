@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Alexander Stojanovich <coas91@rocketmail.com>
+ * Copyright (C) 2024 Aleksandar Stojanovic <coas91@rocketmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,19 +40,11 @@ import static rs.alexanderstojanovich.evgds.main.GameServer.MAX_CLIENTS;
 import rs.alexanderstojanovich.evgds.models.Model;
 import rs.alexanderstojanovich.evgds.net.ClientInfo;
 import rs.alexanderstojanovich.evgds.net.DSObject;
-import static rs.alexanderstojanovich.evgds.net.DSObject.DataType.INT;
-import static rs.alexanderstojanovich.evgds.net.DSObject.DataType.STRING;
 import rs.alexanderstojanovich.evgds.net.LevelMapInfo;
 import rs.alexanderstojanovich.evgds.net.PlayerInfo;
 import rs.alexanderstojanovich.evgds.net.PosInfo;
 import rs.alexanderstojanovich.evgds.net.Request;
 import rs.alexanderstojanovich.evgds.net.RequestIfc;
-import static rs.alexanderstojanovich.evgds.net.RequestIfc.RequestType.DOWNLOAD;
-import static rs.alexanderstojanovich.evgds.net.RequestIfc.RequestType.GET_POS;
-import static rs.alexanderstojanovich.evgds.net.RequestIfc.RequestType.GET_TIME;
-import static rs.alexanderstojanovich.evgds.net.RequestIfc.RequestType.GOODBYE;
-import static rs.alexanderstojanovich.evgds.net.RequestIfc.RequestType.HELLO;
-import static rs.alexanderstojanovich.evgds.net.RequestIfc.RequestType.PING;
 import rs.alexanderstojanovich.evgds.net.Response;
 import rs.alexanderstojanovich.evgds.net.ResponseIfc;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
@@ -192,7 +184,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                     msg = String.format("Hello, you are connected to %s, v%s, for help append \"help\" without quotes. Welcome!", gameServer.worldName, gameServer.version);
                     response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                     gameServer.clients.add(new ClientInfo(session, clientHostName, clientGuid, GameServer.TIME_TO_LIVE));
-                    gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
+                    gameServer.gameObject.mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
                     response.send(clientGuid, gameServer, session);
                 }
                 break;
@@ -206,7 +198,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             msg = String.format("Player ID is registered!", gameServer.worldName, gameServer.version);
                             response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
 
-                            gameServer.gameObject.WINDOW.logMessage((String.format("Player %s has connected.", newPlayerUniqueId)), Window.Status.INFO);
+                            gameServer.gameObject.mainWindow.logMessage((String.format("Player %s has connected.", newPlayerUniqueId)), Window.Status.INFO);
                             DSLogger.reportInfo(String.format("Player %s has connected.", newPlayerUniqueId), null);
 
                         } else {
@@ -226,7 +218,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                             critter.body.texName = info.texModel;
                             levelActors.otherPlayers.add(critter);
 
-                            gameServer.gameObject.WINDOW.logMessage((String.format("Player %s (%s) has connected.", info.name, info.uniqueId)), Window.Status.INFO);
+                            gameServer.gameObject.mainWindow.logMessage((String.format("Player %s (%s) has connected.", info.name, info.uniqueId)), Window.Status.INFO);
                             DSLogger.reportInfo(String.format("Player %s (%s) has connected.", info.name, info.uniqueId), null);
 
                             msg = String.format("Player ID is registered!", gameServer.worldName, gameServer.version);
@@ -248,7 +240,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, msg);
                 response.send(clientGuid, gameServer, session);
                 gameServer.clients.removeIf(c -> c.uniqueId.equals(clientGuid));
-                gameServer.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
+                gameServer.gameObject.mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + (gameServer.clients.size()));
                 if (clientGuid != null) {
                     GameServer.performCleanUp(gameServer.gameObject, clientGuid, false);
                 }
@@ -384,7 +376,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 Gson gson = new Gson();
                 IList<PlayerInfo> playerInfos = new GapList<>();
                 levelActors.otherPlayers.forEach(op -> {
-                    playerInfos.add(new PlayerInfo(op.getName(), op.body.texName, op.uniqueId, op.body.getPrimaryRGBAColor(), op.getWeapon().getTexName()));
+                    playerInfos.add(new PlayerInfo(op.getName(), op.body.texName, op.uniqueId, op.body.getPrimaryRGBAColor(), op.activeWeapon().getTexName()));
                 });
                 String obj = gson.toJson(playerInfos, IList.class);
                 response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.OK, DSObject.DataType.OBJECT, obj);
@@ -398,7 +390,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                     senderName = otherPlayerOrNull.getName();
                 }
 
-                gameServer.gameObject.WINDOW.logMessage(String.format("%s:%s", senderName, request.getData()), Window.Status.INFO);
+                gameServer.gameObject.mainWindow.logMessage(String.format("%s:%s", senderName, request.getData()), Window.Status.INFO);
                 DSLogger.reportInfo(String.format("%s:%s", senderName, request.getData()), null);
 
                 response = new Response(DSObject.NIL_ID, 0L, ResponseIfc.ResponseStatus.OK, DSObject.DataType.STRING, senderName + ":" + request.getData());
@@ -465,8 +457,8 @@ public class GameServerProcessor extends IoHandlerAdapter {
             case SET_PLAYER_INFO:
                 switch (request.getDataType()) {
                     case OBJECT: {
-                        String jsonStro = request.getData().toString();
-                        PlayerInfo info = PlayerInfo.fromJson(jsonStro);
+                        String jsonString = request.getData().toString();
+                        PlayerInfo info = PlayerInfo.fromJson(jsonString);
                         levelActors = gameServer.gameObject.game.gameObject.levelContainer.levelActors;
                         Critter targCrit = levelActors.otherPlayers.getIf(ot -> ot.uniqueId.equals(info.uniqueId));
                         if (targCrit == null) {
@@ -512,7 +504,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
             case INTERNAL_ERROR:
                 msg = String.format("Server %s %s %s error!", procResult.hostname, procResult.guid, procResult.message);
                 DSLogger.reportError(msg, null);
-                gameServer.gameObject.WINDOW.logMessage(msg, Window.Status.ERR);
+                gameServer.gameObject.mainWindow.logMessage(msg, Window.Status.ERR);
                 break;
             case CLIENT_ERROR:
                 // kick violators
@@ -520,10 +512,10 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 gameServer.assertTstFailure(procResult.hostname, procResult.guid);
                 msg = String.format("Client %s %s %s error!", procResult.hostname, procResult.guid, procResult.message);
                 DSLogger.reportError(msg, null);
-                gameServer.gameObject.WINDOW.logMessage(msg, Window.Status.ERR);
+                gameServer.gameObject.mainWindow.logMessage(msg, Window.Status.ERR);
                 if (gameServer.blacklist.contains(procResult.hostname)) {
                     DSLogger.reportWarning(msg, null);
-                    gameServer.gameObject.WINDOW.logMessage(msg, Window.Status.WARN);
+                    gameServer.gameObject.mainWindow.logMessage(msg, Window.Status.WARN);
                 }
                 break;
             default:
@@ -536,7 +528,7 @@ public class GameServerProcessor extends IoHandlerAdapter {
                 if (config.getLogLevel() == DSLogger.DSLogLevel.DEBUG || config.getLogLevel() == DSLogger.DSLogLevel.ALL) {
                     msg = String.format("Client %s %s %s OK", procResult.hostname, procResult.guid, procResult.message);
                     DSLogger.reportInfo(msg, null);
-                    gameServer.gameObject.WINDOW.logMessage(msg, Window.Status.INFO);
+                    gameServer.gameObject.mainWindow.logMessage(msg, Window.Status.INFO);
                 }
                 break;
         }

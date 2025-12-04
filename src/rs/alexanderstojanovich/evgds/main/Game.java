@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2020 Alexander Stojanovich <coas91@rocketmail.com>
+ * Copyright (C) 2020 Aleksandar Stojanovic <coas91@rocketmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -172,7 +172,7 @@ public class Game implements DSMachine {
                 // Detecting critical status
                 if (ups == 0 && deltaTime > CRITICAL_TIME) {
                     DSLogger.reportFatalError("Game status critical!", null);
-                    gameObject.WINDOW.stopServerAndUpdate();
+                    gameObject.mainWindow.stopServerAndUpdate();
                 }
 
                 while (accumulator >= TICK_TIME) {
@@ -197,8 +197,8 @@ public class Game implements DSMachine {
      */
     public static Configuration makeConfig(GameObject gameObject) {
         Configuration cfg = Configuration.getInstance();
-        cfg.setWidth(gameObject.WINDOW.getWidth());
-        cfg.setHeight(gameObject.WINDOW.getHeight());
+        cfg.setWidth(gameObject.mainWindow.getWidth());
+        cfg.setHeight(gameObject.mainWindow.getHeight());
 //        cfg.setFullscreen(gameObject.WINDOW.isFullscreen());
         cfg.setLocalIP(gameObject.gameServer.localIP);
         cfg.setServerPort(gameObject.gameServer.port);

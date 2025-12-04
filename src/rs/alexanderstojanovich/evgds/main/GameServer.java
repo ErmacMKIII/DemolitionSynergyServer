@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Alexander Stojanovich <coas91@rocketmail.com>
+ * Copyright (C) 2024 Aleksandar Stojanovic <coas91@rocketmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -197,6 +197,9 @@ public class GameServer implements DSMachine, Runnable {
     public void startServer() {
         this.shutDownSignal = false;
 
+        // Reset total failed attempts (important on server restart)
+        TotalFailedAttempts = 0;
+
         // Start server helper
         serverHelperExecutor = Executors.newSingleThreadExecutor();
 
@@ -242,7 +245,7 @@ public class GameServer implements DSMachine, Runnable {
                 clients.removeIf(cli -> cli.timeToLive <= 0 || kicklist.contains(cli.uniqueId));
 
                 // Update server window title with current player count
-                GameServer.this.gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + GameServer.this.worldName + " - Player Count: " + (GameServer.this.clients.size()));
+                GameServer.this.gameObject.mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + GameServer.this.worldName + " - Player Count: " + (GameServer.this.clients.size()));
             }
         };
         timerClientChk.scheduleAtFixedRate(task1, 1000L, 1000L);
@@ -264,7 +267,7 @@ public class GameServer implements DSMachine, Runnable {
             // Send 'notification' that server ic shutting down..
             this.shutDownSignal = true;
             // Reset server window title
-            gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE);
+            gameObject.mainWindow.setTitle(GameObject.WINDOW_TITLE);
 
             // Kick all players (and close their sessions internally)            
             clients.immutableList().forEach(cli -> kickPlayer(cli.uniqueId));
@@ -290,7 +293,7 @@ public class GameServer implements DSMachine, Runnable {
 
             // Log server shutdown completion
             DSLogger.reportInfo("Game Server finished!", null);
-            gameObject.WINDOW.logMessage("Game Server finished!", Window.Status.INFO);
+            gameObject.mainWindow.logMessage("Game Server finished!", Window.Status.INFO);
         }
     }
 
@@ -323,18 +326,18 @@ public class GameServer implements DSMachine, Runnable {
         // Blacklist the client if they exceeded maximum failed attempts
         if (filtered != null && ++filtered.failedAttempts >= FAIL_ATTEMPT_MAX && !blacklist.contains(failedHostName)) {
             blacklist.add(failedHostName);
-            gameObject.WINDOW.logMessage((String.format("Client (%s) is now blacklisted!", failedHostName)), Window.Status.WARN);
+            gameObject.mainWindow.logMessage((String.format("Client (%s) is now blacklisted!", failedHostName)), Window.Status.WARN);
             DSLogger.reportWarning(String.format("Game Server (%s) is now blacklisted!", failedHostName), null);
         }
 
         // Shut down the server if total failed attempts threshold is exceeded
         if (++TotalFailedAttempts >= TOTAL_FAIL_ATTEMPT_MAX) {
-            gameObject.WINDOW.logMessage((String.format("Game Server (%s:%d) status critical! Trying to shut down!", this.localIP, this.port)), Window.Status.ERR);
+            gameObject.mainWindow.logMessage((String.format("Game Server (%s:%d) status critical! Trying to shut down!", this.localIP, this.port)), Window.Status.ERR);
             DSLogger.reportWarning(String.format("Game Server (%s:%d) status critical! Trying to shut down!", this.localIP, this.port), null);
 
 //            stopServer();
 //            gameObject.game.stop();
-            gameObject.WINDOW.stopServerAndUpdate(); // this will do commented out commands above
+            gameObject.mainWindow.stopServerAndUpdate(); // this will do commented out commands above
         }
     }
 
@@ -360,13 +363,13 @@ public class GameServer implements DSMachine, Runnable {
             acceptor.bind(endpoint);
 
             // Update server window title with current player count
-            gameObject.WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + worldName + " - Player Count: " + (clients.size()));
+            gameObject.mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + worldName + " - Player Count: " + (clients.size()));
             DSLogger.reportInfo(String.format("Game Server (%s:%d) started!", this.localIP, this.port), null);
-            gameObject.WINDOW.logMessage((String.format("Game Server (%s:%d) started!", this.localIP, this.port)), Window.Status.INFO);
+            gameObject.mainWindow.logMessage((String.format("Game Server (%s:%d) started!", this.localIP, this.port)), Window.Status.INFO);
         } catch (IOException ex) {
             // Handle server creation failure
             DSLogger.reportError("Cannot create Game Server!", ex);
-            gameObject.WINDOW.logMessage(("Cannot create Game Server!"), Window.Status.ERR);
+            gameObject.mainWindow.logMessage(("Cannot create Game Server!"), Window.Status.ERR);
             DSLogger.reportError(ex.getMessage(), ex);
             shutDownSignal = true;
         }
@@ -386,7 +389,7 @@ public class GameServer implements DSMachine, Runnable {
         LevelActors levelActors = gameObject.game.gameObject.levelContainer.levelActors;
         levelActors.otherPlayers.removeIf(ply -> ply.uniqueId.equals(uniqueId));
         DSLogger.reportInfo(String.format(isError ? "Player %s timed out." : "Player %s disconnected.", uniqueId), null);
-        gameObject.WINDOW.logMessage(String.format(isError ? "Player %s timed out." : "Player %s disconnected.", uniqueId), isError ? Window.Status.ERR : Window.Status.INFO);
+        gameObject.mainWindow.logMessage(String.format(isError ? "Player %s timed out." : "Player %s disconnected.", uniqueId), isError ? Window.Status.ERR : Window.Status.INFO);
     }
 
     // Getters and setters for private fields

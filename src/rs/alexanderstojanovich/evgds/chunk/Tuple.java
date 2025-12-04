@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Alexander Stojanovich <coas91@rocketmail.com>
+ * Copyright (C) 2020 Aleksandar Stojanovic <coas91@rocketmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,7 +108,7 @@ public class Tuple extends Series {
      * @return block if found (null if not found)
      */
     public Block getBlock(Vector3f pos) {
-        Integer key = ModelUtils.blockSpecsToUniqueInt(isSolid(), this.texName(), this.faceBits(), pos);
+        Integer key = ModelUtils.blockSpecsToUniqueInt(this.texName(), pos);
 
         int left = 0;
         int right = this.blockList.size() - 1;

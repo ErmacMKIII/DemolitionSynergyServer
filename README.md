@@ -5,7 +5,7 @@ Old one is taken down. Because of severe malware infection.
 Please see ***Very Important Notice*** located at the bottom for more info.
 
 # Demolition Synergy Server
-Demolition Synergy Dedicated Server
+Demolition Synergy Dedicated Server.
 
 Dedicated server is with Java Swing graphical user interface (GUI) 
 and dark mode (darcula library).
@@ -29,6 +29,10 @@ Java 11 Installer (11.0.26) could be downloaded from:
 https://mega.nz/file/FMNB2RTJ#-jNDrxX2RAxcf-jdJEKBfDHI9FpqxSX-m4kxN8sm9bE
 
 # How To Build
+
+Build can be opened with Apache NetBeans IDE 21 (becoming obsolete).
+However, advised to use IntelliJ IDEA 2025.2.4 (Community Edition).
+
 Build was coded in Apache NetBeans IDE 21. Requires Java JDK 11 (or later).
 In order to build the project you are gonna need NetBeans IDE 16 (or later) and following libraries:
 1. JOML (installed),

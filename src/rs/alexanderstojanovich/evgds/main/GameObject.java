@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2020 Alexander Stojanovich <coas91@rocketmail.com>
+ * Copyright (C) 2020 Aleksandar Stojanovic <coas91@rocketmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,14 +48,14 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
 
     private final Configuration cfg = Configuration.getInstance();
 
-    public static final int VERSION = 57;
+    public static final int VERSION = 58;
     public static final String WINDOW_TITLE = String.format("Demolition Synergy - v%s", VERSION);
     // makes default window -> Renderer sets resolution from config
 
     /**
-     * Game GLFW Window
+     * Game GLFW Window (Swing JFrame)
      */
-    public final Window WINDOW;
+    public final Window mainWindow;
 
     public final LevelContainer levelContainer;
     public final RandomLevelGenerator randomLevelGenerator;
@@ -101,11 +101,11 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         final int height = cfg.getHeight();
         // creating the window
         /* Create and display the form */
-        WINDOW = new Window(this);
-        WINDOW.setSize(width, height);
-        WINDOW.setVisible(true);
-        WINDOW.initCenterWindow();
-        WINDOW.setTitle(WINDOW_TITLE);
+        mainWindow = new Window(this);
+        mainWindow.setSize(width, height);
+        mainWindow.setVisible(true);
+        mainWindow.initCenterWindow();
+        mainWindow.setTitle(WINDOW_TITLE);
         //----------------------------------------------------------------------        
 
         //----------------------------------------------------------------------        
@@ -165,20 +165,20 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         }
 
         // working check avoids locking the monitor
-        WINDOW.upsertPosInfo(levelContainer.levelActors.getPosInfo());
-        WINDOW.upsertPlayerInfo(levelContainer.levelActors.getPlayerInfo());
-        WINDOW.upsertClientInfo(gameServer.getClientInfo());
+        mainWindow.upsertPosInfo(levelContainer.levelActors.getPosInfo());
+        mainWindow.upsertPlayerInfo(levelContainer.levelActors.getPlayerInfo());
+        mainWindow.upsertClientInfo(gameServer.getClientInfo());
         GameTime now = GameTime.Now();
-        this.WINDOW.getGameTimeText().setText(String.format("Day %d %02d:%02d:%02d", now.days, now.hours, now.minutes, now.seconds));
+        this.mainWindow.getGameTimeText().setText(String.format("Day %d %02d:%02d:%02d", now.days, now.hours, now.minutes, now.seconds));
 
         if (!isWorking() || this.getLevelContainer().getProgress() == 100.0f) {
             this.levelContainer.setProgress(0.0f);
         }
 
-        this.WINDOW.updateDayNightCycle();
+        this.mainWindow.updateDayNightCycle();
 
-        this.WINDOW.getProgBar().setValue(Math.round(this.levelContainer.getProgress()));
-        this.WINDOW.getProgBar().validate();
+        this.mainWindow.getProgBar().setValue(Math.round(this.levelContainer.getProgress()));
+        this.mainWindow.getProgBar().validate();
     }
 
     // -------------------------------------------------------------------------
@@ -195,10 +195,11 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         levelContainer.levelActors.spectator.setPos(new Vector3f());
         levelContainer.levelActors.npcList.clear();
         levelContainer.levelActors.otherPlayers.clear();
+        levelContainer.items.clear();
         if (gameServer.isShutDownSignal() || !gameServer.isRunning()) {
-            WINDOW.setTitle(GameObject.WINDOW_TITLE);
+            mainWindow.setTitle(GameObject.WINDOW_TITLE);
         } else {
-            WINDOW.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + gameServer.clients.size());
+            mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + gameServer.clients.size());
         }
         Game.setCurrentMode(Game.Mode.FREE);
     }

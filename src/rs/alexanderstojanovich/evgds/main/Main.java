@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 Alexander Stojanovich <coas91@rocketmail.com>
+ * Copyright (C) 2024 Aleksandar Stojanovic <coas91@rocketmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class Main {
         // Init Config and Logging
         Configuration inCfg = Configuration.getInstance();
         inCfg.readConfigFile(); // this line reads if input file exists otherwise uses defaults
-        IList<String> argsList = new GapList();
+        IList<String> argsList = new GapList<>();
         argsList.addAll(Arrays.asList(args));
         final boolean logToFile = (argsList.contains("-logtofile") || inCfg.isLogToFile()); // determine debug flag (write in a log file or not)
         String arg = argsList.getIf(a -> a.equals("-" + DSLogger.DSLogLevel.ERR.name()) || a.equals("-" + DSLogger.DSLogLevel.DEBUG.name()) || a.equals("-" + DSLogger.DSLogLevel.ALL.name()));
@@ -81,13 +81,13 @@ public class Main {
             final GameObject gameObject = new GameObject(); // throws ex
             // parse arguments
             if (argList.contains("-runonstart")) {
-                gameObject.WINDOW.startServerAndUpdate();
+                gameObject.mainWindow.startServerAndUpdate();
 
                 if (argList.contains("-genworld")) {
                     if (argList.contains("-size")) {
                         String someString = argList.get(argsList.indexOf("-size") + 1);
                         if (!someString.isEmpty()) {
-                            gameObject.WINDOW.setWorldLevelSize(someString.toUpperCase());
+                            gameObject.mainWindow.setWorldLevelSize(someString.toUpperCase());
                         }
                     }
 
@@ -96,11 +96,11 @@ public class Main {
                         if (someString2.matches("^-?\\d{1,19}$")) {
                             long seed = Long.parseLong(someString2);
                             gameObject.randomLevelGenerator.setSeed(seed);
-                            gameObject.WINDOW.getSpinMapSeed().setValue(seed);
+                            gameObject.mainWindow.getSpinMapSeed().setValue(seed);
                         }
                     }
 
-                    gameObject.WINDOW.generateWorld();
+                    gameObject.mainWindow.generateWorld();
                 }
             }
 
@@ -130,7 +130,7 @@ public class Main {
                     time[0] = time[1];
 
 //                    DSLogger.reportInfo("deltaTime" + deltaTime, null);
-                    gameObject.WINDOW.checkHealthMini(deltaTime);
+                    gameObject.mainWindow.checkHealthMini(deltaTime);
                 }
             };
             timer0.scheduleAtFixedRate(task1, 1000L, 1000L);

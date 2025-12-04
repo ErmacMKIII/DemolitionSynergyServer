@@ -22,7 +22,6 @@ import rs.alexanderstojanovich.evgds.chunk.Chunk;
 import rs.alexanderstojanovich.evgds.chunk.Chunks;
 import rs.alexanderstojanovich.evgds.core.Camera;
 import rs.alexanderstojanovich.evgds.critter.Critter;
-import rs.alexanderstojanovich.evgds.level.GravityEnviroment.Result;
 import rs.alexanderstojanovich.evgds.light.LightSource;
 import rs.alexanderstojanovich.evgds.light.LightSources;
 import rs.alexanderstojanovich.evgds.location.BlockLocation;
@@ -121,6 +120,11 @@ public class LevelContainer implements GravityEnviroment {
      * Position of all the solid blocks to texture name & neighbors
      */
     public static final BlockLocation AllBlockMap = new BlockLocation();
+
+    /**
+     * Various items like e.g. weapons on the ground
+     */
+    public final ItemSystem items = new ItemSystem();
 
     /**
      * Level Buffer to load or save (world) levels.
@@ -269,8 +273,9 @@ public class LevelContainer implements GravityEnviroment {
 
         chunks.clear();
         levelActors.npcList.clear();
+        items.clear();
         AllBlockMap.init();
-
+        items.clear();
         lightSources.retainLights(2);
 
         for (int i = 0; i <= 2; i++) {
@@ -324,7 +329,7 @@ public class LevelContainer implements GravityEnviroment {
         chunks.clear();
 
         AllBlockMap.init();
-
+        items.clear();
         lightSources.retainLights(2);
 
         if (numberOfBlocks > 0 && numberOfBlocks <= MAX_NUM_OF_BLOCKS) {
@@ -361,7 +366,7 @@ public class LevelContainer implements GravityEnviroment {
         chunks.clear();
 
         AllBlockMap.init();
-
+        items.clear();
         lightSources.retainLights(2);
 
         if (numberOfBlocks > 0 && numberOfBlocks <= MAX_NUM_OF_BLOCKS) {
@@ -401,7 +406,7 @@ public class LevelContainer implements GravityEnviroment {
         chunks.clear();
 
         AllBlockMap.init();
-
+        items.clear();
         lightSources.retainLights(2);
 
         if (numberOfBlocks > 0 && numberOfBlocks <= MAX_NUM_OF_BLOCKS) {
@@ -524,7 +529,7 @@ public class LevelContainer implements GravityEnviroment {
     }
 
     public Window getMyWindow() {
-        return gameObject.WINDOW;
+        return gameObject.mainWindow;
     }
 
     public float getProgress() {
