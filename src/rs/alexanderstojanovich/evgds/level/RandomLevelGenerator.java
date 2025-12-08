@@ -792,18 +792,18 @@ public class RandomLevelGenerator {
                 int blocksRandom = generateByRandom(solidRandom, fluidRandom, totalRandom, posR_Min, posR_Max, hRMin, hRMax);
                 DSLogger.reportDebug("Done.", null);
                 // --------------------------------------------------------------
-                DSLogger.reportDebug("Generating Part III - Fluid Series", null);
-                levelContainer.gameObject.mainWindow.logMessage(String.format("Generating Part III - Fluid Series (%d blocks)", totalNoise + totalRandom), Window.Status.INFO);
-                DSLogger.reportDebug("Done.", null);
                 // 3. Fluid Series
+                // DSLogger.reportDebug("Generating Part III - Fluid Series", null);
+                levelContainer.gameObject.mainWindow.logMessage(String.format("Generating Part III - Fluid Series (%d blocks)", totalNoise + totalRandom), Window.Status.INFO);
                 generateFluidSeries(numberOfBlocks - blocksNoise - blocksRandom);
-                DSLogger.reportDebug("Done.", null);
                 levelContainer.gameObject.mainWindow.logMessage("Done.", Window.Status.INFO);
+                DSLogger.reportDebug("Done.", null);
                 // --------------------------------------------------------------
                 // 4. Generate Weapons (Items)
                 DSLogger.reportDebug("Generating Part IV - Weapon placement", null);
                 levelContainer.gameObject.mainWindow.logMessage("Weapon placement", Window.Status.INFO);
                 generateWeaponItems(numberOfBlocks);
+                levelContainer.gameObject.mainWindow.logMessage("Done.", Window.Status.INFO);
                 DSLogger.reportDebug("Done.", null);
             }
         }

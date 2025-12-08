@@ -462,12 +462,13 @@ public class GameServerProcessor extends IoHandlerAdapter {
                         levelActors = gameServer.gameObject.game.gameObject.levelContainer.levelActors;
                         Critter targCrit = levelActors.otherPlayers.getIf(ot -> ot.uniqueId.equals(info.uniqueId));
                         if (targCrit == null) {
-                            msg = String.format("Players ID is not registered. Registration required!", gameServer.worldName, gameServer.version);
+                            msg = "Player ID is not registered. Registration required!";
                             response = new Response(request.getId(), request.getChecksum(), ResponseIfc.ResponseStatus.ERR, DSObject.DataType.STRING, msg);
                         } else {
                             targCrit.setName(info.name);
                             targCrit.body.setPrimaryRGBAColor(info.color);
                             targCrit.body.texName = info.texModel;
+                            targCrit.setModelClazz(info.texModel);
 
                             IList<WeaponIfc> weaponsAsList = GapList.create(Arrays.asList(gameServer.gameObject.levelContainer.weapons.AllWeapons));
                             WeaponIfc weapon = weaponsAsList.getIf(w -> w.getTexName().equals(info.weapon));

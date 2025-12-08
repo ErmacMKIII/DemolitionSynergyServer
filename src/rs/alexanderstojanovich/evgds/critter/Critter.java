@@ -27,6 +27,8 @@ import rs.alexanderstojanovich.evgds.util.HardwareUtils;
 import rs.alexanderstojanovich.evgds.weapons.WeaponIfc;
 import rs.alexanderstojanovich.evgds.weapons.Weapons;
 
+import java.util.Objects;
+
 /**
  * Critter is class of living things. Has capabilities moving. Is collision
  * predictable. However no observation. Renders with body in some shader.
@@ -565,7 +567,7 @@ public class Critter implements Predictable, Moveable {
 
     public void setModelClazz(String modelClazz) {
         this.modelClazz = modelClazz;
-        switchBodyModel();
+//        switchBodyModel();
     }
 
     /**
@@ -583,7 +585,13 @@ public class Critter implements Predictable, Moveable {
      * @return weapon in hands
      */
     public WeaponIfc activeWeapon() {
-        return (activeHand == Hand.PRIMARY) ? primaryWeapon : secondaryWeapon;
+        if (activeHand == Hand.PRIMARY) {
+            return primaryWeapon;
+        } else if (activeHand == Hand.SECONDARY) {
+            return secondaryWeapon;
+        } else {
+            return Weapons.NONE;
+        }
     }
 
     public WeaponIfc getPrimaryWeapon() {
@@ -632,12 +640,19 @@ public class Critter implements Predictable, Moveable {
      * @param weapon weapon to switch to
      */
     public void switchWeapon(WeaponIfc weapon) {
-        if (weapon == primaryWeapon) {
-            this.activeHand = Hand.PRIMARY;
-        } else if (weapon == secondaryWeapon) {
-            this.activeHand = Hand.SECONDARY;
-        } else {
-            this.activeHand = Hand.NONE;
+        switch (weapon.getClazz()) {
+            case OneHandedSmallGun:
+                this.secondaryWeapon = weapon;
+                this.activeHand = Hand.SECONDARY;
+                break;
+            case TwoHandedSmallGun:
+            case TwoHandedBigGuns:
+                this.primaryWeapon = weapon;
+                this.activeHand = Hand.PRIMARY;
+                break;
+            default:
+                this.activeHand = Hand.NONE;
+                break;
         }
         this.switchBodyModel(weapon);
     }
@@ -654,7 +669,7 @@ public class Critter implements Predictable, Moveable {
         float rYCopy = this.body.getrY();
 
         // which weapon is active in hands
-//        final WeaponIfc weapon = activeWeapon();
+        // final WeaponIfc weapon = activeWeapon();
 
         // model class or skin (array of models for that skin)
         switch (modelClazz) {
