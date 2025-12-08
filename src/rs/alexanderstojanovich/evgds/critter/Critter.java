@@ -567,7 +567,7 @@ public class Critter implements Predictable, Moveable {
 
     public void setModelClazz(String modelClazz) {
         this.modelClazz = modelClazz;
-        switchBodyModel();
+//        switchBodyModel();
     }
 
     /**
@@ -642,10 +642,12 @@ public class Critter implements Predictable, Moveable {
     public void switchWeapon(WeaponIfc weapon) {
         switch (weapon.getClazz()) {
             case OneHandedSmallGun:
+                this.secondaryWeapon = weapon;
                 this.activeHand = Hand.SECONDARY;
                 break;
             case TwoHandedSmallGun:
             case TwoHandedBigGuns:
+                this.primaryWeapon = weapon;
                 this.activeHand = Hand.PRIMARY;
                 break;
             default:
@@ -667,7 +669,7 @@ public class Critter implements Predictable, Moveable {
         float rYCopy = this.body.getrY();
 
         // which weapon is active in hands
-//        final WeaponIfc weapon = activeWeapon();
+        // final WeaponIfc weapon = activeWeapon();
 
         // model class or skin (array of models for that skin)
         switch (modelClazz) {
