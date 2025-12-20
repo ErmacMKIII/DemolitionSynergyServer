@@ -120,7 +120,6 @@ Project may use assets from Demolition Synergy.
 
 # Mentions
 Author: Ermac(MKIII); 
-Testers: 13;
 Credits: Erokia
 
 # Very Important Notice
