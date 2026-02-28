@@ -1690,7 +1690,7 @@ public class Window extends javax.swing.JFrame {
             sb.append("\n");
             sb.append(String.format("Demolition Synergy Version: %d\n", GameObject.VERSION));
             sb.append("\n");
-            sb.append("Copyright © 2025\n");
+            sb.append("Copyright © 2026\n");
             sb.append("Aleksandar \"Ermac\" Stojanovic\n");
             sb.append("\n");
             ImageIcon icon = new ImageIcon(icon_url);
@@ -1843,6 +1843,11 @@ public class Window extends javax.swing.JFrame {
     }
 
     /**
+     * Cached filtered messages for multi-pass chunked rendering.
+     */
+    private IList<Message> cachedLastNMessages = null;
+
+    /**
      * Refresh console log in chunks. Works with filters {INFO, WARN, ERR}.
      * Called by a Swing Timer to append messages in manageable chunks.
      */
@@ -1850,52 +1855,65 @@ public class Window extends javax.swing.JFrame {
         final DefaultListModel<String> conListModel = (DefaultListModel<String>) console.getModel();
         if (messageLog.isEmpty()) {
             conListModel.clear();
-            logPass = 0; // Reset logPass for future use
+            logPass = 0;
+            cachedLastNMessages = null;
             return;
         }
 
-        IList<Message> filteredMessages;
-        int lines = (int) this.spinLineNum.getValue();
+        final int lines = (int) this.spinLineNum.getValue();
 
-        // Prevent memory overflow by trimming the logs
+        // Prevent memory overflow by trimming the logs (trim once, cheaply)
         if (messageLog.size() > 2 * lines) {
-            messageLog.remove(0, lines);
-        }
-        if (conListModel.size() > 2 * lines) {
-            conListModel.removeRange(0, lines);
+            messageLog.remove(0, messageLog.size() - lines);
         }
 
-        // Filter messages
-        filteredMessages = messageLog.immutableList().filter(m -> (m.status.mask & filter) != 0);
+        // Only re-filter and re-slice on the first pass
+        if (logPass == 0) {
+            // Filter directly on messageLog without creating an immutableList wrapper
+            final int msgSize = messageLog.size();
+            final GapList<Message> filtered = new GapList<>(Math.min(msgSize, lines));
+            for (int i = 0; i < msgSize; i++) {
+                final Message m = messageLog.get(i);
+                if ((m.status.mask & filter) != 0) {
+                    filtered.add(m);
+                }
+            }
 
-        int size = filteredMessages.size();
-        if (size == 0) {
+            if (filtered.isEmpty()) {
+                conListModel.clear();
+                cachedLastNMessages = null;
+                return;
+            }
+
+            // Slice to last N messages
+            final int filteredSize = filtered.size();
+            final int startIndex = Math.max(filteredSize - lines, 0);
+            cachedLastNMessages = filtered.getAll(startIndex, filteredSize - startIndex);
+
             conListModel.clear();
-            logPass = 0; // Reset logPass for future use
+        }
+
+        // Guard: if cache is somehow null at this point, bail out
+        if (cachedLastNMessages == null || cachedLastNMessages.isEmpty()) {
+            logPass = 0;
             return;
         }
 
-        // Calculate the range of messages to display
-        int startIndex = Math.max(size - lines, 0);
-        final IList<Message> lastNMessages = filteredMessages.getAll(startIndex, size - startIndex);
+        // Append the current chunk
+        final int chunkSize = Window.CON_CHUNK_LINES_SIZE;
+        final int start = logPass * chunkSize;
+        final int total = cachedLastNMessages.size();
+        final int end = Math.min(start + chunkSize, total);
 
-        // If this is the first pass, clear the model
-        if (logPass == 0) {
-            conListModel.clear();
+        for (int i = start; i < end; i++) {
+            appendToConsole(conListModel, cachedLastNMessages.get(i));
         }
 
-        // Append messages in chunks
-        int chunkSize = Window.CON_CHUNK_LINES_SIZE;
-        int start = logPass * chunkSize;
-        int end = Math.min(start + chunkSize, lastNMessages.size());
-
-        lastNMessages.getAll(start, end - start).forEach(msg -> appendToConsole(conListModel, msg));
-
-        // Check if we are done processing all messages
-        if (end >= lastNMessages.size()) {
-            logPass = 0; // Reset logPass for the next refresh
+        if (end >= total) {
+            logPass = 0;
+            cachedLastNMessages = null; // Release memory after full render
         } else {
-            logPass++; // Prepare for the next chunk
+            logPass++;
         }
     }
 
