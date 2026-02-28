@@ -20,6 +20,8 @@ import java.util.Objects;
 import org.joml.Vector4f;
 
 /**
+ * TexByte is a class representing the block occupying the place in world.
+ * It contains all the properties of the block, like color, texture name, facebits and solid property.
  *
  * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
@@ -44,7 +46,7 @@ public class TexByte {
     /**
      * Unique block id (provide faster search)
      */
-    public final int blkId;
+    public final String blkId;
 
     /**
      * Get properties of block.
@@ -54,7 +56,7 @@ public class TexByte {
      * @param solid is block solid
      * @param blkId block id (primary key) occupying the slot
      */
-    public TexByte(Vector4f color, String texName, boolean solid, int blkId) {
+    public TexByte(Vector4f color, String texName, boolean solid, String blkId) {
         this.color = color;
         this.texName = texName;
         this.solid = solid;
@@ -70,7 +72,7 @@ public class TexByte {
      * @param solid is block solid
      * @param blkId block id (primary key) occupying the slot
      */
-    public TexByte(Vector4f color, String texName, byte byteValue, boolean solid, int blkId) {
+    public TexByte(Vector4f color, String texName, byte byteValue, boolean solid, String blkId) {
         this.color = color;
         this.texName = texName;
         this.byteValue = byteValue;
@@ -117,9 +119,9 @@ public class TexByte {
     /**
      * Get unique id (primary key) of this block
      *
-     * @return
+     * @return occupying block id
      */
-    public int getBlkId() {
+    public String getBlkId() {
         return blkId;
     }
 
@@ -130,7 +132,7 @@ public class TexByte {
         hash = 97 * hash + Objects.hashCode(this.texName);
         hash = 97 * hash + this.byteValue;
         hash = 97 * hash + (this.solid ? 1 : 0);
-        hash = 97 * hash + this.blkId;
+        hash = 97 * hash + this.blkId.hashCode();
         return hash;
     }
 

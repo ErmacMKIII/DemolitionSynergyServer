@@ -80,7 +80,7 @@ public class Block extends Model {
     private boolean verticesReversed = false;
 
     // unique id
-    private final int id;
+    private final String id;
 
     public static final Vector3f[] FACE_NORMALS = {
             new Vector3f(-1.0f, 0.0f, 0.0f),
@@ -100,8 +100,8 @@ public class Block extends Model {
     public static final Comparator<Block> UNIQUE_BLOCK_CMP = new Comparator<Block>() {
         @Override
         public int compare(Block o1, Block o2) {
-            Integer a = o1.id;
-            Integer b = o2.id;
+            String a = o1.id;
+            String b = o2.id;
             return a.compareTo(b);
         }
     };
@@ -1221,8 +1221,8 @@ public class Block extends Model {
      *
      * @return unique int
      */
-    private int genId() {
-        return ModelUtils.blockSpecsToUniqueInt(texName, pos);
+    private String genId() {
+        return ModelUtils.blockSpecsToUniqueString(texName, pos);
     }
 
     /**
@@ -1230,7 +1230,7 @@ public class Block extends Model {
      *
      * @return unique (int) id
      */
-    public int getId() {
+    public String getId() {
         return id;
     }
 

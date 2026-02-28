@@ -113,15 +113,15 @@ public interface Chunk { // some operations are mutually exclusive
      * @return block if found (null if not found)
      */
     public static Block getBlock(Tuple tuple, Vector3f pos) {
-        Integer key = ModelUtils.blockSpecsToUniqueInt(tuple.texName(), pos);
+        String key = ModelUtils.blockSpecsToUniqueString(tuple.texName(), pos);
         int left = 0;
         int right = tuple.blockList.size() - 1;
         int startIndex = -1;
         while (left <= right) {
             int mid = left + (right - left) / 2;
             Block candidate = tuple.blockList.get(mid);
-            Integer candInt = candidate.getId();
-            int res = candInt.compareTo(key);
+            String cand = candidate.getId();
+            int res = cand.compareTo(key);
             if (res < 0) {
                 left = mid + 1;
             } else if (res == 0) {
@@ -138,8 +138,8 @@ public interface Chunk { // some operations are mutually exclusive
         while (left <= right) {
             int mid = left + (right - left) / 2;
             Block candidate = tuple.blockList.get(mid);
-            Integer candInt = candidate.getId();
-            int res = candInt.compareTo(key);
+            String cand = candidate.getId();
+            int res = cand.compareTo(key);
             if (res < 0) {
                 left = mid + 1;
             } else if (res == 0) {
@@ -173,7 +173,7 @@ public interface Chunk { // some operations are mutually exclusive
      * @param blkId the unique ID of the block
      * @return the matching block if found, or null if not found
      */
-    public static Block getBlock(Tuple tuple, Vector3f pos, int blkId) {
+    public static Block getBlock(Tuple tuple, Vector3f pos, String blkId) {
         // Binary search for the first occurrence of blkId
         int left = 0;
         int right = tuple.blockList.size() - 1;
@@ -182,7 +182,7 @@ public interface Chunk { // some operations are mutually exclusive
         while (left <= right) {
             int mid = left + (right - left) / 2;
             Block candidate = tuple.blockList.get(mid);
-            int comparison = Integer.compare(candidate.getId(), blkId);
+            int comparison = candidate.getId().compareTo(blkId);
 
             if (comparison < 0) {
                 left = mid + 1;
@@ -229,7 +229,7 @@ public interface Chunk { // some operations are mutually exclusive
      * @param blkId the unique ID of the block
      * @return the first matching block if found, or null if not found
      */
-    public static Block getBlock(Tuple tuple, int blkId) {
+    public static Block getBlock(Tuple tuple, String blkId) {
         // Perform binary search to locate the block with the given ID
         int left = 0;
         int right = tuple.blockList.size() - 1;
@@ -237,7 +237,7 @@ public interface Chunk { // some operations are mutually exclusive
         while (left <= right) {
             int mid = left + (right - left) / 2;
             Block candidate = tuple.blockList.get(mid);
-            int comparison = Integer.compare(candidate.getId(), blkId);
+            int comparison = candidate.getId().compareTo(blkId);
 
             if (comparison < 0) {
                 left = mid + 1;
@@ -353,7 +353,7 @@ public interface Chunk { // some operations are mutually exclusive
                 Vector3f adjPos = Block.getAdjacentPos(block.pos, j);
                 TexByte location = LevelContainer.AllBlockMap.getLocation(adjPos);
                 if (location != null) {
-                    int blkId = location.blkId;
+                    String blkId = location.blkId;
                     String tupleTexName = location.texName;
                     int adjNBits = block.isSolid()
                             ? LevelContainer.AllBlockMap.getNeighborSolidBits(adjPos)
@@ -407,7 +407,7 @@ public interface Chunk { // some operations are mutually exclusive
             TexByte location = LevelContainer.AllBlockMap.getLocation(adjPos);
             // location exists and has neighbors (otherwise pointless)
             if (location != null && nBits != 0) {
-                int blkId = location.blkId;
+                String blkId = location.blkId;
                 String tupleTexName = location.texName;
                 byte adjNBits = location.getByteValue();
                 int k = ((j & 1) == 0 ? j + 1 : j - 1);
