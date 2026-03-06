@@ -16,6 +16,7 @@
  */
 package rs.alexanderstojanovich.evgds.chunk;
 
+import org.joml.Vector3f;
 import org.magicwerk.brownies.collections.BigList;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
@@ -86,7 +87,13 @@ public class Chunks {
 
         // block list filter of the tuple
         if (tuple != null) {
-            return tuple.blockList.filter(blk -> Chunk.chunkFunc(blk.pos) == chunkId);
+            Vector3f centre = Chunk.invChunkFunc(chunkId);
+            return tuple.blockList.filter(blk
+                    -> blk.pos.x >= centre.x - Chunk.LENGTH / 2.0f
+                    && blk.pos.x < centre.x + Chunk.LENGTH / 2.0f
+                    && blk.pos.z >= centre.z - Chunk.LENGTH / 2.0f
+                    && blk.pos.z < centre.z + Chunk.LENGTH / 2.0f
+            );
         }
 
         return null;
@@ -119,7 +126,18 @@ public class Chunks {
 
         // block list filter of the tuple
         if (tuple != null) {
-            return tuple.blockList.filter(blk -> chunkIdList.contains(Chunk.chunkFunc(blk.pos)));
+            final IList<Block> filteredBlocks = new GapList<>();
+            for (int chunkId : chunkIdList) {
+                Vector3f centre = Chunk.invChunkFunc(chunkId);
+                IList<Block> filtered = tuple.blockList.filter(blk
+                        -> blk.pos.x >= centre.x - Chunk.LENGTH / 2.0f
+                        && blk.pos.x < centre.x + Chunk.LENGTH / 2.0f
+                        && blk.pos.z >= centre.z - Chunk.LENGTH / 2.0f
+                        && blk.pos.z < centre.z + Chunk.LENGTH / 2.0f);
+                filteredBlocks.addAll(filtered);
+            }
+
+            return filteredBlocks;
         }
 
         return null;
@@ -137,35 +155,6 @@ public class Chunks {
         tupleList.forEach(tuple -> blocks.addAll(tuple.blockList));
 
         return blocks;
-    }
-
-    /**
-     * Gets the chunk block list using chunk id.
-     *
-     * This version (MK2) uses access to chunk id as key to provide faster
-     * filtering.
-     *
-     * @param texName tuple texName
-     * @param faceBits face bits of the tuple
-     * @param chunkIdList provided chunk id list
-     * @return null if tuple doest not exist otherwise block list from tuple
-     */
-    public IList<Block> getFilteredBlockListMK2(String texName, int faceBits, IList<Integer> chunkIdList) {
-        // binary search of the tuple
-        Tuple tuple = Chunk.getTuple(tupleList, texName, faceBits);
-
-        // block list filter of the tuple
-        if (tuple != null) {
-            final IList<Block> filteredBlocks = new GapList<>();
-            for (int chunkId : chunkIdList) {
-                IList<Block> filtered = tuple.blockList.getAllByKey1(chunkId);
-                filteredBlocks.addAll(filtered);
-            }
-
-            return filteredBlocks;
-        }
-
-        return null;
     }
 
     public String printInfo() { // for debugging purposes

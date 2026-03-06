@@ -19,6 +19,7 @@ package rs.alexanderstojanovich.evgds.models;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import rs.alexanderstojanovich.evgds.texture.Texture;
+import rs.alexanderstojanovich.evgds.texture.TextureIfc;
 import rs.alexanderstojanovich.evgds.util.GlobalColors;
 
 /**
@@ -36,13 +37,13 @@ public class Material {
     protected Vector4f specular = new Vector4f(GlobalColors.WHITE, 1.0f);
 
     protected Vector4f color = new Vector4f(new Vector3f(GlobalColors.WHITE), 1.0f);
-    protected Texture texture;
+    protected TextureIfc texture;
 
-    public Material(Texture texture) {
+    public Material(TextureIfc texture) {
         this.texture = texture;
     }
 
-    public Material(Vector4f ambient, Vector4f diffuse, Vector4f specular, Texture texture) {
+    public Material(Vector4f ambient, Vector4f diffuse, Vector4f specular, TextureIfc texture) {
         this.ambient = ambient;
         this.diffuse = diffuse;
         this.specular = specular;
@@ -65,7 +66,7 @@ public class Material {
         return color;
     }
 
-    public Texture getTexture() {
+    public TextureIfc getTexture() {
         return texture;
     }
 
@@ -85,7 +86,7 @@ public class Material {
         this.color = color;
     }
 
-    public void setTexture(Texture texture) {
+    public void setTexture(TextureIfc texture) {
         this.texture = texture;
     }
 

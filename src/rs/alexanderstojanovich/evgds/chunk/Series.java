@@ -18,18 +18,19 @@ package rs.alexanderstojanovich.evgds.chunk;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.function.Predicate;
+
 import org.magicwerk.brownies.collections.IList;
 import org.magicwerk.brownies.collections.Key1List;
 import rs.alexanderstojanovich.evgds.main.Configuration;
 import rs.alexanderstojanovich.evgds.models.Block;
 
 /**
+ * List of world blocks.
  *
  * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class Series { // mutual class for both solid blocks and fluid blocks with improved rendering
-
-    public static final int DYNAMIC_INCREMENT = Configuration.getInstance().getBlockDynamicSize();
 
     /**
      * List of (environment) blocks with access keys to chunk id
@@ -44,7 +45,7 @@ public class Series { // mutual class for both solid blocks and fluid blocks wit
     // --------------blkIndex---ibo-----------------------------
     protected boolean buffered = false;
 
-//    protected static int dynamicSize = DYNAMIC_INCREMENT;
+    //    protected static int dynamicSize = DYNAMIC_INCREMENT;
     protected static FloatBuffer bigFloatBuff = null;
 
     protected static IntBuffer intBuff;
@@ -58,6 +59,34 @@ public class Series { // mutual class for both solid blocks and fluid blocks wit
         indicesNum = Block.INDICES_COUNT;
     }
 
+    /**
+     * Buffer vertex data prior rendering
+     *
+     * @return if vertex data was successfully buffered
+     */
+    public boolean bufferVertices() { // Call before rendering
+
+        return true;
+    }
+
+    /**
+     * SubBuffer vertex data prior rendering. And after at at least one vertex
+     * data buffering
+     *
+     * @return if vertex data was successfully buffered
+     */
+    public boolean subBufferVertices() { // Call before rendering
+
+        return true;
+    }
+
+    /**
+     * Calculate the number of indices needed based on the face bits of the block.
+     * Each face bit represents a visible face of the block, and each face contributes 6 indices (2 triangles).
+     *
+     * @param bitValue the integer representing the face bits of the block
+     * @return the total number of indices needed for rendering the block
+     */
     public static int checkSize(int bitValue) {
         // Initialize a counter for counting ones
         int onesCount = 0;
@@ -72,6 +101,34 @@ public class Series { // mutual class for both solid blocks and fluid blocks wit
         }
 
         return onesCount * 6;
+    }
+
+    /**
+     * Buffer index data prior rendering
+     *
+     * @return if index data was successfully buffered
+     */
+    public boolean bufferIndices() { // Call before rendering
+
+        return true;
+    }
+
+    public boolean bufferIndices(int baseConst) { // Call before rendering
+        int blkIndex = 0;
+
+        return true;
+    }
+
+    public void bufferAll() { // Buffer both, call before rendering
+        buffered = bufferVertices() && bufferIndices();
+    }
+
+    public void animate() { // Call only for fluid blocks
+
+    }
+
+    public void prepare(boolean cameraInFluid) { // Call only for fluid blocks before rendering
+
     }
 
     public boolean isBuffered() {

@@ -17,6 +17,9 @@
 package rs.alexanderstojanovich.evgds.chunk;
 
 import java.util.List;
+
+import org.joml.FrustumIntersection;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.magicwerk.brownies.collections.GapList;
@@ -30,27 +33,19 @@ import rs.alexanderstojanovich.evgds.models.Block;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
 import rs.alexanderstojanovich.evgds.util.ModelUtils;
 
-/**
- * Chunk is virtual.
- *
- * It does not actually exists (anymore). It is part of the world blocks based
- * on location VEC3 pos.
- *
- * Contains various util functions.
- *
- * @author Aleksandar Stojanovic <coas91@rocketmail.com>
- */
-public interface Chunk { // some operations are mutually exclusive    
+public interface Chunk { // some operations are mutually exclusive
 
     // MODULATOR, DIVIDER, VISION are used in chunkCheck and for determining visible chunks
     /**
      * Bound to determine vec x/z length of the chunk
      */
     public static final int BOUND = 128;
+
     /**
      * Some mask constant - used for Block ID generation
      */
     public static final int SOME_MASK = 0xFF;
+
     /**
      * Visibility of chunks. Not used in live code
      */
@@ -73,12 +68,13 @@ public interface Chunk { // some operations are mutually exclusive
     public static final float LENGTH = BOUND * STEP * 2.0f;
 
     // is a group of blocks which are prepared for instanced rendering
-    // where each tuple is considered as:                
+    // where each tuple is considered as:
     //--------------------------MODULATOR--------DIVIDER--------VISION-------D--------E-----------------------------
     //------------------------blocks-vec4Vbos-mat4Vbos-texture-faceEnBits------------------------
     /**
-     * Binary search of the tuple. Tuples are sorted by name ascending.
+     * Binary search of the tuple. Tuples are sorted by name ascending. (Legacy)
      * Complexity is logarithmic.
+     * Consider using getTuple with faceBits only if you want to find any tuple with this faceBits, otherwise use this one.
      *
      * @param tupleList provided tuple list
      * @param keyTexture texture name part
@@ -138,8 +134,8 @@ public interface Chunk { // some operations are mutually exclusive
         while (left <= right) {
             int mid = left + (right - left) / 2;
             Block candidate = tuple.blockList.get(mid);
-            String cand = candidate.getId();
-            int res = cand.compareTo(key);
+            String candInt = candidate.getId();
+            int res = candInt.compareTo(key);
             if (res < 0) {
                 left = mid + 1;
             } else if (res == 0) {
@@ -253,7 +249,7 @@ public interface Chunk { // some operations are mutually exclusive
     }
 
     /**
-     * Transfer block between two tuples. Block will be transfered from tuple
+     * Transfer block between two tuples. Block will be transferred from tuple
      * with formFaceBits to tuple with current facebits.
      *
      * @param tupleList provided tuple list
@@ -265,7 +261,7 @@ public interface Chunk { // some operations are mutually exclusive
         String texture = block.getTexName();
 
         Tuple srcTuple = getTuple(tupleList, texture, formFaceBits);
-        if (srcTuple != null) { // lazy aaah!
+        if (srcTuple != null) {
             srcTuple.blockList.remove(block);
             if (srcTuple.getBlockList().isEmpty()) {
                 tupleList.remove(srcTuple);
@@ -284,7 +280,7 @@ public interface Chunk { // some operations are mutually exclusive
     }
 
     /**
-     * Transfer block between two tuples. Block will be transfered from tuple
+     * Transfer block between two tuples. Block will be transferred from tuple
      * with formFaceBits to tuple with current facebits.
      *
      * @param tupleList provided tuple list
@@ -293,19 +289,18 @@ public interface Chunk { // some operations are mutually exclusive
     public static void transfer(IList<Tuple> tupleList, IList<TransferUnit> blkUnits) { // update fluids use this to transfer fluid blocks between tuples
         for (TransferUnit unit : blkUnits) {
             Block block = unit.block;
-            String texture = block.getTexName();
 
-            Tuple srcTuple = getTuple(tupleList, texture, unit.bitsBefore);
-            if (srcTuple != null) { // lazy aaah!
+            Tuple srcTuple = getTuple(tupleList, block.texName, unit.bitsBefore);
+            if (srcTuple != null) {
                 srcTuple.blockList.remove(block);
                 if (srcTuple.getBlockList().isEmpty()) {
                     tupleList.remove(srcTuple);
                 }
             }
 
-            Tuple dstTuple = getTuple(tupleList, texture, unit.bitsAfter);
+            Tuple dstTuple = getTuple(tupleList, block.texName, unit.bitsAfter);
             if (dstTuple == null) {
-                dstTuple = new Tuple(texture, unit.bitsAfter);
+                dstTuple = new Tuple(block.texName, unit.bitsAfter);
                 tupleList.add(dstTuple);
                 tupleList.sort(Tuple.TUPLE_COMP);
             }
@@ -325,17 +320,17 @@ public interface Chunk { // some operations are mutually exclusive
      * @param block block to update
      */
     private static void updateForAdd(IList<Tuple> tupleList, Block block) {
-        // only same solidity - solid to solid or fluid to fluid is updated        
+        // only same solidity - solid to solid or fluid to fluid is updated
         int neighborBits = block.isSolid()
                 ? LevelContainer.AllBlockMap.getNeighborSolidBits(block.pos)
                 : LevelContainer.AllBlockMap.getNeighborFluidBits(block.pos);
         if (neighborBits != 0) {
-            // retieve current neightbor bits      
+            // retieve current neightbor bits
             int faceBitsBefore = block.getFaceBits();
             // -------------------------------------------------------------------
             // this logic updates facebits of this block
-            // & transfers it to correct tuple 
-            // -------------------------------------------------------------------                    
+            // & transfers it to correct tuple
+            // -------------------------------------------------------------------
             block.setFaceBits(~neighborBits & 63);
             int faceBitsAfter = block.getFaceBits();
             if (faceBitsBefore != faceBitsAfter) {
@@ -346,7 +341,7 @@ public interface Chunk { // some operations are mutually exclusive
             IList<TransferUnit> blkUnits = new GapList<>();
             for (int j = Block.LEFT; j <= Block.FRONT; j++) {
                 // -------------------------------------------------------------------
-                // following logic updates adjacent block 
+                // following logic updates adjacent block
                 // if it is same solidity as this block
                 // need to find tuple where it is located
                 // -------------------------------------------------------------------
@@ -460,7 +455,7 @@ public interface Chunk { // some operations are mutually exclusive
         // level container also set neighbor bits
         LevelContainer.putBlock(block);
         // update original block with neighbor blocks
-        // setSafeCheck if it's light block        
+        // setSafeCheck if it's light block
         if (block.getTexName().equals("reflc")) { // if first add
             GameObject gameObject;
             try {

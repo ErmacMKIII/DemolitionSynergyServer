@@ -27,6 +27,7 @@ import org.joml.Vector3f;
 public class Vertex {
 
     public static final int SIZE = 8; // size in floats -> it means 8 floats
+    public static final int EXTENDED_SIZE = 9; // size in floats with color -> it means 9 floats
 
     private Vector3f pos; // VEC3
     private Vector3f normal; // VEC3

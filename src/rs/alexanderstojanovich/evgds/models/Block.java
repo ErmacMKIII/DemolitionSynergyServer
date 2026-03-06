@@ -34,6 +34,7 @@ import rs.alexanderstojanovich.evgds.core.Camera;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import rs.alexanderstojanovich.evgds.location.TexByte;
 import rs.alexanderstojanovich.evgds.texture.Texture;
+import rs.alexanderstojanovich.evgds.texture.TextureIfc;
 import rs.alexanderstojanovich.evgds.util.BlockUtils;
 import rs.alexanderstojanovich.evgds.util.GlobalColors;
 import rs.alexanderstojanovich.evgds.util.MathUtils;
@@ -130,7 +131,7 @@ public class Block extends Model {
         final Mesh mesh = new Mesh();
         deepCopyTo(mesh, texName);
         meshes.add(mesh);
-        Material material = new Material(Texture.getOrDefault(texName));
+        Material material = new Material(TextureIfc.getOrDefault(texName));
         material.color = new Vector4f(GlobalColors.WHITE, solid ? 1.0f : 0.5f);
         materials.add(material);
         width = height = depth = 2.0f;
@@ -143,7 +144,7 @@ public class Block extends Model {
         final Mesh mesh = new Mesh();
         deepCopyTo(mesh, texName);
         meshes.add(mesh);
-        Material material = new Material(Texture.getOrDefault(texName));
+        Material material = new Material(TextureIfc.getOrDefault(texName));
         material.color = primaryRGBAColor;
         materials.add(material);
         this.solid = solid;
@@ -158,8 +159,8 @@ public class Block extends Model {
 
     // cuz regular shallow copy doesn't work, for List of integers is applicable
     public static void deepCopyTo(IList<Vertex> vertices, String texName) {
-        int texGridSize = Texture.getOrDefaultGridSize(texName);
-        int texIndex = Texture.getOrDefaultIndex(texName);
+        int texGridSize = TextureIfc.getOrDefaultGridSize(texName);
+        int texIndex = TextureIfc.getOrDefaultIndex(texName);
         int row = texIndex / texGridSize;
         int col = texIndex % texGridSize;
         final float oneOver = 1.0f / (float) texGridSize;
@@ -176,8 +177,8 @@ public class Block extends Model {
 
     // cuz regular shallow copy doesn't work, for List of integers is applicable
     public static void deepCopyTo(Mesh mesh, String texName) {
-        int texGridSize = Texture.getOrDefaultGridSize(texName);
-        int texIndex = Texture.getOrDefaultIndex(texName);
+        int texGridSize = TextureIfc.getOrDefaultGridSize(texName);
+        int texIndex = TextureIfc.getOrDefaultIndex(texName);
         int row = texIndex / texGridSize;
         int col = texIndex % texGridSize;
         final float oneOver = 1.0f / (float) texGridSize;

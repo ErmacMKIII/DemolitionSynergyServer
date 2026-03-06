@@ -39,6 +39,7 @@ import rs.alexanderstojanovich.evgds.models.Mesh;
 import rs.alexanderstojanovich.evgds.models.Model;
 import rs.alexanderstojanovich.evgds.models.Vertex;
 import rs.alexanderstojanovich.evgds.texture.Texture;
+import rs.alexanderstojanovich.evgds.texture.TextureIfc;
 
 public class ModelUtils {
 
@@ -135,7 +136,7 @@ public class ModelUtils {
             }
         }
 
-        Material material = new Material(Texture.getOrDefault(texName));
+        Material material = new Material(TextureIfc.getOrDefault(texName));
         material.setColor(new Vector4f(GlobalColors.WHITE_RGBA));
         result.materials.add(material);
 
@@ -188,7 +189,7 @@ public class ModelUtils {
             return null;
         }
 
-        int texIndex = Texture.getOrDefaultIndex(texName);
+        int texIndex = TextureIfc.getOrDefaultIndex(texName);
         int row = texIndex / gridSize;
         int col = texIndex % gridSize;
         final float oneOver = 1.0f / (float) gridSize;
@@ -255,7 +256,7 @@ public class ModelUtils {
             }
         }
 
-        Material material = new Material(Texture.getOrDefault(texName));
+        Material material = new Material(TextureIfc.getOrDefault(texName));
         material.setColor(new Vector4f(GlobalColors.WHITE_RGBA));
         result.materials.add(material);
 
@@ -350,7 +351,7 @@ public class ModelUtils {
                             1.0f - Float.parseFloat(things[2]) // Flip Y-axis if necessary
                     );
 
-                    texIndex = Texture.getOrDefaultIndex(texNames[globlIndex]);
+                    texIndex = TextureIfc.getOrDefaultIndex(texNames[globlIndex]);
                     int row = texIndex / gridSize;
                     int col = texIndex % gridSize;
 
@@ -423,7 +424,7 @@ public class ModelUtils {
             }
         }
 
-        Material material = new Material(Texture.getOrDefault(texNames[0]));
+        Material material = new Material(TextureIfc.getOrDefault(texNames[0]));
         material.setColor(new Vector4f(GlobalColors.WHITE_RGBA));
         result.materials.add(material);
 
