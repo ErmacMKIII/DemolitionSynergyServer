@@ -27,14 +27,11 @@ import rs.alexanderstojanovich.evgds.light.LightSources;
 import rs.alexanderstojanovich.evgds.location.BlockLocation;
 import rs.alexanderstojanovich.evgds.location.TexByte;
 import rs.alexanderstojanovich.evgds.main.Configuration;
-import rs.alexanderstojanovich.evgds.main.Game;
 import rs.alexanderstojanovich.evgds.main.GameObject;
-import rs.alexanderstojanovich.evgds.main.GameTime;
 import rs.alexanderstojanovich.evgds.main.Window;
 import rs.alexanderstojanovich.evgds.models.Block;
 import rs.alexanderstojanovich.evgds.models.Model;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
-import rs.alexanderstojanovich.evgds.util.ModelUtils;
 import rs.alexanderstojanovich.evgds.weapons.Weapons;
 
 /**
@@ -43,23 +40,6 @@ import rs.alexanderstojanovich.evgds.weapons.Weapons;
  * @author Aleksandar Stojanovic <coas91@rocketmail.com>
  */
 public class LevelContainer implements GravityEnviroment {
-
-    // Constants for collision control & gravity handling
-    /**
-     * Min amount of iteration for collision control or gravity control (inner
-     * loop)
-     */
-    public static final float MIN_AMOUNT = -8.4f;
-    /**
-     * Max amount of iteration for collision control or gravity control (inner
-     * loop)
-     */
-    public static final float MAX_AMOUNT = 8.4f;
-    /**
-     * Step amount of iteration for collision control or gravity control (inner
-     * loop).
-     */
-    public static final float STEP_AMOUNT = 0.05f;
 
     // -------------------------------------------------
     /**
@@ -87,7 +67,7 @@ public class LevelContainer implements GravityEnviroment {
     /**
      * Main source of light. Outside of skybox.
      */
-    public static final Model SUN = ModelUtils.readFromObjFile(Game.WORLD_ENTRY, "sun.obj", "suntx");
+    public static final Model SUN = Model.MODEL_NONE;
     public static final Vector4f SUN_COLOR_RGBA = new Vector4f(0.75f, 0.5f, 0.25f, 1.0f); // orange-yellow color
     public static final Vector3f SUN_COLOR_RGB = new Vector3f(0.75f, 0.5f, 0.25f); // orange-yellow color RGB
 

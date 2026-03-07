@@ -26,17 +26,22 @@ import com.google.gson.Gson;
 public class LevelMapInfo {
 
     /**
-     * world name obtained from server
+     * World name obtained from server
      */
-    public final String worldname;
+    public String worldname;
     /**
-     * checksum of the level
+     * Checksum of the level
      */
-    public final long chksum;
+    public long chksum;
     /**
-     * size of level in bytes
+     * Size of level in bytes
      */
-    public final long sizebytes;
+    public long sizebytes;
+
+    /**
+     * NULL Level Info. Initial value when send request.
+     */
+    public static final LevelMapInfo NULL = new LevelMapInfo("", 0L, -1L);
 
     /**
      * Level Map Info object
@@ -49,6 +54,15 @@ public class LevelMapInfo {
         this.worldname = worldname;
         this.chksum = chksum;
         this.sizebytes = sizebytes;
+    }
+
+    /**
+     * Clear level map info. Set worldname to null, chksum to 0 and sizebytes to -1.
+     */
+    public void clear() {
+        this.worldname = "";
+        this.chksum = 0L;
+        this.sizebytes = -1L;
     }
 
     /**
@@ -70,4 +84,29 @@ public class LevelMapInfo {
     public static LevelMapInfo fromJson(String json) {
         return new Gson().fromJson(json, LevelMapInfo.class);
     }
+
+    public String getWorldname() {
+        return worldname;
+    }
+
+    public void setWorldname(String worldname) {
+        this.worldname = worldname;
+    }
+
+    public long getChksum() {
+        return chksum;
+    }
+
+    public void setChksum(long chksum) {
+        this.chksum = chksum;
+    }
+
+    public long getSizebytes() {
+        return sizebytes;
+    }
+
+    public void setSizebytes(long sizebytes) {
+        this.sizebytes = sizebytes;
+    }
+
 }

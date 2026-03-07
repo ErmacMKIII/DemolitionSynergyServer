@@ -16,10 +16,24 @@
  */
 package rs.alexanderstojanovich.evgds.main;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
+import java.util.zip.CRC32C;
+
 import org.joml.Vector3f;
+import org.magicwerk.brownies.collections.GapList;
 import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import rs.alexanderstojanovich.evgds.level.RandomLevelGenerator;
 import rs.alexanderstojanovich.evgds.resources.Assets;
@@ -202,7 +216,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         if (gameServer.isShutDownSignal() || !gameServer.isRunning()) {
             mainWindow.setTitle(GameObject.WINDOW_TITLE);
         } else {
-            mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldName + " - Player Count: " + gameServer.clients.size());
+            mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + gameServer.worldInfo.worldname + " - Player Count: " + gameServer.clients.size());
         }
         Game.setCurrentMode(Game.Mode.FREE);
     }
@@ -251,7 +265,7 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
         boolean ok = false;
         this.clearEverything();
         ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
-        ok |= levelContainer.levelBuffer.saveLevelToFile(gameServer.worldName + ".ndat");
+        ok |= levelContainer.levelBuffer.saveLevelToFile(gameServer.worldInfo.worldname + ".ndat");
 
         return ok;
     }
@@ -266,9 +280,12 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
      *
      * @param levelSize Map Level Size
      * @return success of operation
+     *
+     * @throws FileNotFoundException if level file is not found after generation (should not happen, but just in case)
+     * @throws IOException if level file cannot be read after generation (should not happen, but just in case)
      */
-    public boolean generateRandomLevel(GameObject.MapLevelSize levelSize) {
-        boolean ok = false;
+    public boolean generateRandomLevel(GameObject.MapLevelSize levelSize) throws IOException {
+        boolean okey = false;
         this.clearEverything();
         final int numberOfBlocks;
         switch (levelSize) {
@@ -286,10 +303,59 @@ public final class GameObject { // is mutual object for {Main, Renderer, Random 
                 numberOfBlocks = 131070;
                 break;
         }
-        ok |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
-        ok |= levelContainer.levelBuffer.saveLevelToFile(gameServer.worldName + ".ndat");
+        okey |= levelContainer.generateRandomLevel(randomLevelGenerator, numberOfBlocks);
+        okey |= levelContainer.levelBuffer.saveLevelToFile(gameServer.worldInfo.worldname + ".ndat");
 
-        return ok;
+        // Locate all level map files with dat or ndat extension
+        final File clientDir = new File("./");
+        final String worldNameEscaped = Pattern.quote(gameServer.worldInfo.worldname);
+        Pattern pattern = Pattern.compile(worldNameEscaped + "\\.(n)?dat$", Pattern.CASE_INSENSITIVE);
+        List<String> datFileList = Arrays.asList(clientDir.list((dir, name) -> pattern.matcher(name).find()));
+        GapList<String> datFileListCopy = GapList.create(datFileList);
+        String mapFileOrNull = datFileListCopy.getFirstOrNull();
+        CRC32C checksum = new CRC32C();
+
+        if (mapFileOrNull == null) {
+            mapFileOrNull = gameServer.worldInfo.worldname + ".ndat";
+            okey = gameServer.gameObject.levelContainer.levelBuffer.saveLevelToFile(mapFileOrNull);
+            if (!okey) {
+                gameServer.gameObject.mainWindow.logMessage("Internal error - Level still does not exist!", Window.Status.ERR);
+                return false;
+            }
+            // Refresh the file list after storing the level
+            datFileList = Arrays.asList(clientDir.list((dir, name) -> pattern.matcher(name.toLowerCase()).find()));
+            datFileListCopy = GapList.create(datFileList);
+            mapFileOrNull = datFileListCopy.getFirstOrNull();
+        }
+
+        if (mapFileOrNull == null) {
+            gameServer.gameObject.mainWindow.logMessage("Internal error - Level still does not exist!", Window.Status.ERR);
+            return false;
+        }
+
+        File mapFileLevel = new File(mapFileOrNull);
+        if (!mapFileLevel.exists()) {
+            gameServer.gameObject.mainWindow.logMessage("Internal error - Level still does not exist!", Window.Status.ERR);
+            return false;
+        }
+
+        // calculating file size & checksum
+        // with attend to send to the client
+        int sizeBytes = 0;
+        try (FileChannel fileChannel = new FileInputStream(mapFileLevel).getChannel()) {
+            sizeBytes = (int) Files.size(Path.of(mapFileOrNull));
+            ByteBuffer buffc = ByteBuffer.allocate((int) fileChannel.size());
+            while ((fileChannel.read(buffc)) > 0) {
+                // Do nothing, just read the file into the buffer
+            }
+            buffc.flip();
+            checksum.update(buffc);
+        }
+
+        gameServer.worldInfo.chksum = checksum.getValue();
+        gameServer.worldInfo.sizebytes = sizeBytes;
+
+        return okey;
     }
 
     /**

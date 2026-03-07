@@ -73,6 +73,7 @@ import rs.alexanderstojanovich.evgds.level.LevelContainer;
 import static rs.alexanderstojanovich.evgds.main.Game.RESOURCES_DIR;
 
 import rs.alexanderstojanovich.evgds.net.ClientInfo;
+import rs.alexanderstojanovich.evgds.net.LevelMapInfo;
 import rs.alexanderstojanovich.evgds.net.PlayerInfo;
 import rs.alexanderstojanovich.evgds.net.PosInfo;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
@@ -1277,6 +1278,12 @@ public class Window extends javax.swing.JFrame {
         startServerAndUpdate();
     }//GEN-LAST:event_fileMenuStartActionPerformed
 
+    /**
+     * Generate new world using Random Level Generator. World will be generated
+     * in a separate thread to prevent UI freezing. Player(s) which are
+     * connecting won't download that world until generation is finished and new
+     * world is generated.
+     */
     public void generateWorld() {
         // TODO add your handling code here:    
         btnGenerate.setEnabled(false);
@@ -1380,11 +1387,22 @@ public class Window extends javax.swing.JFrame {
         gameObject.randomLevelGenerator.setSeed((long) this.spinMapSeed.getValue());
     }//GEN-LAST:event_spinMapSeedStateChanged
 
+    /**
+     * Erase world data and info. World will have to be created or imported
+     * again. Player(s) which are connecting won't download that world until new
+     * one is created or imported.
+     */
     private void eraseWorld() {
         if (LevelContainer.AllBlockMap.getPopulation() == 0) {
             JOptionPane.showMessageDialog(Window.this, "World is empty - Please create or import one!", "Erase World", JOptionPane.ERROR_MESSAGE);
         } else {
+            // Clear world data and info
             gameObject.clearEverything();
+            gameObject.gameServer.worldInfo.clear();
+
+            // Reset world info to default values
+            this.tboxWorldName.setText(gameObject.gameServer.worldInfo.getWorldname());
+
             JOptionPane.showMessageDialog(Window.this, "World erased! New world can be created or imported.", "Erase World", JOptionPane.INFORMATION_MESSAGE);
             tboxBlockNum.setText(String.valueOf(LevelContainer.AllBlockMap.getPopulation()));
         }

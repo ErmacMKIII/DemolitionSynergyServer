@@ -30,11 +30,7 @@ import org.apache.mina.transport.socket.nio.NioDatagramAcceptor;
 import org.magicwerk.brownies.collections.GapList;
 import org.magicwerk.brownies.collections.IList;
 import rs.alexanderstojanovich.evgds.level.LevelActors;
-import rs.alexanderstojanovich.evgds.net.ClientInfo;
-import rs.alexanderstojanovich.evgds.net.DSMachine;
-import rs.alexanderstojanovich.evgds.net.DSObject;
-import rs.alexanderstojanovich.evgds.net.Response;
-import rs.alexanderstojanovich.evgds.net.ResponseIfc;
+import rs.alexanderstojanovich.evgds.net.*;
 import rs.alexanderstojanovich.evgds.util.DSLogger;
 
 /**
@@ -73,9 +69,9 @@ public class GameServer implements DSMachine, Runnable {
     public static final Configuration config = Configuration.getInstance();
 
     /**
-     * Default world name
+     * Name of the game world, cheksum and size in bytes in world info.
      */
-    protected String worldName = "My World";
+    public final LevelMapInfo worldInfo = new LevelMapInfo("My World", 0L,0L);
 
     /**
      * Default server port
@@ -178,18 +174,6 @@ public class GameServer implements DSMachine, Runnable {
     }
 
     /**
-     * Constructs a new GameServer instance with a given GameObject and world
-     * name.
-     *
-     * @param gameObject The GameObject instance associated with this server.
-     * @param name The name of the game world.
-     */
-    public GameServer(GameObject gameObject, String name) {
-        this.gameObject = gameObject;
-        this.worldName = name;
-    }
-
-    /**
      * Starts the game server endpoint.
      *
      * This method initializes necessary resources and starts the server loop.
@@ -245,7 +229,7 @@ public class GameServer implements DSMachine, Runnable {
                 clients.removeIf(cli -> cli.timeToLive <= 0 || kicklist.contains(cli.uniqueId));
 
                 // Update server window title with current player count
-                GameServer.this.gameObject.mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + GameServer.this.worldName + " - Player Count: " + (GameServer.this.clients.size()));
+                GameServer.this.gameObject.mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + GameServer.this.worldInfo.worldname + " - Player Count: " + (GameServer.this.clients.size()));
             }
         };
         timerClientChk.scheduleAtFixedRate(task1, 1000L, 1000L);
@@ -363,7 +347,7 @@ public class GameServer implements DSMachine, Runnable {
             acceptor.bind(endpoint);
 
             // Update server window title with current player count
-            gameObject.mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + worldName + " - Player Count: " + (clients.size()));
+            gameObject.mainWindow.setTitle(GameObject.WINDOW_TITLE + " - " + worldInfo.worldname + " - Player Count: " + (clients.size()));
             DSLogger.reportInfo(String.format("Game Server (%s:%d) started!", this.localIP, this.port), null);
             gameObject.mainWindow.logMessage((String.format("Game Server (%s:%d) started!", this.localIP, this.port)), Window.Status.INFO);
         } catch (IOException ex) {
@@ -442,7 +426,7 @@ public class GameServer implements DSMachine, Runnable {
      * @return The name of the game world.
      */
     public String getWorldName() {
-        return worldName;
+        return worldInfo.worldname;
     }
 
     /**
@@ -511,7 +495,7 @@ public class GameServer implements DSMachine, Runnable {
     }
 
     public void setWorldName(String worldName) {
-        this.worldName = worldName;
+        this.worldInfo.worldname = worldName;
     }
 
     public void setPort(int port) {
