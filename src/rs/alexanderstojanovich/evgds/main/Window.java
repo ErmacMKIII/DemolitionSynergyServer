@@ -1696,11 +1696,14 @@ public class Window extends javax.swing.JFrame {
         checkHealth();
     }//GEN-LAST:event_statusMenuHealthActionPerformed
 
+    /**
+     * Display info about the software, license, author, version, etc.
+     */
     private void infoAbout() {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LICENSE_LOGO_FILE_NAME);
         if (icon_url != null) {
             StringBuilder sb = new StringBuilder();
-            sb.append(String.format("VERSION v%s (%s BUILD reviewed on 2026-02-28 at 11:32).\n", GameObject.VERSION, BUILD.toString()));
+            sb.append(String.format("VERSION v%s (%s BUILD reviewed on 2026-03-11 at 12:19).\n", GameObject.VERSION, BUILD.toString()));
             sb.append("This software is free software, \n");
             sb.append("licensed under GNU General Public License (GPL).\n");
             sb.append("\n");
@@ -1856,7 +1859,7 @@ public class Window extends javax.swing.JFrame {
      * @param listModel model of the console
      * @param msg the message to append
      */
-    private void appendToConsole(DefaultListModel listModel, Message msg) {
+    private void appendToConsole(DefaultListModel<String> listModel, Message msg) {
         listModel.addElement(msg.status + ":" + msg.text + "\r\n");
     }
 
@@ -1935,6 +1938,10 @@ public class Window extends javax.swing.JFrame {
         }
     }
 
+    /**
+     * Display info about how to use the software, quick start guide, and
+     * trivia.
+     */
     private void infoHelp() {
         URL icon_url = getClass().getResource(RESOURCES_DIR + LOGOX_FILE_NAME);
         if (icon_url != null) {
